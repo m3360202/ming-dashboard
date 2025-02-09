@@ -8,15 +8,20 @@ import {
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useNav } from '@/store/nav';
 
 export function NavItem({
   href,
   label,
-  children
+  children,
+  nav1,
+  nav2
 }: {
   href: string;
   label: string;
   children: React.ReactNode;
+  nav1?: string;
+  nav2?: string;
 }) {
   const pathname = usePathname();
 
@@ -25,8 +30,13 @@ export function NavItem({
       <TooltipTrigger asChild>
         <Link
           href={href}
+          onClick={()=>{
+            if(nav1 && nav2){
+              useNav.setState({navItem:[nav1,nav2]});
+            }
+          }}
           className={clsx(
-            'flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8',
+            'flex items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground',
             {
               'bg-accent text-black': pathname === href
             }

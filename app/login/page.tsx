@@ -1,3 +1,4 @@
+'use client'
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -6,7 +7,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { signIn } from '@/lib/auth';
+// import { signIn } from '@/lib/auth';
 
 export default function LoginPage() {
   return (
@@ -20,15 +21,9 @@ export default function LoginPage() {
         </CardHeader>
         <CardFooter>
           <form
-            action={async () => {
-              'use server';
-              await signIn('github', {
-                redirectTo: '/'
-              });
-            }}
             className="w-full"
           >
-            <Button className="w-full">Sign in with GitHub</Button>
+            <Button className="w-full">登录</Button>
           </form>
         </CardFooter>
       </Card>
