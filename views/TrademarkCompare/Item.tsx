@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,30 +9,33 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { SelectProduct } from '@/lib/db';
 
-export function ItemDetail({ product }: { product: SelectProduct }) {
+export function ItemDetail({ product, index }: { product: any; index: number; }) {
   return (
     <TableRow>
       <TableCell className="hidden sm:table-cell">
-        <Image
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        <img
           alt="Product image"
           className="aspect-square rounded-md object-cover"
           height="64"
-          src={product.imageUrl}
+          src={product.tmImg}
           width="64"
         />
       </TableCell>
-      <TableCell className="font-medium">{product.name}</TableCell>
+      <TableCell className="font-medium">{index===0 ? '95%' : '40%'}</TableCell>
+      <TableCell className="font-medium">第{product.cls}类 {product.cn}</TableCell>
       <TableCell>
         <Badge variant="outline" className="capitalize">
-          {product.status}
+          {product.id}
         </Badge>
       </TableCell>
-      <TableCell className="hidden md:table-cell">{`$${product.price}`}</TableCell>
-      <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+      <TableCell className="hidden md:table-cell">{product.state_cn}</TableCell>
+      <TableCell className="hidden md:table-cell">{product.appliant
+      }</TableCell>
       <TableCell className="hidden md:table-cell">
-        {product.availableAt.toLocaleDateString("en-US")}
+        {product.appDate}
       </TableCell>
       <TableCell>
         <DropdownMenu>

@@ -8,7 +8,7 @@ import { useSearchKey } from '@/store/nav';
 
 export default function ProductsPage() {
   const { searchParams } = useSearchKey();
-  const products = [];
+  const products: any = [];
   const newOffset= 100;
   const totalProducts= 90;
 

@@ -35,22 +35,20 @@ export function User() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>我的账号</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Settings</DropdownMenuItem>
-        <DropdownMenuItem>Support</DropdownMenuItem>
+        <DropdownMenuItem>设置</DropdownMenuItem>
+        <DropdownMenuItem>技术支持</DropdownMenuItem>
         <DropdownMenuSeparator />
         {user ? (
           <DropdownMenuItem>
-            <form
-             
-            >
-              <button type="submit">Sign Out</button>
-            </form>
+            <button type="submit" onClick={()=>{
+              useUser.setState({user: {username: '',image: '', role: '', token: ''}})
+            }}>退出登录</button>
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem>
-            <Link href="/login">Sign In</Link>
+            <Link href="/login">登录</Link>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

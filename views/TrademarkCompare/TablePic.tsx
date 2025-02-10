@@ -19,12 +19,15 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsData } from '@/utils/trademarkCls';
-import { useTrademarkCheck } from '@/store/trademark';
+import { useTrademarkCheck } from '@/store/trademarkPic';
 import { PlusCircle } from 'lucide-react';
+import { uploadFile } from "@/utils/upload";
+import { useCurrentFile } from "@/store/upload";
 import axios from 'axios';
 import { useState } from 'react';
+import TestLogo from '@/images/testlogo.jpg';
 
-export function ItemsTable() {
+export function ItemsTablePic() {
   let router = useRouter();
   const { cls, st, keyword, sc } = useTrademarkCheck();
   let productsPerPage = 5;
@@ -71,12 +74,24 @@ export function ItemsTable() {
     })
   }
 
+  // const handleSetImg = async(file: any) => {
+  //   const currentFile = useCurrentFile.getState().file ?? { name: '' };
+  //   if (currentFile.name.length > 0) {
+  //     await uploadFile(currentFile);
+  //   }
+  //   const img = useCurrentFile.getState().url;
+  //   if (file && file[0] && file[0].file) {
+  //     useCurrentFile.setState({ file: file[0].file });
+  //   }
+
+  // }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>批量近似查询条件</CardTitle>
+        <CardTitle>图形近似查询条件</CardTitle>
         <CardDescription style={{ marginTop: '20px' }}>
-          商标审查标准（2025版）
+          商标审查标准（2019版）
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -90,26 +105,13 @@ export function ItemsTable() {
               <li
                 style={{ 
                   listStyle: 'none', 
-                  color: cls.indexOf(clsItem.cls) > -1 ? '#fff' : 'rgb(102, 102, 102)', 
+                  color: cls === clsItem.cls ? '#fff' : 'rgb(102, 102, 102)', 
                   cursor: 'pointer',
-                  borderRadius: cls.indexOf(clsItem.cls) > -1 ? '10px' : '0px',
-                  backgroundColor: cls.indexOf(clsItem.cls) > -1 ? 'rgb(29, 147, 171)' : '',
+                  borderRadius: cls === clsItem.cls ? '10px' : '0px',
+                  backgroundColor: cls === clsItem.cls ? 'rgb(29, 147, 171)' : '',
                   padding: '4px 10px',
                 }}
-                onClick={() => {
-                  useTrademarkCheck.setState((state: any) => {
-                    const { cls } = state;
-                    const index = cls.indexOf(clsItem.cls);
-                
-                    if (index === -1) {
-                      // 如果元素不在数组中，添加它
-                      return { cls: [...cls, clsItem.cls] };
-                    } else {
-                      // 如果元素在数组中，移除它
-                      return { cls: [...cls.slice(0, index), ...cls.slice(index + 1)] };
-                    }
-                  });
-                }} key={index}>
+                onClick={() => { useTrademarkCheck.setState({ cls: clsItem.cls }) }} key={index}>
                 {clsItem.name}
               </li>
             ))}
@@ -118,41 +120,17 @@ export function ItemsTable() {
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
             <span style={{ color: 'red' }}>*</span>
-            <span style={{ color: '#637381' }}>查询方式</span>
-          </div>
-          <div style={{ width: '85%' }} className="max-w-[85%] flex flex-wrap jusify-between gap-4 items-start">
-            <select
-              defaultValue={st}
-              style={{border: '#1c252e 1px solid', width: '150px', borderRadius: '5px', padding: '6px'}}
-              onChange={(e)=>{
-                useTrademarkCheck.setState({st: e.target.value});
-                if(e.target.value === "1"){
-                  useTrademarkCheck.setState({sc: "1,2,3,4,5,6,7,8,9,10"});
-                }
-                if(e.target.value === "4"){
-                  useTrademarkCheck.setState({sc: "1,2,3,4,5,6,7,8,9,10,11"});
-                }
-              }}
-            >
-              <option value="1">
-                中文
-              </option>
-              <option value="4">
-                英文
-              </option>
-            </select>
-          </div>
-        </div>
-        <div className='flex flex-row justify-between w-full my-4'>
-          <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
-            <span style={{ color: '#637381' }}>商标内关键词</span>
+            <span style={{ color: '#637381' }}>商标图片</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
-            <input onChange={(e)=>{
-              useTrademarkCheck.setState({keyword: e.target.value});
-            }} style={{border: '#1c252e 1px solid', width: '450px', borderRadius: '5px', padding: '6px'}} defaultValue={keyword} placeholder='请输入关键词，使用半角逗号,隔开' />
-            <span style={{color: '#637381'}}>请输入关键词的 中/英文 字符/字母 或 数字,使用半角逗号,隔开</span>
+            {showTestLogo &&(<img src={TestLogo.src} width={80} height={80} />)}
+            <Button size="sm" className="h-8 gap-1">
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                图片上传
+              </span>
+            </Button>
+            <span style={{color: '#637381'}}>支持上传格式 png jpg gif svg</span>
           </div>
         </div>
 

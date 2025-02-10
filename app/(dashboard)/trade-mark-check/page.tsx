@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { File, PlusCircle } from 'lucide-react';
 import { ItemsTable } from '@/views/TrademarkCompare/Table';
-
+import { ItemsTablePic } from '@/views/TrademarkCompare/TablePic';
 export default function CustomersPage() {
   const results: any[] = [];
   const newOffset= 100;
@@ -25,8 +25,8 @@ export default function CustomersPage() {
       <Tabs defaultValue="china">
       <div className="flex items-center">
         <TabsList>
-          <TabsTrigger value="china">国内商标</TabsTrigger>
-          <TabsTrigger value="foreign">国际商标</TabsTrigger>
+          <TabsTrigger value="china">批量商标查询</TabsTrigger>
+          <TabsTrigger value="foreign">图形商标查询</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -44,16 +44,10 @@ export default function CustomersPage() {
         </div>
       </div>
       <TabsContent value="china">
-        <ItemsTable
-          items={results}
-          offset={newOffset ?? 0}
-          totalProducts={totalProducts}
-        />
+        <ItemsTable />
       </TabsContent>
       <TabsContent value="foreign">
-        <span style={{marginLeft: '10px',marginTop: '30px'}}>
-              开发中，寻找数据源中...
-            </span>
+        <ItemsTablePic />
       </TabsContent>
     </Tabs>
 
