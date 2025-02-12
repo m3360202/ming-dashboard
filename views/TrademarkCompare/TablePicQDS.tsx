@@ -28,7 +28,7 @@ interface TrademarkCheckState {
   sc: string;
 }
 
-export function ItemsTablePic() {
+export function ItemsTablePicQDS() {
   let router = useRouter();
   const { cls, st, keyword, sc }: TrademarkCheckState = useTrademarkCheck();
   let productsPerPage = 20;
@@ -37,6 +37,7 @@ export function ItemsTablePic() {
   const [showTestLogo, setShowTestLogo] = useState<boolean>(false);
   const [items, setItems] = useState<TrademarkItem[]>([]);
   const [imageBase64, setImageBase64] = useState<string>('');
+  const [image, setImage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<any[]>([]);
 
@@ -46,7 +47,9 @@ export function ItemsTablePic() {
     const file = event.target.files?.[0];
     if (file) {
       const base64 = await convertToBase64(file);
-      setImageBase64(base64);
+      const base64Data = base64.split('base64,')[1];
+      setImageBase64(base64Data);
+      setImage(base64);
     }
   };
 
@@ -72,7 +75,7 @@ export function ItemsTablePic() {
     }
     setLoading(true);
     const data = {
-      cls,
+      //cls,
       img_src: imageBase64
     };
 
@@ -81,12 +84,21 @@ export function ItemsTablePic() {
     }
 
     setShowTestLogo(true);
-    axios.post('https://gptserver.aliensoft.com.cn/handleGetTrademarkPicList', data, {
+    axios.post('https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList', data, {
       headers: headers
     }).then((res) => {
       setLoading(false);
-      setData(res?.data?.data);
-      setPageTotal(Math.ceil((res?.data?.pager?.total || 0) / productsPerPage));
+
+      if (res?.data?.data) {
+        const string = res?.data?.data.split('###{\"公告类型\":{},')[0]
+        console.log('------', JSON.parse(string))
+        const data = JSON.parse(string);
+        setData(data);
+        setPageTotal(Math.ceil((data.length || 0) / productsPerPage));
+      } else {
+        alert('request fail');
+      }
+
     }).catch((error) => {
       setLoading(false);
       console.log('error', error);
@@ -107,13 +119,19 @@ export function ItemsTablePic() {
 
   const getTag = (status: string) => {
     if (status === '已注册') {
-      return (<div style={{ padding: '3px 12px', borderRadius: '10px', backgroundColor: '#07c160', color: '#fff' }}>已注册</div>)
+      return (<div style={{ fontSize: '12px', color: '#07c160' }}>已注册</div>)
     }
     else if (status === '已驳回') {
-      return (<div style={{ padding: '3px 12px', borderRadius: '10px', backgroundColor: '#f30000', color: '#fff' }}>已驳回</div>)
+      return (<div style={{ fontSize: '12px', color: '#f30000' }}>已驳回</div>)
+    }
+    else if (status === '商标无效') {
+      return (<div style={{ fontSize: '12px', color: '#cccccc' }}>商标无效</div>)
+    }
+    else if (status === '注册申请中') {
+      return (<div style={{ fontSize: '12px', color: '#fa9d3b' }}>注册申请中</div>)
     }
     else {
-      return (<div style={{ padding: '3px 12px', borderRadius: '10px', border: '#ccc 1px solid' }}>{status}</div>)
+      return (<div style={{ fontSize: '12px', color: '#ffc300' }}>{status}</div>)
     }
   }
 
@@ -130,13 +148,13 @@ export function ItemsTablePic() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>图形近似查询条件</CardTitle>
+        <CardTitle>图形精准近似查询条件</CardTitle>
         <CardDescription style={{ marginTop: '20px' }}>
-          商标审查标准（2019版）
+          商标审查标准（2021版），实时数据学习： 6-48小时迭代
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='flex flex-row justify-between w-full my-4'>
+        <div className='flex flex-row justify-between w-full my-4 hidden'>
           <div className="w-[150px]">
             <span style={{ color: 'red' }}>*</span>
             <span style={{ color: '#637381' }}>国际分类</span>
@@ -165,15 +183,27 @@ export function ItemsTablePic() {
             <span style={{ color: '#637381' }}>商标图片</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start">
-            {imageBase64 && (<img src={imageBase64} width={80} height={80} alt="Uploaded Logo" />)}
-            <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                图片上传
-              </span>
-            </Button>
+            {image && (<img src={image} width={80} height={80} alt="Uploaded Logo" />)}
+            <div className="flex flex-row items-center gap-4">
+              <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  图片上传
+                </span>
+              </Button>
+              <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start ">
+                {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    开始查询
+                  </span>
+                </Button>)}
+                {loading && (
+                  <LoadingSvg />
+                )}
+              </div>
+            </div>
 
-            <span style={{ color: '#637381' }}>支持上传格式 png jpg gif svg</span>
+            <span style={{ color: '#637381' }}>支持上传格式 png jpg </span>
             <input
               type="file"
               ref={fileInputRef}
@@ -185,28 +215,20 @@ export function ItemsTablePic() {
           </div>
         </div>
 
-        <div className='flex flex-row justify-between w-full my-4'>
-          <div className="w-[150px]">
-
-          </div>
-          <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start">
-            {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                开始查询
-              </span>
-            </Button>)}
-            {loading && (
-              <LoadingSvg />
-            )}
-          </div>
-        </div>
         <div style={{ gap: '30px', marginTop: '60px' }} className="w-full flex flex-row justify-start items-center flex-wrap">
           {currentData.map((product: any, index: number) => (
-            <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='p-4 gap-4 flex flex-col items-center justify-center gap-2'>
-              <img src={'https://gptserver.aliensoft.com.cn' + product.url} style={{ width: '240px', height: '120px' }} />
-              <div className='p-4 gap-4 flex items-center justify-between gap-2'>
-                <span>{getClsName(product?.cls)}</span>
-                <span>{getTag(product?.status)}</span>
+            <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='p-4 gap-2 flex flex-col items-center justify-start gap-2'>
+              <img src={product.tmLogoUrl} style={{ width: '240px', height: '120px' }} />
+              <div className='w-full gap-4 flex items-center justify-between gap-2'>
+                <span className="text-[14px] font-[800]">{product?.tmName}</span>
+              </div>
+              <div className='w-full gap-4 flex items-center justify-between gap-2'>
+                <span className="text-[14px] font-[800] text-[#1485ee]">类目：{product?.category}</span>
+                <span>{getTag(product?.['法律状态'])}</span>
+                <span className="text-[14px] font-[800] text-[#ffc300]">{product?.tmId}</span>
+              </div>
+              <div className='w-full gap-4 flex items-center justify-between gap-2'>
+                <span className="text-[14px] font-[800] text-[#ffc300] word-break">{product?.applicant}</span>
               </div>
             </div>
           ))}

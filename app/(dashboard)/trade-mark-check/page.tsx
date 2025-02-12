@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { File, PlusCircle } from 'lucide-react';
 import { ItemsTable } from '@/views/TrademarkCompare/Table';
 import { ItemsTablePic } from '@/views/TrademarkCompare/TablePic';
+import { ItemsTablePicQDS } from '@/views/TrademarkCompare/TablePicQDS';
 export default function CustomersPage() {
   const results: any[] = [];
   const newOffset= 100;
@@ -27,6 +28,7 @@ export default function CustomersPage() {
         <TabsList>
           <TabsTrigger value="china">批量商标查询</TabsTrigger>
           <TabsTrigger value="foreign">图形商标查询</TabsTrigger>
+          <TabsTrigger value="3">图形商标精准查询</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -48,6 +50,9 @@ export default function CustomersPage() {
       </TabsContent>
       <TabsContent value="foreign">
         <ItemsTablePic />
+      </TabsContent>
+      <TabsContent value="3">
+        <ItemsTablePicQDS />
       </TabsContent>
     </Tabs>
 
