@@ -30,7 +30,7 @@ export default function CustomersPage() {
           <TabsTrigger value="foreign">图形商标查询</TabsTrigger>
           <TabsTrigger value="3">图形商标精准查询</TabsTrigger>
         </TabsList>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="lg:hidden ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
             <File className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">

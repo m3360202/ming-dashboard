@@ -39,7 +39,14 @@ import pdfPng from '@/images/Pdf.png';
 import { useNav, useUser } from '@/store/nav';
 
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState } from 'react'; import * as Dialog from '@radix-ui/react-dialog';
+
+import Meetpng from '@/images/meet.jpg';
+import Docpng from '@/images/doc.png';
+import Boardpng from '@/images/Board.png';
+import Dspng from '@/images/deepseek.png';
+import Mingpng from '@/images/ming.jpeg';
+import Hyperpng from '@/images/hyper.jpeg';
 
 export default function DashboardLayout({
   children
@@ -50,19 +57,23 @@ export default function DashboardLayout({
   const { user } = useUser();
   const [username, setUsername] = useState<string | null>(null);
   const [pwd, setPwd] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const handleLogin = () => {
-    if(!pwd || !username){
+    if (!pwd || !username) {
       return alert('请输入用户名和密码！');
     }
-    if(username && username !=='mingcheng'){
+    if (username && username !== 'mingcheng') {
       return alert('账号错误！');
     }
-    if(pwd && pwd !=='930216'){
+    if (pwd && pwd !== '930216') {
       return alert('密码错误！');
     }
-    useUser.setState({ user: {username: 'mingcheng',image: '', role: 'admin', token: ''}});
-    window.location.href='/trade-mark-check';
+    useUser.setState({ user: { username: 'mingcheng', image: '', role: 'admin', token: '' } });
+    window.location.href = '/trade-mark-check';
   }
 
   return (
@@ -75,8 +86,63 @@ export default function DashboardLayout({
               <MobileNav />
               <DashboardBreadcrumb navItem={navItem} />
               <SearchInput />
+              <span onClick={handleOpen} style={{ color: '#1485ee', fontSize: '14px', cursor: 'pointer' }}>常用配套平台</span>
               <User />
             </header>
+            <Dialog.Root open={open} onOpenChange={setOpen}>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+                <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[90vw] max-w-md">
+                  <Dialog.Title className="text-lg font-bold mb-4">常用平台快捷链接</Dialog.Title>
+                  <div className="mb-6" style={{ color: '#999', fontSize: '14px', fontWeight: '400'}}>
+                    以下是基于Aliensoft AIGC创建的平台或第三方应用平台.
+
+                    <div className="flex flex-row items-center justify-between w-full p-10 gap-4 flex-wrap">
+                      <div onClick={()=>{window.open('https://hypergpt.aliensoft.com.cn/','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                        <img src={Hyperpng.src} width="50" height="50" />
+                        <span>HyperGPT</span>
+                        <span>AI 对话助手</span>
+                      </div>
+                      <div onClick={()=>{window.open('https://chat.deepseek.com/','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                        <img src={Dspng.src} width="50" height="50" />
+                        <span>DeepSeek</span>
+                        <span>AI 三方助手</span>
+                      </div>
+                      <div onClick={()=>{window.open('http://minggpt.aliensoft.com.cn/','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                        <img src={Mingpng.src} width="50" height="50" />
+                        <span>MingTrans</span>
+                        <span>AI 图片翻译</span>
+                      </div>
+                      <div onClick={()=>{window.open('https://app.boardx.us','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                        <img src={Boardpng.src} width="50" height="50" />
+                        <span>BoardX</span>
+                        <span>在线协作画板</span>
+                      </div>
+                      <div onClick={()=>{window.open('https://doc.qq.com','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                        <img src={Docpng.src} width="50" height="50" />
+                        <span>腾讯文档</span>
+                        <span>云文档存储</span>
+                      </div>
+                      <div onClick={()=>{window.open('https://meeting.qq.com','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                        <img src={Meetpng.src} width="50" height="50" />
+                        <span>腾讯会议</span>
+                        <span>云文档存储</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-4">
+                    <Dialog.Close asChild>
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={handleClose}
+                      >
+                        关闭窗口
+                      </button>
+                    </Dialog.Close>
+                  </div>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
             <main className="grid flex-1 items-start gap-2 p-4 sm:px-6 sm:py-0 md:gap-4 bg-muted/40">
               {children}
             </main>
@@ -97,13 +163,13 @@ export default function DashboardLayout({
               >
                 <Input
                   name="q"
-                  onChange={(e)=>{setUsername(e.target.value as string)}}
+                  onChange={(e) => { setUsername(e.target.value as string) }}
                   placeholder="请输入用户名..."
                   className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
                 />
                 <Input
                   name="q"
-                  onChange={(e)=>{setPwd(e.target.value as string)}}
+                  onChange={(e) => { setPwd(e.target.value as string) }}
                   type="password"
                   placeholder="请输入密码..."
                   className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-4 mb-8"
@@ -127,7 +193,7 @@ function DesktopNav() {
           <span className="text-[#637381] mt-2">数据挖掘系统Beta 0.1.4</span>
         </div>
         <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
-          <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-10 justify-start">
+          <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-6 justify-start">
             <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M358.869333 370.304c32.768-158.523733 187.733333-260.411733 346.24-227.643733 158.5152 32.810667 260.181333 187.9296 227.413334 346.581333-32.7168 158.523733-187.733333 260.4032-346.24 227.643733-158.506667-32.810667-260.266667-188.0576-227.413334-346.581333z m329.216-154.8544c-117.504-24.260267-232.405333 51.285333-256.64 168.8832-24.234667 117.640533 51.2 232.6528 168.746667 256.8704 117.504 24.260267 232.413867-51.242667 256.768-168.8832 24.234667-117.469867-51.2-232.482133-168.874667-256.8704zM125.44 790.144h551.125333c22.144 0 40.106667 17.962667 40.106667 40.149333a40.106667 40.106667 0 0 1-40.106667 40.106667H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 830.250667c0-22.144 17.92-40.106667 40.106667-40.106667z m0-259.498667h160.341333c22.144 0 40.106667 17.954133 40.106667 40.149334a40.106667 40.106667 0 0 1-40.106667 40.106666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 570.743467c0-22.144 17.92-40.1408 40.106667-40.1408v0.042666z m0-267.921066h160.341333a40.149333 40.149333 0 0 1 0 80.298666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 302.8736c0-22.152533 17.92-40.149333 40.106667-40.149333z" fill="#607D8B" p-id="5258"></path><path d="M813.781333 641.621333L932.693333 812.202667c12.288 17.7408 4.992 40.5504-16.341333 50.7392l-5.12 2.474666c-21.333333 10.2656-48.725333 4.164267-61.013333-13.610666l-118.929067-170.666667c-12.288-17.7408-4.992-40.5504 16.341333-50.773333l5.12-2.474667c21.333333-10.231467 48.725333-4.130133 61.013334 13.738667z"></path></svg>
             <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">近似商标查询</span>
           </div>
@@ -196,16 +262,16 @@ function DesktopNav() {
           </div>
         </NavItem>
         <NavItem href="#" label="Map">
-            <div className="flex flex-col justify-start items-center mt-20">
-              <img src={pdfPng.src} width="50" height="50" />
-              <div className="text-[#ADD8E6]">
-                蓝图框架设想2025
-              </div>
-              <div className="text-[#ADD8E6]">
-                (点击查看)
-              </div>
+          <div className="flex flex-col justify-start items-center mt-2">
+            <img src={pdfPng.src} width="50" height="50" />
+            <div className="text-[#333] text-[14px]">
+              技术支持框架2025
+            </div>
+            <div className="text-[#333] text-[14px]">
+              (点击查看)
+            </div>
           </div>
-          </NavItem>
+        </NavItem>
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
         <Tooltip>
@@ -310,10 +376,10 @@ function MobileNav() {
               <div className="text-[#1c252e]">
                 商业蓝图
               </div>
-          </div>
+            </div>
           </NavItem>
         </nav>
-        
+
         <nav className="mt-auto flex flex-col items-start justify-start gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
