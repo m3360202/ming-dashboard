@@ -84,7 +84,9 @@ export function ItemsTablePicQDS() {
     }
 
     setShowTestLogo(true);
-    axios.post('https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList', data, {
+    // const url = 'http://localhost:8080/handleGetQDSTrademarkPicList';
+    const url = 'https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList';
+    axios.post(url, data, {
       headers: headers
     }).then((res) => {
       setLoading(false);

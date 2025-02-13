@@ -9,7 +9,7 @@ import { useTrademarkCheck } from '@/store/trademarkPic';
 import { PlusCircle } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
-import { textMark } from '@/utils/chesanfengxian';
+import { textMark } from '@/utils/origin';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性

@@ -19,54 +19,64 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsData } from '@/utils/trademarkCls';
-import { useTrademarkCheck } from '@/store/trademark';
+import { useTrademarkCheck } from '@/store/trademarkmutil';
 import { PlusCircle } from 'lucide-react';
 import axios from 'axios';
 import { useState } from 'react';
 
 export function ItemsTable() {
   let router = useRouter();
-  const { cls, st, keyword, sc } = useTrademarkCheck();
+  const { cls, st, keyword } = useTrademarkCheck();
   let productsPerPage = 5;
   const [pageIndex, setPageIndex] = useState(1);
   const [pageTotal, setPageTotal] = useState(10);
-  const [showTestLogo, setShowTestLogo] = useState(false);
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // function prevPage() {
-  //   router.back();
-  // }
-
-  // function nextPage() {
-  //   router.push(`/?offset=${offset}`, { scroll: false });
-  // }
+  const LoadingSvg = () => (
+    <svg width="50" height="50" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+      <circle className="spin" cx="400" cy="400" fill="none"
+        r="200" strokeWidth="60" stroke="#1485ee"
+        strokeDasharray="800 1400"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
 
   const submitCheck = async() => {
-    if(!cls){
+    if(!cls || cls.length === 0){
       return alert('请选择国际分类');
     }
-    if(!st){
-      return alert('请选择商标匹配语言库');
-    }
     if(!keyword){
-      return alert('请填写特征词');
+      return alert('请填写关键词');
     }
-    const payload = {
-      keyword,
-      pageIndex,
-      cls,
-      st,
-      sc
+
+    const getTotal = (keyword: string) => {
+      const r = keyword.replace('，',",");
+      const result = r.split(',');
+      return result.length;
     }
-    setShowTestLogo(true);
-    axios.get('https://gptserver.aliensoft.com.cn/handleGetTrademarkList',{
-      params: payload
+    const data = {
+      keywords: keyword.replace('，',","),
+      total: getTotal(keyword),
+      cls: cls.join(',')
+    }
+
+    const headers = {
+
+    }
+    setLoading(true);
+    // const url = 'https://gptserver.aliensoft.com.cn';
+    const url = 'http://localhost:8080';
+    axios.post(url + '/handleGetQDSTrademarkMutilList', data, {
+      headers: headers
     }).then((res)=>{
-      console.log('aaaaaaa',res)
-      setItems(res?.data?.data);
-      setPageTotal(res?.data?.pager?.total)
+      console.log('aaaaaaa',res?.data?.data?.data?.data)
+      setLoading(false);
+      setItems(res?.data?.data?.data?.data);
     }).catch((error)=>{
       console.log('error', error);
+      setLoading(false);
       alert('request fail');
     })
   }
@@ -86,14 +96,14 @@ export function ItemsTable() {
             <span style={{ color: '#637381' }}>国际分类</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-wrap jusify-between gap-4 items-start">
-            {clsData.map((clsItem, index) => (
+            {clsData.map((clsItem: any, index: number) => (
               <li
                 style={{ 
                   listStyle: 'none', 
-                  color: cls.indexOf(clsItem.cls) > -1 ? '#fff' : 'rgb(102, 102, 102)', 
+                  color: cls.indexOf(clsItem?.cls) > -1 ? '#fff' : 'rgb(102, 102, 102)', 
                   cursor: 'pointer',
-                  borderRadius: cls.indexOf(clsItem.cls) > -1 ? '10px' : '0px',
-                  backgroundColor: cls.indexOf(clsItem.cls) > -1 ? 'rgb(29, 147, 171)' : '',
+                  borderRadius: cls.indexOf(clsItem?.cls) > -1 ? '10px' : '0px',
+                  backgroundColor: cls.indexOf(clsItem?.cls) > -1 ? 'rgb(29, 147, 171)' : '',
                   padding: '4px 10px',
                 }}
                 onClick={() => {
@@ -118,34 +128,6 @@ export function ItemsTable() {
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
             <span style={{ color: 'red' }}>*</span>
-            <span style={{ color: '#637381' }}>查询方式</span>
-          </div>
-          <div style={{ width: '85%' }} className="max-w-[85%] flex flex-wrap jusify-between gap-4 items-start">
-            <select
-              defaultValue={st}
-              style={{border: '#1c252e 1px solid', width: '150px', borderRadius: '5px', padding: '6px'}}
-              onChange={(e)=>{
-                useTrademarkCheck.setState({st: e.target.value});
-                if(e.target.value === "1"){
-                  useTrademarkCheck.setState({sc: "1,2,3,4,5,6,7,8,9,10"});
-                }
-                if(e.target.value === "4"){
-                  useTrademarkCheck.setState({sc: "1,2,3,4,5,6,7,8,9,10,11"});
-                }
-              }}
-            >
-              <option value="1">
-                中文
-              </option>
-              <option value="4">
-                英文
-              </option>
-            </select>
-          </div>
-        </div>
-        <div className='flex flex-row justify-between w-full my-4'>
-          <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
             <span style={{ color: '#637381' }}>商标内关键词</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
@@ -161,11 +143,14 @@ export function ItemsTable() {
 
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
-            <Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                开始查询
-              </span>
-            </Button>
+            {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    开始查询
+                  </span>
+                </Button>)}
+                {loading && (
+                  <LoadingSvg />
+                )}
           </div>
         </div>
         <Table>
