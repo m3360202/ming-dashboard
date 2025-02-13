@@ -1,16 +1,13 @@
 'use client';
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
+  CardContent
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { clsData } from '@/utils/trademarkCls';
 import { useTrademarkCheck } from '@/store/trademarkmutil';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function ItemsTable() {
   const { cls, keyword } = useTrademarkCheck();
@@ -26,6 +23,10 @@ export function ItemsTable() {
     </svg>
   )
 
+  useEffect(()=>{
+    useTrademarkCheck.setState({cls: []})
+  }, [])
+
   const submitCheck = async () => {
     setItems([]);
     if (!cls || cls.length === 0) {
@@ -40,10 +41,11 @@ export function ItemsTable() {
       const result = r.split(',');
       return result.length;
     }
+    console.log('-----',cls)
     const data = {
       keywords: keyword.replace('，', ","),
       total: getTotal(keyword),
-      cls: cls.join(',')
+      cls: cls.length > 2 ? cls.join(',') : cls
     }
 
     const headers = {
@@ -218,58 +220,68 @@ export function ItemsTable() {
           </div>
         </div>
         <table style={{ border: '#ffe0b3 1px solid' }}>
-          <tr>
-            <td style={{ padding: '20px', width: '160px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>检索词</td>
-            <td style={{borderBottom: '1px solid #ffe0b3', width: '100%'}}>
-              <table style={{width: '100%'}}>
-                <tr>
-                  <td style={{ padding: '20px', width: '180px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>分类</td>
-                  <td style={{ padding: '20px', width: '150px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>风险评估</td>
-                  {/* <td style={{ padding: '20px', width: '150px', textAlign: 'center' }}>相同或近似</td> */}
-                  <td style={{ padding: '20px', width: '150px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>群组风险</td>
-                  <td style={{ padding: '20px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>对比结果</td>
-                </tr>
-              </table>
-            </td>
-            
-          </tr>
-          {items.map((a: any, index1: number) => (
-            <tr key={index1}>
-              <td style={{ border: '1px solid #ffe0b3', padding: '20px 40px', color: '#333', fontSize: '14px', width: '160px', wordBreak: 'break-word' }}>{a.name}</td>
-              <td>
-                {a.data.map((b: any, index2: number) => (
-                  <tr key={index2} style={{ borderBottom: '#ffe0b3 1px solid' }}>
-                    <td style={{ padding: '20px', color: '#999', fontSize: '14px', width: '180px' }}>
-                      {getClsName(b?.value)}
-                    </td>
-                    <td style={{ padding: '20px', width: '150px' }}>
-                      <div className="flex flex-col items-center gap-4">
-                        <span style={{ fontSize: '14px', color: getColorLevel(b.data.riskLevel) }}>{b.data.riskLevel}</span>
-                        <span style={{ fontSize: '14px', color: '#999' }}>{getTagLevel(b.data.riskLevel)}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '20px' }}>
-                      <div style={{ width: '200px' }} className="flex flex-row items-center gap-2 flex-wrap w-[200px]">
-                        {b.data.groupRisk.map((c: any, index3: number) => (
-                          <span key={index3} style={{ fontSize: '12px', color: getColorGroup(c.value) }}>{c.name}</span>
-                        ))}
-                      </div>
-                    </td>
-                    <td style={{ padding: '20px' }}>
-                      <div className="flex flex-row items-center gap-2 flex-wrap">
-                        {b.data.approximateList.map((d: any, index4: number) => (
-                          <span key={index4} style={{ fontSize: '12px', color: '#999', cursor: 'pointer' }}>
-                            {d.name}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+          <thead>
+            <tr>
+              <td style={{ padding: '20px', width: '160px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>检索词</td>
+              <td style={{ borderBottom: '1px solid #ffe0b3', width: '90%' }}>
+                <table style={{ width: '100%' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '20px', width: '180px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>分类</td>
+                      <td style={{ padding: '20px', width: '150px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>风险评估</td>
+                      {/* <td style={{ padding: '20px', width: '150px', textAlign: 'center' }}>相同或近似</td> */}
+                      <td style={{ padding: '20px', width: '150px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>群组风险</td>
+                      <td style={{ padding: '20px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>对比结果</td>
+                    </tr>
+                  </tbody>
+                </table>
               </td>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {items.map((a: any, index1: number) => (
+              <tr key={index1}>
+                <td style={{ border: '1px solid #ffe0b3', padding: '20px 40px', color: '#333', fontSize: '14px', width: '160px', wordBreak: 'break-word' }}>{a.name}</td>
+                <td>
+                  <table style={{ width: '100%' }}>
+                    <tbody>
+                      {a.data.map((b: any, index2: number) => (
+                        <tr key={index2} style={{ borderBottom: '#ffe0b3 1px solid' }}>
+                          <td style={{ padding: '20px', color: '#999', fontSize: '14px', width: '180px' }}>
+                            {getClsName(b?.value)}
+                          </td>
+                          <td style={{ padding: '20px', width: '150px' }}>
+                            <div className="flex flex-col items-center gap-4">
+                              <span style={{ fontSize: '14px', color: getColorLevel(b.data.riskLevel) }}>{b.data.riskLevel}</span>
+                              <span style={{ fontSize: '14px', color: '#999' }}>{getTagLevel(b.data.riskLevel)}</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '20px' }}>
+                            <div style={{ width: '200px' }} className="flex flex-row items-center gap-2 flex-wrap w-[200px]">
+                              {b.data.groupRisk.map((c: any, index3: number) => (
+                                <span key={index3} style={{ fontSize: '12px', color: getColorGroup(c.value) }}>{c.name}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td style={{ padding: '20px' }}>
+                            <div className="flex flex-row items-center gap-2 flex-wrap">
+                              {b.data.approximateList.map((d: any, index4: number) => (
+                                <span key={index4} style={{ fontSize: '12px', color: '#999', cursor: 'pointer' }}>
+                                  {d.name}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
+
 
       </CardContent>
     </Card>

@@ -37,8 +37,8 @@ export function User() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>我的账号</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>设置</DropdownMenuItem>
-        <DropdownMenuItem>技术支持</DropdownMenuItem>
+        <DropdownMenuItem>权限: <span style={{color: '#1485ee', marginLeft: '8px'}}>平台所有者</span></DropdownMenuItem>
+        {/* <DropdownMenuItem>技术支持</DropdownMenuItem> */}
         <DropdownMenuSeparator />
         {user ? (
           <DropdownMenuItem>
