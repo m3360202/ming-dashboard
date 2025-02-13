@@ -146,7 +146,7 @@ export function ItemsTablePic() {
               <li
                 style={{
                   listStyle: 'none',
-                  width: '160px',
+                  fontSize: '12px',
                   color: cls === clsItem.cls ? '#fff' : 'rgb(102, 102, 102)',
                   cursor: 'pointer',
                   borderRadius: cls === clsItem.cls ? '10px' : '0px',

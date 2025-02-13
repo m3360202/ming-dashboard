@@ -16,14 +16,14 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            This demo uses GitHub for authentication.
+            顶尖的数据分析能力,助你成为行业顶流.
           </CardDescription>
         </CardHeader>
         <CardFooter>
           <form
             className="w-full"
           >
-            <Button className="w-full">登录</Button>
+            <Button className="w-full">明成-数据挖掘系统Beta 0.1.4</Button>
           </form>
         </CardFooter>
       </Card>
