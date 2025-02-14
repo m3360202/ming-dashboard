@@ -45,7 +45,7 @@ export function ItemsTable() {
     const data = {
       keywords: keyword.replace('，', ","),
       total: getTotal(keyword),
-      cls: cls.length > 2 ? cls.join(',') : cls
+      cls: cls.length > 1 ? cls.join(',') : cls[0]
     }
 
     const headers = {
