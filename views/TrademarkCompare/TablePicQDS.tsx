@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsData } from '@/utils/trademarkCls';
-import { useTrademarkCheck } from '@/store/trademarkPic';
+import { useTrademarkCheck } from '@/store/trademarkPicQDS';
 import { PlusCircle } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
@@ -156,7 +156,7 @@ export function ItemsTablePicQDS() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='flex flex-row justify-between w-full my-4 hidden'>
+        <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
             <span style={{ color: 'red' }}>*</span>
             <span style={{ color: '#637381' }}>国际分类</span>
@@ -166,7 +166,7 @@ export function ItemsTablePicQDS() {
               <li
                 style={{
                   listStyle: 'none',
-                  width: '160px',
+                  fontSize: '12px',
                   color: cls === clsItem.cls ? '#fff' : 'rgb(102, 102, 102)',
                   cursor: 'pointer',
                   borderRadius: cls === clsItem.cls ? '10px' : '0px',

@@ -6,7 +6,7 @@ import {
   Settings,
   Users2
 } from 'lucide-react';
-
+import Image from 'next/image';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -99,32 +99,32 @@ export default function DashboardLayout({
 
                     <div className="flex flex-row items-center justify-between w-full p-10 gap-4 flex-wrap">
                       <div onClick={() => { window.open('https://hypergpt.aliensoft.com.cn/', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
-                        <img src={Hyperpng.src} width="50" height="50" />
+                        <Image alt='HyperGPT' src={Hyperpng} width="50" height="50" />
                         <span>HyperGPT</span>
                         <span>AI 对话助手</span>
                       </div>
                       <div onClick={() => { window.open('https://chat.deepseek.com/', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
-                        <img src={Dspng.src} width="50" height="50" />
+                        <Image alt='DeepSeek' src={Dspng} width="50" height="50" />
                         <span>DeepSeek</span>
                         <span>AI 三方助手</span>
                       </div>
                       <div onClick={() => { window.open('http://minggpt.aliensoft.com.cn/', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
-                        <img src={Mingpng.src} width="50" height="50" />
+                        <Image alt='MingTrans' src={Mingpng} width="50" height="50" />
                         <span>MingTrans</span>
                         <span>AI 图片翻译</span>
                       </div>
                       <div onClick={() => { window.open('https://app.boardx.us', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
-                        <img src={Boardpng.src} width="50" height="50" />
+                        <Image alt='BoardX' src={Boardpng} width="50" height="50" />
                         <span>BoardX</span>
                         <span>在线协作画板</span>
                       </div>
                       <div onClick={() => { window.open('https://doc.qq.com', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
-                        <img src={Docpng.src} width="50" height="50" />
+                        <Image alt='腾讯文档' src={Docpng} width="50" height="50" />
                         <span>腾讯文档</span>
                         <span>云文档存储</span>
                       </div>
                       <div onClick={() => { window.open('https://meeting.qq.com', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
-                        <img src={Meetpng.src} width="50" height="50" />
+                        <Image alt='腾讯会议' src={Meetpng} width="50" height="50" />
                         <span>腾讯会议</span>
                         <span>在线会议</span>
                       </div>
@@ -207,7 +207,7 @@ function DesktopNav() {
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-48 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         <div className="flex flex-col items-center">
-          <img src={logoPng.src} width="120" height="40" />
+          <Image alt='智慧树-明成' src={logoPng} width="120" height="40" />
           <span className="text-[#637381] mt-2">知产数据探测系统</span>
         </div>
         <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
@@ -281,7 +281,7 @@ function DesktopNav() {
         </NavItem>
         <NavItem href="#" label="Map">
           <div className="flex flex-col justify-start items-center mt-2">
-            <img src={pdfPng.src} width="35" height="50" />
+            <Image alt='plan 2025' src={pdfPng} width="35" height="50" />
             <div className="text-[#333] text-[14px] mt-2">
               业务设计框架2025
             </div>
