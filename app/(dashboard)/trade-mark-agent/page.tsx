@@ -9,7 +9,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { File, PlusCircle } from 'lucide-react';
+import { ItemsTable8 } from '@/views/TrademarkDetective/Table8';
 import { ItemsTable } from '@/views/TrademarkDetective/Table';
+
 export default function CustomersPage() {
 
   return (
@@ -22,6 +24,9 @@ export default function CustomersPage() {
       <Tabs defaultValue="china">
       <div className="flex items-center">
         <TabsList>
+          <TabsTrigger value="8">无效答辩</TabsTrigger>
+          <TabsTrigger value="9">撤三答辩</TabsTrigger>
+          <TabsTrigger value="10">撤三风险</TabsTrigger>
           <TabsTrigger value="1">等待注册</TabsTrigger>
           <TabsTrigger value="2">驳回复审</TabsTrigger>
           <TabsTrigger value="3">驳回风险</TabsTrigger>
@@ -29,9 +34,6 @@ export default function CustomersPage() {
           <TabsTrigger value="5">等待答辩</TabsTrigger>
           <TabsTrigger value="6">等待续展</TabsTrigger>
           <TabsTrigger value="7">等待变更</TabsTrigger>
-          <TabsTrigger value="8">无效答辩</TabsTrigger>
-          <TabsTrigger value="9">撤三答辩</TabsTrigger>
-          <TabsTrigger value="10">撤三风险</TabsTrigger>
         </TabsList>
         <div className=" lg:hidden ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -48,13 +50,10 @@ export default function CustomersPage() {
           </Button> */}
         </div>
       </div>
-      <TabsContent value="1">
-        <ItemsTable />
+      <TabsContent value="8">
+        <ItemsTable8 />
       </TabsContent>
-      <TabsContent value="2">
-      <ItemsTable />
-      </TabsContent>
-      <TabsContent value="3">
+      <TabsContent value="9">
       <ItemsTable />
       </TabsContent>
       <TabsContent value="10">
