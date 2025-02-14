@@ -94,36 +94,36 @@ export default function DashboardLayout({
                 <Dialog.Overlay className="fixed inset-0 bg-black/50" />
                 <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[90vw] max-w-md">
                   <Dialog.Title className="text-lg font-bold mb-4">常用平台快捷链接</Dialog.Title>
-                  <div className="mb-6" style={{ color: '#999', fontSize: '14px', fontWeight: '400'}}>
+                  <div className="mb-6" style={{ color: '#999', fontSize: '14px', fontWeight: '400' }}>
                     以下是基于Aliensoft AIGC创建的平台或第三方应用平台.
 
                     <div className="flex flex-row items-center justify-between w-full p-10 gap-4 flex-wrap">
-                      <div onClick={()=>{window.open('https://hypergpt.aliensoft.com.cn/','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div onClick={() => { window.open('https://hypergpt.aliensoft.com.cn/', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Hyperpng.src} width="50" height="50" />
                         <span>HyperGPT</span>
                         <span>AI 对话助手</span>
                       </div>
-                      <div onClick={()=>{window.open('https://chat.deepseek.com/','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div onClick={() => { window.open('https://chat.deepseek.com/', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Dspng.src} width="50" height="50" />
                         <span>DeepSeek</span>
                         <span>AI 三方助手</span>
                       </div>
-                      <div onClick={()=>{window.open('http://minggpt.aliensoft.com.cn/','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div onClick={() => { window.open('http://minggpt.aliensoft.com.cn/', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Mingpng.src} width="50" height="50" />
                         <span>MingTrans</span>
                         <span>AI 图片翻译</span>
                       </div>
-                      <div onClick={()=>{window.open('https://app.boardx.us','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div onClick={() => { window.open('https://app.boardx.us', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Boardpng.src} width="50" height="50" />
                         <span>BoardX</span>
                         <span>在线协作画板</span>
                       </div>
-                      <div onClick={()=>{window.open('https://doc.qq.com','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div onClick={() => { window.open('https://doc.qq.com', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Docpng.src} width="50" height="50" />
                         <span>腾讯文档</span>
                         <span>云文档存储</span>
                       </div>
-                      <div onClick={()=>{window.open('https://meeting.qq.com','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div onClick={() => { window.open('https://meeting.qq.com', '_blank') }} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Meetpng.src} width="50" height="50" />
                         <span>腾讯会议</span>
                         <span>在线会议</span>
@@ -149,12 +149,12 @@ export default function DashboardLayout({
           </div>
           <Analytics />
         </main>) : (
-        <div className="min-h-screen flex justify-center items-start md:items-center p-8">
+        <div className="min-h-screen flex flex-col justify-center items-start md:items-center p-8">
           <Card className="w-full max-w-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">登录</CardTitle>
+              <CardTitle className="text-2xl">明成 Beta 1.0</CardTitle>
               <CardDescription style={{ marginTop: '10px' }}>
-                This demo uses GitHub for authentication.
+                顶尖的数据分析能力,助你成为行业顶流.
               </CardDescription>
             </CardHeader>
             <CardFooter>
@@ -178,6 +178,24 @@ export default function DashboardLayout({
               </form>
             </CardFooter>
           </Card>
+          <div
+            className={`fixed bottom-0 flex flex-col lg:flex-row justify-between items-center mx-auto max-w-[1152px] w-full`}
+            style={{ padding: '24px 0' }}>
+            <span style={{ fontSize: '12px', color: '#637381' }}>
+              © 2025 ZhiHuiTree.
+            </span>
+            <div className="flex flex-col lg:flex-row justify-between items-center">
+              <a
+                style={{ fontSize: '12px', color: '#637381', marginRight: '10px' }}
+                href="http://www.miibeian.gov.cn/"
+                target="_blank">
+                {'冀ICP备13008594号-1'}
+              </a>
+              <span style={{ fontSize: '12px', color: '#637381' }}>
+                版权所有 智慧树（北京）知识产权有限公司 技术支持 微工坊（保定）网络科技有限公司
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </Providers>
@@ -190,7 +208,7 @@ function DesktopNav() {
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         <div className="flex flex-col items-center">
           <img src={logoPng.src} width="120" height="40" />
-          <span className="text-[#637381] mt-2">数据挖掘系统Beta 0.1.4</span>
+          <span className="text-[#637381] mt-2">知产数据探测系统</span>
         </div>
         <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
           <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-6 justify-start">
@@ -263,8 +281,8 @@ function DesktopNav() {
         </NavItem>
         <NavItem href="#" label="Map">
           <div className="flex flex-col justify-start items-center mt-2">
-            <img src={pdfPng.src} width="50" height="50" />
-            <div className="text-[#333] text-[14px]">
+            <img src={pdfPng.src} width="35" height="50" />
+            <div className="text-[#333] text-[14px] mt-2">
               技术支持框架2025
             </div>
             <div className="text-[#333] text-[14px]">

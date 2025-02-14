@@ -23,10 +23,28 @@ export default function LoginPage() {
           <form
             className="w-full"
           >
-            <Button className="w-full">明成-数据挖掘系统Beta 0.1.4</Button>
+            <Button className="w-full">明成 Beta 1.0</Button>
           </form>
         </CardFooter>
       </Card>
+      <div
+        className={`flex flex-col lg:flex-row justify-between items-center mx-auto max-w-[1152px] w-full`}
+        style={{ padding: '24px 0' }}>
+        <span style={{ fontSize: '12px', color: '#637381' }}>
+          © 2025 ZhiHuiTree.
+        </span>
+        <div className="flex flex-col lg:flex-row justify-between items-center">
+          <a
+            style={{ fontSize: '12px', color: '#637381', marginRight: '10px' }}
+            href="http://www.miibeian.gov.cn/"
+            target="_blank">
+            {'冀ICP备13008594号-1'}
+          </a>
+          <span style={{ fontSize: '12px', color: '#637381' }}>
+          版权所有 智慧树（北京）知识产权有限公司 技术支持 微工坊（保定）网络科技有限公司
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
