@@ -283,7 +283,7 @@ function DesktopNav() {
           <div className="flex flex-col justify-start items-center mt-2">
             <img src={pdfPng.src} width="35" height="50" />
             <div className="text-[#333] text-[14px] mt-2">
-              技术支持框架2025
+              业务设计框架2025
             </div>
             <div className="text-[#333] text-[14px]">
               (点击查看)
