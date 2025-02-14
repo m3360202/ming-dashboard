@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
-import { textMark } from '@/utils/wuxiaodabian';
+import { textMark } from '@/utils/chesandabian';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性
@@ -24,7 +24,7 @@ interface TrademarkCheckState {
   sc: string;
 }
 
-export function ItemsTable8() {
+export function ItemsTable9() {
   let productsPerPage = 20;
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [pageTotal, setPageTotal] = useState<number>(0);
@@ -70,7 +70,7 @@ export function ItemsTable8() {
 
   useEffect(() => {
     // const data = JSON.parse(textMark);
-    console.log('----------',textMark)
+    // console.log('----------',data.data.list)
     setData(textMark);
   }, [textMark])
 

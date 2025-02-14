@@ -1,50 +1,90 @@
 'use client'
-
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { File, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ProductsTable } from './products-table';
-import { useSearchKey } from '@/store/nav';
+import { File, PlusCircle } from 'lucide-react';
+import { ItemsTable8 } from '@/views/TrademarkDetective/Table8';
+import { ItemsTable9 } from '@/views/TrademarkDetective/Table9';
+import { ItemsTableLoading } from '@/views/TrademarkDetective/TableLoading';
+import { ItemsTable } from '@/views/TrademarkDetective/Table';
 
-export default function ProductsPage() {
-  const { searchParams } = useSearchKey();
-  const products: any = [];
-  const newOffset= 100;
-  const totalProducts= 90;
+export default function CustomersPage() {
 
   return (
-    <Tabs defaultValue="all">
+    <Card>
+      <CardHeader>
+        <CardTitle>潜在客户探测</CardTitle>
+        <CardDescription style={{marginTop: '20px'}}>获取最新国家知识产权局数据库的快照，有4-24小时延迟，领先于大部分国内数据商.AI探测可能性随时间积累和学习能力加强越来越有效率，现在平均出结果时间需要一周左右</CardDescription>
+      </CardHeader>
+      <CardContent>
+      <Tabs defaultValue="8">
       <div className="flex items-center">
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="draft">Draft</TabsTrigger>
-          <TabsTrigger value="archived" className="hidden sm:flex">
-            Archived
-          </TabsTrigger>
+          <TabsTrigger value="8">无效答辩</TabsTrigger>
+          <TabsTrigger value="9">撤三答辩</TabsTrigger>
+          <TabsTrigger value="10">撤三风险</TabsTrigger>
+          <TabsTrigger value="1">等待注册</TabsTrigger>
+          <TabsTrigger value="2">驳回复审</TabsTrigger>
+          <TabsTrigger value="3">驳回风险</TabsTrigger>
+          <TabsTrigger value="4">等待异议</TabsTrigger>
+          <TabsTrigger value="5">等待答辩</TabsTrigger>
+          <TabsTrigger value="6">等待续展</TabsTrigger>
+          <TabsTrigger value="7">等待变更</TabsTrigger>
         </TabsList>
-        <div className="ml-auto flex items-center gap-2">
+        <div className=" lg:hidden ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
             <File className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Export
+              导出数据
             </span>
           </Button>
-          <Button size="sm" className="h-8 gap-1">
+          {/* <Button size="sm" className="h-8 gap-1">
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
               Add Product
             </span>
-          </Button>
+          </Button> */}
         </div>
       </div>
-      <TabsContent value="all">
-        <ProductsTable
-          products={products}
-          offset={newOffset ?? 0}
-          totalProducts={totalProducts}
-        />
+      <TabsContent value="8">
+        <ItemsTable8 />
+      </TabsContent>
+      <TabsContent value="9">
+      <ItemsTable9 />
+      </TabsContent>
+      <TabsContent value="10">
+      <ItemsTable />
+      </TabsContent>
+      <TabsContent value="1">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="2">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="3">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="4">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="5">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="6">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="7">
+      <ItemsTableLoading />
       </TabsContent>
     </Tabs>
+
+      </CardContent>
+    </Card>
   );
 }

@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { File, PlusCircle } from 'lucide-react';
 import { ItemsTable8 } from '@/views/TrademarkDetective/Table8';
+import { ItemsTable9 } from '@/views/TrademarkDetective/Table9';
+import { ItemsTableLoading } from '@/views/TrademarkDetective/TableLoading';
 import { ItemsTable } from '@/views/TrademarkDetective/Table';
 
 export default function CustomersPage() {
@@ -21,7 +23,7 @@ export default function CustomersPage() {
         <CardDescription style={{marginTop: '20px'}}>获取最新国家知识产权局数据库的快照，有4-24小时延迟，领先于大部分国内数据商.AI探测可能性随时间积累和学习能力加强越来越有效率，现在平均出结果时间需要一周左右</CardDescription>
       </CardHeader>
       <CardContent>
-      <Tabs defaultValue="china">
+      <Tabs defaultValue="8">
       <div className="flex items-center">
         <TabsList>
           <TabsTrigger value="8">无效答辩</TabsTrigger>
@@ -54,10 +56,31 @@ export default function CustomersPage() {
         <ItemsTable8 />
       </TabsContent>
       <TabsContent value="9">
-      <ItemsTable />
+      <ItemsTable9 />
       </TabsContent>
       <TabsContent value="10">
       <ItemsTable />
+      </TabsContent>
+      <TabsContent value="1">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="2">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="3">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="4">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="5">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="6">
+      <ItemsTableLoading />
+      </TabsContent>
+      <TabsContent value="7">
+      <ItemsTableLoading />
       </TabsContent>
     </Tabs>
 

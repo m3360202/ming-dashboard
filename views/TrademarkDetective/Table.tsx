@@ -9,7 +9,7 @@ import { useTrademarkCheck } from '@/store/trademarkPic';
 import { PlusCircle } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
-import { textMark } from '@/utils/origin';
+import { textMark } from '@/utils/chesanfengxian';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性
@@ -115,9 +115,9 @@ export function ItemsTable() {
   )
 
   useEffect(() => {
-    const data = JSON.parse(textMark);
-    console.log('----------',data.data.list)
-    setData(data.data.list);
+    // const data = JSON.parse(textMark);
+    console.log('----------',textMark)
+    setData(textMark);
   }, [textMark])
 
   const calculateYears = (startDateString: string) => {

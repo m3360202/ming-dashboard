@@ -126,7 +126,7 @@ export default function DashboardLayout({
                       <div onClick={()=>{window.open('https://meeting.qq.com','_blank')}} className="flex flex-col items-center gap-2 cursor-pointer">
                         <img src={Meetpng.src} width="50" height="50" />
                         <span>腾讯会议</span>
-                        <span>云文档存储</span>
+                        <span>在线会议</span>
                       </div>
                     </div>
                   </div>
