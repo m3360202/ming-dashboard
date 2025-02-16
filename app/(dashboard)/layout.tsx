@@ -69,7 +69,7 @@ export default function DashboardLayout({
     if (username && username !== 'mingcheng') {
       return alert('账号错误！');
     }
-    if (pwd && pwd !== '930216') {
+    if (pwd && pwd !== '181225') {
       return alert('密码错误！');
     }
     useUser.setState({ user: { username: 'mingcheng', image: '', role: 'admin', token: '' } });

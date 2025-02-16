@@ -3,13 +3,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { clsData } from '@/utils/trademarkCls';
 import { useTrademarkCheck } from '@/store/trademarkPic';
 import { PlusCircle } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
 import { textMark } from '@/utils/chesanfengxian';
+import { Button } from '@/components/ui/button';
+import { File } from 'lucide-react';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性
@@ -139,12 +140,72 @@ export function ItemsTable() {
     return `注册已满 ${yearsDiff} 年`;
 }
 
+const escapeCommas = (value: string) => {
+  if (value.includes(',')) {
+    return `"${value}"`;
+  }
+  return value;
+};
+
+const exportToCSV = () => {
+  const headers = [
+    '商标名称',
+    '类目',
+    '联系人',
+    '联系电话',
+    '联系邮箱',
+    '联系地址',
+    '注册号',
+    '状态',
+    '代理机构'
+  ];
+
+  const csvData = [
+    headers.join(','),
+    ...data.map(product => [
+      product.tmName,
+      product.intCls,
+      product.operName,
+      escapeCommas(product.clueWithCustomerVo.fcontactPhone),
+      escapeCommas(product.clueWithCustomerVo.fcontactEmail),
+      product.addressCn,
+      product.regNo,
+      calculateYears(product?.privateDateStart),
+      product.agent
+    ].join(','))
+  ].join('\r\n');
+
+  const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+
+    // 设置下载文件名
+    const fileName = `${formattedDate} 撤三风险潜在客户数据.csv`;
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+
   return (
     <Card>
       <CardHeader>
-        <CardDescription style={{ marginTop: '20px' }}>
-          经过AI比对风险维度，撤三风险大于60分，或24小时内没有其他知产代理公司代理的潜在用户将会被列出在这里，具体算法请看PDF
-        </CardDescription>
+        <div className='flex flex-row justify-between items-center'>
+            <span>经过AI比对风险维度，撤三风险大于60分，或24小时内没有其他知产代理公司代理的潜在用户将会被列出在这里，具体算法请看PDF</span>
+            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
+              <File className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                导出数据
+              </span>
+            </Button>
+          </div>
       </CardHeader>
       <CardContent>
         <div style={{ gap: '30px', marginTop: '60px' }} className="w-full flex flex-col justify-start items-center flex-wrap">

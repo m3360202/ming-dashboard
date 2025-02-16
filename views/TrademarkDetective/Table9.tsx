@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
 import { textMark } from '@/utils/chesandabian';
+import { Button } from '@/components/ui/button';
+import { File } from 'lucide-react';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性
@@ -58,16 +60,6 @@ export function ItemsTable9() {
     }
   }
 
-  const LoadingSvg = () => (
-    <svg width="50" height="50" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
-      <circle className="spin" cx="400" cy="400" fill="none"
-        r="200" strokeWidth="60" stroke="#1485ee"
-        strokeDasharray="800 1400"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-
   useEffect(() => {
     // const data = JSON.parse(textMark);
     // console.log('----------',data.data.list)
@@ -96,12 +88,76 @@ export function ItemsTable9() {
     }
 }
 
+const escapeCommas = (value: string) => {
+  if (value.includes(',')) {
+    return `"${value}"`;
+  }
+  return value;
+};
+
+const exportToCSV = () => {
+  const headers = [
+    '商标名称',
+    '类目',
+    '联系人',
+    '联系电话',
+    '联系邮箱',
+    '联系地址',
+    '注册号',
+    '状态',
+    '无效申请收文',
+    '无效受通发文',
+    '代理机构'
+  ];
+
+  const csvData = [
+    headers.join(','),
+    ...data.map(product => [
+      product.tmName,
+      product.intCls,
+      product.operName,
+      escapeCommas(product.clueWithCustomerVo.fcontactPhone),
+      escapeCommas(product.clueWithCustomerVo.fcontactEmail),
+      product.addressCn,
+      product.regNo,
+      product.statusName,
+      product.acceptDate,
+      product.rescindDate,
+      product.agent
+    ].join(','))
+  ].join('\r\n');
+
+  const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+
+    // 设置下载文件名
+    const fileName = `${formattedDate} 撤三答辩潜在客户数据.csv`;
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+
   return (
     <Card>
       <CardHeader>
-        <CardDescription style={{ marginTop: '20px' }}>
-          经过AI比对，无效答辩风险大于60分，的潜在奇特用户将会被列出在这里，具体算法请看PDF
-        </CardDescription>
+        <div className='flex flex-row justify-between items-center'>
+            <span>经过AI比对，撤三答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
+            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
+              <File className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                导出数据
+              </span>
+            </Button>
+          </div>
       </CardHeader>
       <CardContent>
         <div style={{ gap: '30px', marginTop: '60px' }} className="w-full flex flex-col justify-start items-center flex-wrap">
