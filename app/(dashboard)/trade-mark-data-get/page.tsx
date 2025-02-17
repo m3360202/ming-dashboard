@@ -18,10 +18,7 @@ export default function ItemsTable() {
     if (isWriting) return; // 如果正在写入，则不获取新数据
 
     try {
-      const res = await axios.post('http://localhost:8080/handleGetTargetList', {
-        pageNo: pageNo,
-        pageSize: productsPerPage
-      });
+      const res = await axios.get(`http://localhost:8080/handleGetThreeClueList?pageNo=${pageNo}&pageSize=${productsPerPage}`);
 
       if (res?.data?.data) {
         console.log('------', res?.data?.data?.list);
@@ -45,7 +42,7 @@ export default function ItemsTable() {
   const writeToDBSingle = async () => {
     const data = textMark;
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData10', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -70,7 +67,7 @@ export default function ItemsTable() {
 
   const writeToDB = async (data) => {
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData10', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'

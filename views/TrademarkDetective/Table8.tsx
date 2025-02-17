@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import './style.css';
-import { textMark } from '@/utils/wuxiaodabian';
 import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
 
@@ -19,6 +18,8 @@ interface TrademarkItem {
   regNo: string;
   operName: string;
   addressCn: string;
+  contactPhone: string;
+  contactEmail: string;
   clueWithCustomerVo: {
     fcontactPhone: string;
     fcontactEmail: string;
@@ -26,16 +27,33 @@ interface TrademarkItem {
 }
 
 export function ItemsTable8() {
-  let productsPerPage = 20;
+  const productsPerPage = 20;
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [data, setData] = useState<TrademarkItem[]>([]);
+  const [pageTotal, setPageTotal] = useState(0);
+
+  const getData = async (pageNo: number) => {
+    try {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData8', {
+        pageNo: pageNo,
+        pageSize: 500
+      });
+
+      if (res?.data?.success) {
+        setData(res?.data?.data);
+        setPageTotal(res?.data?.total);
+      } else {
+        alert('请求失败');
+      }
+    } catch (error) {
+      console.log('error', error);
+      alert('请求失败');
+    }
+  };
 
   useEffect(() => {
-    // const data = JSON.parse(textMark);
-    // console.log('----------',data.data.list)
-    // console.log('----------',textMark)
-    setData(textMark);
-  }, [textMark]);
+    getData(pageIndex);
+  }, [pageIndex]);
 
   const currentData = data.slice(
     (pageIndex - 1) * productsPerPage,
@@ -59,7 +77,7 @@ export function ItemsTable8() {
       // 将时间差转换为天数
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // 返回“xx天前”
+      // 返回“xx天前 | 申请收文”
       return `${diffDays}天前 | 申请收文`;
     }
   }
@@ -162,10 +180,10 @@ export function ItemsTable8() {
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系地址: {product.addressCn}</span>
                 </div>
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
-                  <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系电话：{product.clueWithCustomerVo.fcontactPhone}</span>
+                  <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系电话：{product.contactPhone}</span>
                 </div>
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
-                  <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系邮箱：{product.clueWithCustomerVo.fcontactEmail}</span>
+                  <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系邮箱：{product.contactEmail}</span>
                 </div>
               </div>
             </div>
@@ -179,7 +197,7 @@ export function ItemsTable8() {
             <strong>
               {Math.max(0, (pageIndex - 1) * productsPerPage + 1)}-{Math.min(pageIndex * productsPerPage, data.length)}
             </strong>{' '}
-            中 <strong>{data.length}</strong> 个商标
+            中 <strong>{data.length}</strong> 个数据
           </div>
           <div style={{ width: '200px' }} className="flex justify-between item-center">
             <div
