@@ -88,7 +88,7 @@ export function ItemsTable9() {
 }
 
 const escapeCommas = (value: string) => {
-  if (value.includes(',')) {
+  if (value && value.includes(',')) {
     return `"${value}"`;
   }
   return value;
