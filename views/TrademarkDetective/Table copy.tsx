@@ -1,15 +1,11 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState,  useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { clsData } from '@/utils/trademarkCls';
-import { useTrademarkCheck } from '@/store/trademarkPic';
-import { PlusCircle } from 'lucide-react';
+
 import axios from 'axios';
 import './style.css';
-import { textMark } from '@/utils/origin';
+import { textMark } from '@/utils/chesanfengxian';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性
@@ -115,9 +111,9 @@ export function ItemsTable() {
   )
 
   useEffect(() => {
-    const data = JSON.parse(textMark);
-    console.log('----------',data.data.list)
-    setData(data.data.list);
+    // const data = JSON.parse(textMark);
+    // console.log('----------',data.data.list)
+    setData(textMark);
   }, [textMark])
 
   const calculateYears = (startDateString: string) => {

@@ -13,6 +13,7 @@ export function ItemsTable() {
   const { cls, keyword } = useTrademarkCheck();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
   const LoadingSvg = () => (
     <svg width="50" height="50" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
       <circle className="spin" cx="400" cy="400" fill="none"
@@ -23,9 +24,19 @@ export function ItemsTable() {
     </svg>
   )
 
-  useEffect(()=>{
-    useTrademarkCheck.setState({cls: []})
+  useEffect(() => {
+    useTrademarkCheck.setState({ cls: [] })
   }, [])
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      useTrademarkCheck.setState({ cls: [] });
+    } else {
+      const allCls = clsData.map(clsItem => clsItem.cls);
+      useTrademarkCheck.setState({ cls: allCls });
+    }
+    setSelectAll(!selectAll);
+  };
 
   const submitCheck = async () => {
     setItems([]);
@@ -41,7 +52,7 @@ export function ItemsTable() {
       const result = r.split(',');
       return result.length;
     }
-    console.log('-----',cls)
+    console.log('-----', cls)
     const data = {
       keywords: keyword.replace('，', ","),
       total: getTotal(keyword),
@@ -190,7 +201,17 @@ export function ItemsTable() {
               </li>
             ))}
           </div>
+
         </div>
+
+        <div style={{marginLeft: '250px'}} className='flex flex-row items-center gap-2'>
+            <input
+              type="checkbox"
+              checked={selectAll}
+              onChange={toggleSelectAll}
+            />
+            全选/取消全选
+          </div>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
             <span style={{ color: 'red' }}>*</span>

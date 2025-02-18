@@ -14,7 +14,7 @@ export default function ItemsTable() {
   const [data, setData] = useState([]);
   const [isWriting, setIsWriting] = useState(false);
 
-  const getData = async (pageNo) => {
+  const getData = async (pageNo: any) => {
     if (isWriting) return; // 如果正在写入，则不获取新数据
 
     try {
@@ -68,7 +68,7 @@ export default function ItemsTable() {
     }
   };
 
-  const writeToDB = async (data) => {
+  const writeToDB = async (data: any) => {
     try {
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
         headers: {
@@ -92,7 +92,7 @@ export default function ItemsTable() {
       setIsWriting(false);
     }
   };
-  let aaa;
+  let aaa: any;
   const startWrite = async() => {
     let pageStart = 0;
     // return console.log('------------',pages,pageStart + 1)
