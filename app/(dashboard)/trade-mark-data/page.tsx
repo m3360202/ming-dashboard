@@ -18,14 +18,15 @@ export default function ItemsTable() {
     if (isWriting) return; // 如果正在写入，则不获取新数据
 
     try {
-      const res = await axios.post('http://localhost:8080/handleGetTargetList', {
+      const res = await axios.post('http://localhost:8080/handleGetBhList', {
         pageNo: pageNo,
         pageSize: productsPerPage
       });
 
       if (res?.data?.data) {
         console.log('------', res?.data?.data?.list);
-        setData(res?.data?.data?.list);
+        const result = res?.data?.data?.list;
+        setData(result);
         setPageTotal(res?.data?.data?.total);
         setPages(res?.data?.data?.pages);
         return res?.data?.data?.list;
@@ -39,13 +40,13 @@ export default function ItemsTable() {
   };
 
   useEffect(() => {
-    getData(pageStart);
+    // getData(pageStart);
   }, []);
 
   const writeToDBSingle = async () => {
     const data = textMark;
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData7', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -68,9 +69,10 @@ export default function ItemsTable() {
     }
   };
 
-  const writeToDB = async (data: any) => {
+  const writeToDB = async (dataList: any) => {
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
+      const data= {dataList: dataList, add_time: '2025-03-11'}
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData7', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -97,7 +99,7 @@ export default function ItemsTable() {
     let pageStart = 0;
     // return console.log('------------',pages,pageStart + 1)
     aaa = setInterval(async() => {
-      if (pageStart + 1 < pages) {
+      if (pageStart < 1) {
       getData(pageStart).then((res) => {
         console.log('res',res)
         writeToDB(res); // 在获取数据后继续写入下一页
