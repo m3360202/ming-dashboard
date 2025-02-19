@@ -22,7 +22,7 @@ interface TrademarkItem {
 }
 
 interface TrademarkCheckState {
-  cls: string;
+  cls: string[];
   st: string;
   keyword: string;
   sc: string;
@@ -75,7 +75,7 @@ export function ItemsTablePicQDS() {
     }
     setLoading(true);
     const data = {
-      //cls,
+      cls: cls.length > 1 ? cls.join(',') : cls[0],
       img_src: imageBase64
     };
 
@@ -84,8 +84,8 @@ export function ItemsTablePicQDS() {
     }
 
     setShowTestLogo(true);
-    // const url = 'http://localhost:8080/handleGetQDSTrademarkPicList';
-    const url = 'https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList';
+    const url = 'http://localhost:8080/handleGetQDSTrademarkPicList';
+    // const url = 'https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList';
     axios.post(url, data, {
       headers: headers
     }).then((res) => {
@@ -167,13 +167,26 @@ export function ItemsTablePicQDS() {
                 style={{
                   listStyle: 'none',
                   fontSize: '12px',
-                  color: cls === clsItem.cls ? '#fff' : 'rgb(102, 102, 102)',
+                  color: cls.indexOf(clsItem?.cls) > -1 ? '#fff' : 'rgb(102, 102, 102)',
                   cursor: 'pointer',
-                  borderRadius: cls === clsItem.cls ? '10px' : '0px',
-                  backgroundColor: cls === clsItem.cls ? '#fa9d3b' : '',
+                  borderRadius: cls.indexOf(clsItem?.cls) > -1 ? '10px' : '0px',
+                  backgroundColor: cls.indexOf(clsItem?.cls) > -1 ? '#fa9d3b' : '',
                   padding: '4px 10px',
                 }}
-                onClick={() => { useTrademarkCheck.setState({ cls: clsItem.cls }) }} key={index}>
+                onClick={() => {
+                  useTrademarkCheck.setState((state: any) => {
+                    const { cls } = state;
+                    const index = cls.indexOf(clsItem.cls);
+
+                    if (index === -1) {
+                      // 如果元素不在数组中，添加它
+                      return { cls: [...cls, clsItem.cls] };
+                    } else {
+                      // 如果元素在数组中，移除它
+                      return { cls: [...cls.slice(0, index), ...cls.slice(index + 1)] };
+                    }
+                  });
+                }}  key={index}>
                 {clsItem.name}
               </li>
             ))}
