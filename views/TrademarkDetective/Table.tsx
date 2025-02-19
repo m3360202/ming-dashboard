@@ -211,9 +211,13 @@ const exportToCSV = () => {
         <div style={{ gap: '30px' }} className="w-full flex flex-col justify-start items-center flex-wrap">
           {currentData.map((product: any, index: number) => (
             <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='w-full p-4 gap-2 flex flex-row items-center justify-start gap-2'>
-              
-              <div style={{ width: '100px', height: '80px', border: '#ccc 1px solid', borderRadius: '10px', padding: '20px' }} >
-                <img src={product.logoUrl} style={{ width: '60px', height: '40px'}} />
+  
+              <div style={{ width: '100px', height: '100px', border: '#ccc 1px solid', borderRadius: '10px', padding: '8px' }} className="flex justify-center items-center overflow-hidden">
+                <img
+                  src={product.logoUrl}
+                  alt="Product Logo"
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
               <div className='flex flex-col ml-4'>
                 <div className='w-full gap-4 flex items-center justify-start gap-2'>
