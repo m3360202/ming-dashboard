@@ -198,7 +198,7 @@ const exportToCSV = () => {
     <Card>
       <CardHeader>
         <div className='flex flex-row justify-between items-center'>
-            <span>经过AI比对风险维度，撤三风险大于60分，或24小时内没有其他知产代理公司代理的潜在用户将会被列出在这里，具体算法请看PDF</span>
+            <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对风险维度，撤三风险大于60分，或24小时内没有其他知产代理公司代理的潜在用户将会被列出在这里，具体算法请看PDF</span>
             <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
               <File className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -208,7 +208,7 @@ const exportToCSV = () => {
           </div>
       </CardHeader>
       <CardContent>
-        <div style={{ gap: '30px', marginTop: '60px' }} className="w-full flex flex-col justify-start items-center flex-wrap">
+        <div style={{ gap: '30px' }} className="w-full flex flex-col justify-start items-center flex-wrap">
           {currentData.map((product: any, index: number) => (
             <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='w-full p-4 gap-2 flex flex-row items-center justify-start gap-2'>
               

@@ -168,7 +168,7 @@ export function ItemsTable() {
       <CardContent>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
+            <span style={{ color: 'red', marginRight: '5px' }}>*</span>
             <span style={{ color: '#637381' }}>国际分类</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-wrap jusify-between gap-4 items-start">
@@ -204,23 +204,23 @@ export function ItemsTable() {
 
         </div>
 
-        <div style={{marginLeft: '250px'}} className='flex flex-row items-center gap-2'>
+        <div style={{marginLeft: '250px', color: '#637381', fontSize: '14px'}} className='flex flex-row items-center gap-2'>
             <input
               type="checkbox"
               checked={selectAll}
               onChange={toggleSelectAll}
             />
-            全选/取消全选
+            全选 / 取消全选
           </div>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
             <span style={{ color: 'red' }}>*</span>
             <span style={{ color: '#637381' }}>商标内关键词</span>
           </div>
-          <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
+          <div style={{ width: '85%', color: '#637381', fontSize: '14px', fontWeight: '400' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
             <input onChange={(e) => {
               useTrademarkCheck.setState({ keyword: e.target.value });
-            }} style={{ border: '#1c252e 1px solid', width: '450px', borderRadius: '5px', padding: '6px' }} defaultValue={keyword} placeholder='请输入关键词，使用半角逗号,隔开' />
+            }} style={{ border: '#ccc 1px solid', width: '450px', borderRadius: '5px', padding: '8px 16px', outline: 'none' }} defaultValue={keyword} placeholder='请输入关键词，使用半角逗号,隔开' />
             <span style={{ color: '#637381' }}>请输入关键词的 中/英文 字符/字母 或 数字,使用半角逗号,隔开</span>
           </div>
         </div>
@@ -229,7 +229,7 @@ export function ItemsTable() {
           <div className="w-[150px]">
 
           </div>
-          <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
+          <div style={{ width: '85%', marginRight: '5px' }} className="max-w-[85%] flex flex-col flex-wrap jusify-between gap-4 items-start">
             {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 开始查询
@@ -240,7 +240,7 @@ export function ItemsTable() {
             )}
           </div>
         </div>
-        <table style={{ border: '#ffe0b3 1px solid' }}>
+        <table style={{ border: '#ffe0b3 1px solid', borderRadius: '8px' }}>
           <thead>
             <tr>
               <td style={{ padding: '20px', width: '160px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>检索词</td>

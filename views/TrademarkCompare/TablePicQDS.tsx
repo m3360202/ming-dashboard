@@ -40,8 +40,18 @@ export function ItemsTablePicQDS() {
   const [image, setImage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<any[]>([]);
-
+  const [selectAll, setSelectAll] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      useTrademarkCheck.setState({ cls: [] });
+    } else {
+      const allCls = clsData.map(clsItem => clsItem.cls);
+      useTrademarkCheck.setState({ cls: allCls });
+    }
+    setSelectAll(!selectAll);
+  };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -148,16 +158,10 @@ export function ItemsTablePicQDS() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>图形精准近似查询条件</CardTitle>
-        <CardDescription style={{ marginTop: '20px' }}>
-          商标审查标准（2021版），实时数据学习： 6-48小时迭代
-        </CardDescription>
-      </CardHeader>
       <CardContent>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
+            <span style={{ color: 'red', marginRight: '5px' }}>*</span>
             <span style={{ color: '#637381' }}>国际分类</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-wrap justify-start gap-4 items-start">
@@ -185,15 +189,23 @@ export function ItemsTablePicQDS() {
                       return { cls: [...cls.slice(0, index), ...cls.slice(index + 1)] };
                     }
                   });
-                }}  key={index}>
+                }} key={index}>
                 {clsItem.name}
               </li>
             ))}
           </div>
         </div>
+        <div style={{ marginLeft: '250px', color: '#637381', fontSize: '14px' }} className='flex flex-row items-center gap-2'>
+          <input
+            type="checkbox"
+            checked={selectAll}
+            onChange={toggleSelectAll}
+          />
+          全选 / 取消全选
+        </div>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
+            <span style={{ color: 'red', marginRight: '5px' }}>*</span>
             <span style={{ color: '#637381' }}>商标图片</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start">
@@ -217,7 +229,7 @@ export function ItemsTablePicQDS() {
               </div>
             </div>
 
-            <span style={{ color: '#637381' }}>支持上传格式 png jpg </span>
+            <span style={{ color: '#637381' }}>支持上传格式 png jpg 商标审查标准（2021版），实时数据学习： 6-48小时迭代</span>
             <input
               type="file"
               ref={fileInputRef}
@@ -232,7 +244,13 @@ export function ItemsTablePicQDS() {
         <div style={{ gap: '30px', marginTop: '60px' }} className="w-full flex flex-row justify-start items-center flex-wrap">
           {currentData.map((product: any, index: number) => (
             <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='p-4 gap-2 flex flex-col items-center justify-start gap-2'>
-              <img src={product.tmLogoUrl} style={{ width: '240px', height: '120px' }} />
+              <div style={{ width: '200px', height: '200px' }} className="flex justify-center items-center overflow-hidden">
+                <img
+                  src={product.tmLogoUrl}
+                  alt="Product Logo"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
               <div className='w-full gap-4 flex items-center justify-between gap-2'>
                 <span className="text-[14px] font-[800]">{product?.tmName}</span>
               </div>
@@ -255,7 +273,7 @@ export function ItemsTablePicQDS() {
             <strong>
               {Math.max(0, (pageIndex - 1) * productsPerPage + 1)}-{Math.min(pageIndex * productsPerPage, data.length)}
             </strong>{' '}
-            中 <strong>{data.length}</strong> 个商标
+            中 <strong>{data.length}</strong> 枚商标
           </div>
           <div style={{ width: '200px' }} className="flex justify-between item-center">
             <div

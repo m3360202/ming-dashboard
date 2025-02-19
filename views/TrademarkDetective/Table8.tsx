@@ -176,7 +176,7 @@ export function ItemsTable8() {
     <Card>
       <CardHeader>
         <div className='flex flex-row justify-between items-center'>
-          <span>经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
+          <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
             <select style={{padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px'}} value={date || ''} onChange={(e) => setDate(e.target.value)}>
               <option value="">选择日期</option>

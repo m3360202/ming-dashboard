@@ -131,16 +131,10 @@ export function ItemsTablePic() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>图形近似查询条件</CardTitle>
-        <CardDescription style={{ marginTop: '20px' }}>
-          商标审查标准（2019版）
-        </CardDescription>
-      </CardHeader>
       <CardContent>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
+            <span style={{ color: 'red', marginRight: '5px' }}>*</span>
             <span style={{ color: '#637381' }}>国际分类</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-wrap justify-start gap-4 items-start">
@@ -163,19 +157,31 @@ export function ItemsTablePic() {
         </div>
         <div className='flex flex-row justify-between w-full my-4'>
           <div className="w-[150px]">
-            <span style={{ color: 'red' }}>*</span>
+            <span style={{ color: 'red', marginRight: '5px' }}>*</span>
             <span style={{ color: '#637381' }}>商标图片</span>
           </div>
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start">
             {imageBase64 && (<img src={imageBase64} width={80} height={80} alt="Uploaded Logo" />)}
-            <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                图片上传
-              </span>
-            </Button>
+            <div className="flex flex-row items-center gap-4">
+              <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  图片上传
+                </span>
+              </Button>
+              <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start ">
+                {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    开始查询
+                  </span>
+                </Button>)}
+                {loading && (
+                  <LoadingSvg />
+                )}
+              </div>
+            </div>
 
-            <span style={{ color: '#637381' }}>支持上传格式 png jpg gif svg</span>
+            <span style={{ color: '#637381' }}>支持上传格式 png jpg 商标审查标准（2019版）</span>
             <input
               type="file"
               ref={fileInputRef}
@@ -191,21 +197,18 @@ export function ItemsTablePic() {
           <div className="w-[150px]">
 
           </div>
-          <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start">
-            {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                开始查询
-              </span>
-            </Button>)}
-            {loading && (
-              <LoadingSvg />
-            )}
-          </div>
+
         </div>
         <div style={{ gap: '30px', marginTop: '60px' }} className="w-full flex flex-row justify-start items-center flex-wrap">
           {currentData.map((product: any, index: number) => (
             <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='p-4 gap-4 flex flex-col items-center justify-center gap-2'>
-              <img src={'https://gptserver.aliensoft.com.cn' + product.url} style={{ width: '240px', height: '120px' }} />
+              <div style={{ width: '200px', height: '200px' }} className="flex justify-center items-center overflow-hidden">
+                <img
+                  src={'https://gptserver.aliensoft.com.cn' + product.url}
+                  alt="Product Logo"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
               <div className='p-4 gap-4 flex items-center justify-between gap-2'>
                 <span>{getClsName(product?.cls)}</span>
                 <span>{getTag(product?.status)}</span>
@@ -221,7 +224,7 @@ export function ItemsTablePic() {
             <strong>
               {Math.max(0, (pageIndex - 1) * productsPerPage + 1)}-{Math.min(pageIndex * productsPerPage, data.length)}
             </strong>{' '}
-            中 <strong>{data.length}</strong> 个商标
+            中 <strong>{data.length}</strong> 枚商标
           </div>
           <div style={{ width: '200px' }} className="flex justify-between item-center">
             <div
