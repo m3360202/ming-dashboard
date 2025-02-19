@@ -84,8 +84,8 @@ export function ItemsTablePicQDS() {
     }
 
     setShowTestLogo(true);
-    const url = 'http://localhost:8080/handleGetQDSTrademarkPicList';
-    // const url = 'https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList';
+    // const url = 'http://localhost:8080/handleGetQDSTrademarkPicList';
+    const url = 'https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList';
     axios.post(url, data, {
       headers: headers
     }).then((res) => {
@@ -93,7 +93,6 @@ export function ItemsTablePicQDS() {
 
       if (res?.data?.data) {
         const string = res?.data?.data.split('###{\"公告类型\":{},')[0]
-        console.log('------', JSON.parse(string))
         const data = JSON.parse(string);
         setData(data);
         setPageTotal(Math.ceil((data.length || 0) / productsPerPage));
