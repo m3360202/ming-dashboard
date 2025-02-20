@@ -166,7 +166,7 @@ export function ItemsTable7() {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
 
-      const fileName = `${formattedDate} 无效答辩潜在客户数据.csv`;
+      const fileName = `${formattedDate} 驳回申请潜在客户数据.csv`;
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
       link.setAttribute('download', fileName);
