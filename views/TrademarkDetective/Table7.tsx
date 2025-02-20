@@ -209,6 +209,7 @@ export function ItemsTable7() {
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
+              <div className='flex flex-col'>
               <div className='flex flex-col ml-4'>
                 <div className='w-full gap-4 flex items-center justify-start gap-2'>
                   <span className="text-[14px] font-[800]">{product.tmName}</span>
@@ -217,30 +218,30 @@ export function ItemsTable7() {
                   <span style={{color: '#fa9d3'}} className="text-[14px] font-[800]">申请人：{product?.applicantCn}</span>
                   <span style={{ color: '#6f67f0' }} className="text-[14px] font-[800]">代理机构：{product.agent}</span>
                 </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
+                <div className='w-full mt-2 gap-4 flex items-center justify-start gap-2'>
                   <span style={{ color: '#1485ee' }} className="text-[14px] font-[800]">类目：{product.intCls}</span>
                   <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
-                  <span style={{ color: '#ffc300' }} className="text-[14px] font-[800] ">{product.regNo}</span>
+                  <span style={{ color: '#ffc300' }} className="text-[14px] font-[800] ">注册号：{product.regNo}</span>
                 </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
+                <div className='w-full mt-2 gap-4 flex items-center justify-start gap-2'>
                   <span style={{ color: '#637381' }} className="text-[14px] font-[800] ">申请日期: {product.appDate}</span>
                   <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
                   <span style={{ color: '#637381' }} className="text-[14px] font-[800] ">更新日期: {product.createTime}</span>
                   <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
                   <span style={{ color: '#f30000' }} className="text-[14px] font-[800] ">驳回发文: {product.rejectDate}</span>
                 </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
+              </div>
+              <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-start gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800]">联系人：{product.operName}</span>
                   <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系地址: {product.addressCn}</span>
                 </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
+                <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系电话：{product.contactPhone}</span>
                 </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
+                <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系邮箱：{product.contactEmail}</span>
                 </div>
-                
               </div>
             </div>
           ))}
