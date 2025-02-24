@@ -29,6 +29,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "store/nav.js", "utils/upload.js", "views/TrademarkCompare/ProductImg.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "store/nav.ts", "utils/upload.js", "views/TrademarkCompare/ProductImg.jsx"],
   "exclude": ["node_modules"]
 }

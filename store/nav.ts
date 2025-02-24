@@ -8,14 +8,21 @@ export const useNav = create(
 { name: 'nav' })
 );
 
+type User = {
+  image?: String;
+  username: String;
+  realname?: String;
+  token?: String;
+  role: Number;
+}
+
 export const useUser = create(
-  persist(() => ({
-  user: {
+  persist<User>(() => ({
     image: '',
-    username: '',
+    username: 'unknown',
+    realname: '',
     token: '',
-    role: 'admin'
-  }
+    role: 0
 }),
 { name: 'user' })
 );

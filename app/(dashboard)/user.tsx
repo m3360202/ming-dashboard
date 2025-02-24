@@ -15,7 +15,7 @@ import { useUser } from '@/store/nav';
 import Avatar from '@/images/a2.jpg';
 
 export function User() {
-  const { user } = useUser();
+  const { username, role } = useUser();
 
   return (
     <DropdownMenu>
@@ -40,10 +40,10 @@ export function User() {
         <DropdownMenuItem>权限: <span style={{color: '#1485ee', marginLeft: '8px'}}>平台所有者</span></DropdownMenuItem>
         {/* <DropdownMenuItem>技术支持</DropdownMenuItem> */}
         <DropdownMenuSeparator />
-        {user ? (
+        {username && username !== 'unknown' ? (
           <DropdownMenuItem>
             <button type="submit" onClick={()=>{
-              useUser.setState({user: {username: '',image: '', role: '', token: ''}})
+              useUser.setState({username: 'unknown', role: 0})
             }}>退出登录</button>
           </DropdownMenuItem>
         ) : (
