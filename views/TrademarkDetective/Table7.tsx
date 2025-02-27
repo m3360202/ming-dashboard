@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
 
 interface TrademarkItem {
+  contactAddress: any;
   rejectDate: string;
   createTime: string;
   appDate: string;
@@ -39,6 +40,8 @@ export function ItemsTable7() {
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
 
   useEffect(() => {
     const generateDates = () => {
@@ -54,11 +57,12 @@ export function ItemsTable7() {
     generateDates();
   }, []);
 
-  const getData = async (date: string | null) => {
-    if (date) {
+  const getData = async () => {
+    if (startDate && endDate) {
       try {
         const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData7', {
-          date
+          startDate,
+          endDate
         });
 
         if (res?.data?.success) {
@@ -97,8 +101,8 @@ export function ItemsTable7() {
   }, [pageIndex]);
 
   useEffect(() => {
-    getData(date);
-  }, [date]);
+    getData();
+  }, [startDate, endDate]);
 
   const currentData = data.slice(
     (pageIndex - 1) * productsPerPage,
@@ -132,7 +136,7 @@ export function ItemsTable7() {
       '联系人',
       '联系电话',
       '联系邮箱',
-      '联系地址',
+      '申请地址',
       '注册号',
       '状态',
       '申请日期',
@@ -148,9 +152,9 @@ export function ItemsTable7() {
         product.intCls,
         product.applicantCn,
         product.operName,
-        escapeCommas(product.contactPhone),
+        product.contactPhone,
         escapeCommas(product.contactEmail),
-        product.addressCn,
+        product.contactAddress,
         product.regNo,
         product.statusName,
         product.appDate,
@@ -183,12 +187,20 @@ export function ItemsTable7() {
         <div className='flex flex-row justify-between items-center'>
           <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，正在驳回的快照，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            <select style={{padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px'}} value={date || ''} onChange={(e) => setDate(e.target.value)}>
-              <option value="">选择日期</option>
-              {dates.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
+            <input
+              type="date"
+              value={startDate as string}
+              onChange={(e) => setStartDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
+            />
+            <input
+              type="date"
+              value={endDate as string}
+              onChange={(e) => setEndDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
+            />
             <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
               <File className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -234,7 +246,7 @@ export function ItemsTable7() {
               <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-start gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800]">联系人：{product.operName}</span>
                   <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
-                  <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系地址: {product.addressCn}</span>
+                  <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">申请地址: {product.contactAddress}</span>
                 </div>
                 <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系电话：{product.contactPhone}</span>

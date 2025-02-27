@@ -121,6 +121,13 @@ export default function ItemsTable() {
               {isWriting ? '正在导入...' : '导入数据到数据库'}
             </span>
           </Button>
+
+          {/* <Button size="sm" variant="outline" className="h-8 gap-1" onClick={startUpdate} disabled={isWriting}>
+            <File className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+              {isWriting ? '正在更新...' : '更新数据'}
+            </span>
+          </Button> */}
         </div>
       </CardHeader>
     </Card>

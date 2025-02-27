@@ -154,7 +154,7 @@ const exportToCSV = () => {
     '联系人',
     '联系电话',
     '联系邮箱',
-    '联系地址',
+    '申请地址',
     '注册号',
     '状态',
     '代理机构'
@@ -240,7 +240,7 @@ const exportToCSV = () => {
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{color: '#1c252e'}} className="text-[14px] font-[800]">联系人：{product?.operName}</span>
                   <span style={{color: '#ccc'}} className="text-[14px] font-[800]"> | </span>
-                  <span style={{color: '#1c252e'}} className="text-[14px] font-[800] ">联系地址: {product?.addressCn}</span>
+                  <span style={{color: '#1c252e'}} className="text-[14px] font-[800] ">申请地址: {product?.addressCn}</span>
                 </div>
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{color: '#1c252e'}} className="text-[14px] font-[800] ">联系电话：{product?.clueWithCustomerVo.fcontactPhone}</span>

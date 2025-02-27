@@ -38,6 +38,8 @@ export function ItemsTable9() {
   const [dates, setDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [listData, setListData] = useState([]);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
 
   const getTag = (status: string) => {
     if (status === '已注册') {
@@ -53,12 +55,13 @@ export function ItemsTable9() {
     }
   };
 
-  const getData = async (date: string | null) => {
-    if (date) {
+  const getData = async () => {
+    if (startDate && endDate) {
       try {
         setLoading(true);
         const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData9', {
-          date
+          startDate,
+          endDate
         });
 
         if (res?.data?.success) {
@@ -99,8 +102,8 @@ export function ItemsTable9() {
   }, [pageIndex]);
 
   useEffect(() => {
-    getData(date);
-  }, [date]);
+    getData();
+  }, [startDate, endDate]);
 
   function calculateDaysOrApply(startDateString: string): string {
     const startDate = new Date(startDateString);
@@ -129,7 +132,7 @@ export function ItemsTable9() {
       '联系人',
       '联系电话',
       '联系邮箱',
-      '联系地址',
+      '申请地址',
       '注册号',
       '状态',
       '无效申请收文',
@@ -144,7 +147,7 @@ export function ItemsTable9() {
         product.intCls,
         product.applicantCn,
         product.operName,
-        escapeCommas(product.contactPhone),
+        product.contactPhone,
         escapeCommas(product.contactEmail),
         product.addressCn,
         product.regNo,
@@ -193,12 +196,20 @@ export function ItemsTable9() {
         <div className='flex flex-row justify-between items-center'>
           <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，撤三答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            <select style={{padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px'}} value={date || ''} onChange={(e) => setDate(e.target.value)}>
-              <option value="">选择日期</option>
-              {dates.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
+            <input
+              type="date"
+              value={startDate as string}
+              onChange={(e) => setStartDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
+            />
+            <input
+              type="date"
+              value={endDate as string}
+              onChange={(e) => setEndDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
+            />
             <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
               <File className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -239,7 +250,7 @@ export function ItemsTable9() {
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{color: '#1c252e'}} className="text-[14px] font-[800]">联系人：{product?.operName}</span>
                   <span style={{color: '#ccc'}} className="text-[14px] font-[800]"> | </span>
-                  <span style={{color: '#1c252e'}} className="text-[14px] font-[800] ">联系地址: {product?.addressCn}</span>
+                  <span style={{color: '#1c252e'}} className="text-[14px] font-[800] ">申请地址: {product?.addressCn}</span>
                 </div>
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{color: '#1c252e'}} className="text-[14px] font-[800] ">联系电话：{product?.contactPhone}</span>

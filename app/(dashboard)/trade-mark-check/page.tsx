@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { File, PlusCircle } from 'lucide-react';
 import { ItemsTable } from '@/views/TrademarkCompare/Table';
-import { ItemsTablePic } from '@/views/TrademarkCompare/TablePic';
+import { ItemsTablePicGlobal } from '@/views/TrademarkCompare/TablePicGlobal';
 import { ItemsTablePicQDS } from '@/views/TrademarkCompare/TablePicQDS';
 export default function CustomersPage() {
   const results: any[] = [];
@@ -26,9 +26,12 @@ export default function CustomersPage() {
       <Tabs defaultValue="china">
       <div className="flex items-center">
         <TabsList>
-          <TabsTrigger value="china">批量商标查询</TabsTrigger>
-          <TabsTrigger value="foreign">图形商标查询</TabsTrigger>
-          <TabsTrigger value="3">图形商标精准查询</TabsTrigger>
+          <TabsTrigger value="china">批量商标相似对比</TabsTrigger>
+          {/* <TabsTrigger value="foreign">图形商标查询</TabsTrigger> */}
+          <TabsTrigger value="3">图形商标精准查询(通常)</TabsTrigger>
+          <TabsTrigger value="4">图形商标精准查询(文字)</TabsTrigger>
+          <TabsTrigger value="5">图形商标精准查询(卡通)</TabsTrigger>
+          <TabsTrigger value="6">图形商标精准查询(国际)</TabsTrigger>
         </TabsList>
         <div className="lg:hidden ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -48,11 +51,20 @@ export default function CustomersPage() {
       <TabsContent value="china">
         <ItemsTable />
       </TabsContent>
-      <TabsContent value="foreign">
+      {/* <TabsContent value="foreign">
         <ItemsTablePic />
-      </TabsContent>
+      </TabsContent> */}
       <TabsContent value="3">
-        <ItemsTablePicQDS />
+        <ItemsTablePicQDS modal={1} />
+      </TabsContent>
+      <TabsContent value="4">
+        <ItemsTablePicQDS modal={2}  />
+      </TabsContent>
+      <TabsContent value="5">
+        <ItemsTablePicQDS modal={3}  />
+      </TabsContent>
+      <TabsContent value="6">
+        <ItemsTablePicGlobal />
       </TabsContent>
     </Tabs>
 

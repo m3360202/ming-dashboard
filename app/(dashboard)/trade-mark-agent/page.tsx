@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { File, PlusCircle } from 'lucide-react';
 import { ItemsTable7 } from '@/views/TrademarkDetective/Table7';
 import { ItemsTable8 } from '@/views/TrademarkDetective/Table8';
+import { ItemsTable8freshAddress } from '@/views/TrademarkDetective/Table8freshAddress';
 import { ItemsTable9 } from '@/views/TrademarkDetective/Table9';
 import { ItemsTableLoading } from '@/views/TrademarkDetective/TableLoading';
 import { ItemsTable } from '@/views/TrademarkDetective/Table';

@@ -28,7 +28,7 @@ interface TrademarkCheckState {
   sc: string;
 }
 
-export function ItemsTablePicQDS({modal}: {modal: number}) {
+export function ItemsTablePicGlobal() {
   let router = useRouter();
   const { cls, st, keyword, sc }: TrademarkCheckState = useTrademarkCheck();
   let productsPerPage = 20;
@@ -86,8 +86,7 @@ export function ItemsTablePicQDS({modal}: {modal: number}) {
     setLoading(true);
     const data = {
       cls: cls.length > 1 ? cls.join(',') : cls[0],
-      img_src: imageBase64,
-      modal: modal
+      img_src: imageBase64
     };
 
     const headers = {
@@ -95,18 +94,17 @@ export function ItemsTablePicQDS({modal}: {modal: number}) {
     }
 
     setShowTestLogo(true);
-    // const url = 'http://localhost:8080/handleGetQDSTrademarkPicList';
-    const url = 'https://gptserver.aliensoft.com.cn/handleGetQDSTrademarkPicList';
+    // const url = 'http://localhost:8080/handleGetGlobalPicList';
+    const url = 'https://gptserver.aliensoft.com.cn/handleGetGlobalPicList';
     axios.post(url, data, {
       headers: headers
     }).then((res) => {
       setLoading(false);
 
       if (res?.data?.data) {
-        const string = res?.data?.data.split('###{\"公告类型\":{},')[0]
-        const data = JSON.parse(string);
-        setData(data);
-        setPageTotal(Math.ceil((data.length || 0) / productsPerPage));
+
+        setData(res?.data?.data?.item);
+        setPageTotal(res?.data?.data?.total);
       } else {
         alert('request fail');
       }
@@ -247,21 +245,26 @@ export function ItemsTablePicQDS({modal}: {modal: number}) {
             <div key={index} style={{ border: '#ccc 1px solid', borderRadius: '10px', marginBottom: '12px' }} className='p-4 gap-2 flex flex-col items-center justify-start gap-2'>
               <div style={{ width: '200px', height: '200px' }} className="flex justify-center items-center overflow-hidden">
                 <img
-                  src={product.tmLogoUrl}
+                  src={product.tmImage}
                   alt="Product Logo"
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
               <div className='w-full gap-4 flex items-center justify-between gap-2'>
-                <span className="text-[14px] font-[800]">{product?.tmName}</span>
+                <span className="text-[12px] font-[800]">{product?.tmName}</span>
               </div>
               <div className='w-full gap-4 flex items-center justify-between gap-2'>
-                <span className="text-[14px] font-[800] text-[#1485ee]">类目：{product?.category}</span>
-                <span>{getTag(product?.['法律状态'])}</span>
-                <span className="text-[14px] font-[800] text-[#ffc300]">{product?.tmId}</span>
+                <span style={{fontSize: '12px', color: '#637381', fontWeight: '600'}}>类目：{product?.regNo}</span>
+                <span>{getTag(product?.tmStatus)}</span>
+                <span style={{fontSize: '12px', color: '#637381', fontWeight: '400'}}>{product?.tmId}</span>
               </div>
               <div className='w-full gap-4 flex items-center justify-between gap-2'>
-                <span className="text-[14px] font-[800] text-[#ffc300] word-break">{product?.applicant}</span>
+                <span style={{fontSize: '12px', color: '#637381', fontWeight: '400'}}>{product?.applicant}</span>
+              </div>
+              <div className='w-full gap-4 flex items-center justify-start gap-2'>
+                <img style={{ width: '30px', height: '20px'}} src={'https://tm-files.oss-cn-beijing.aliyuncs.com/'+ product?.nationalFlag}/>
+                <span style={{fontSize: '12px', color: '#637381', fontWeight: '400'}}>{product?.countryName}</span>
+                <span style={{fontSize: '12px', color: '#637381', fontWeight: '400'}}>{product?.nationalName}</span>
               </div>
             </div>
           ))}

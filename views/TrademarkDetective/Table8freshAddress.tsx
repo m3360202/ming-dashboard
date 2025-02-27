@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
 
 interface TrademarkItem {
+  address: any;
+  detailId: any;
   add_time: string;
   applicantCn: string;
   logoUrl: string;
@@ -28,7 +30,7 @@ interface TrademarkItem {
   };
 }
 
-export function ItemsTable8() {
+export function ItemsTable8freshAddress() {
   const productsPerPage = 20;
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [data, setData] = useState<TrademarkItem[]>([]);
@@ -36,13 +38,11 @@ export function ItemsTable8() {
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [endDate, setEndDate] = useState<string | null>(null);
 
   useEffect(() => {
     const generateDates = () => {
-      const startDate = new Date('2025-02-18');
-      const currentDate = new Date();
+      const startDate = new Date('2025-02-28');
+      const currentDate = new Date('2025-02-28');
       const datesArray = [];
       while (startDate <= currentDate) {
         datesArray.push(startDate.toISOString().split('T')[0]);
@@ -53,12 +53,11 @@ export function ItemsTable8() {
     generateDates();
   }, []);
 
-  const getData = async () => {
-    if (startDate && endDate) {
+  const getData = async (date: string | null) => {
+    if (date) {
       try {
-        const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData8', {
-          startDate,
-          endDate
+        const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData9', {
+          date
         });
 
         if (res?.data?.success) {
@@ -76,7 +75,7 @@ export function ItemsTable8() {
 
   const getListData = async () => {
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/getData8List', {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/getData9List', {
         pageStart: pageIndex
       });
 
@@ -97,8 +96,8 @@ export function ItemsTable8() {
   }, [pageIndex]);
 
   useEffect(() => {
-    getData();
-  }, [startDate, endDate]);
+    getData(date);
+  }, [date]);
 
   const currentData = data.slice(
     (pageIndex - 1) * productsPerPage,
@@ -175,30 +174,62 @@ export function ItemsTable8() {
     }
   };
 
+  const writeToDB = async () => {
+    for (const item of data) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 每次迭代等待2秒
+  
+      if (!item.address) {
+        try {
+          const result = await axios.post('http://localhost:8080/handleUpdateAddress', { detailId: item.detailId }, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          });
+          console.log('result----', result.data.data);
+  
+          if (result.data.data) {
+            const res = await axios.post('https://ai.aliensoft.com.cn/api/editData9', { detailId: item.detailId, address: result.data.data }, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            });
+  
+            if (res?.data?.message === '信息更新成功') {
+              console.log('信息更新成功');
+            }
+          }
+        } catch (error) {
+          console.error('Error in loop:', error);
+        }
+      }
+    }
+  };
+
+
   return (
     <Card>
       <CardHeader>
         <div className='flex flex-row justify-between items-center'>
           <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            <input
-              type="date"
-              value={startDate as string}
-              onChange={(e) => setStartDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
-              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
-            />
-            <input
-              type="date"
-              value={endDate as string}
-              onChange={(e) => setEndDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
-              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
-            />
+            <select style={{padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px'}} value={date || ''} onChange={(e) => setDate(e.target.value)}>
+              <option value="">选择日期</option>
+              {dates.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
             <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
               <File className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 导出数据
+              </span>
+            </Button>
+            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={writeToDB}>
+              <File className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                更新地址
               </span>
             </Button>
           </div>
