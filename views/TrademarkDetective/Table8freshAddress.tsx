@@ -38,11 +38,14 @@ export function ItemsTable8freshAddress() {
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+
 
   useEffect(() => {
     const generateDates = () => {
-      const startDate = new Date('2025-02-28');
-      const currentDate = new Date('2025-02-28');
+      const startDate = new Date('2025-03-01');
+      const currentDate = new Date('2025-03-05');
       const datesArray = [];
       while (startDate <= currentDate) {
         datesArray.push(startDate.toISOString().split('T')[0]);
@@ -53,11 +56,12 @@ export function ItemsTable8freshAddress() {
     generateDates();
   }, []);
 
-  const getData = async (date: string | null) => {
-    if (date) {
+  const getData = async () => {
+    if (startDate && endDate) {
       try {
-        const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData9', {
-          date
+        const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData8', {
+          startDate,
+          endDate
         });
 
         if (res?.data?.success) {
@@ -75,7 +79,7 @@ export function ItemsTable8freshAddress() {
 
   const getListData = async () => {
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/getData9List', {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/getData8List', {
         pageStart: pageIndex
       });
 
@@ -96,8 +100,8 @@ export function ItemsTable8freshAddress() {
   }, [pageIndex]);
 
   useEffect(() => {
-    getData(date);
-  }, [date]);
+    getData();
+  }, [startDate, endDate]);
 
   const currentData = data.slice(
     (pageIndex - 1) * productsPerPage,
@@ -175,8 +179,9 @@ export function ItemsTable8freshAddress() {
   };
 
   const writeToDB = async () => {
+    console.log('-------------------',data)
     for (const item of data) {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 每次迭代等待2秒
+      await new Promise(resolve => setTimeout(resolve, 5000)); // 每次迭代等待2秒
   
       if (!item.address) {
         try {
@@ -189,7 +194,7 @@ export function ItemsTable8freshAddress() {
           console.log('result----', result.data.data);
   
           if (result.data.data) {
-            const res = await axios.post('https://ai.aliensoft.com.cn/api/editData9', { detailId: item.detailId, address: result.data.data }, {
+            const res = await axios.post('https://ai.aliensoft.com.cn/api/editData8', { detailId: item.detailId, address: result.data.data }, {
               headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
@@ -214,12 +219,18 @@ export function ItemsTable8freshAddress() {
         <div className='flex flex-row justify-between items-center'>
           <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            <select style={{padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px'}} value={date || ''} onChange={(e) => setDate(e.target.value)}>
-              <option value="">选择日期</option>
-              {dates.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
+          <input
+              type="date"
+              value={startDate as string}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
+            />
+            <input
+              type="date"
+              value={endDate as string}
+              onChange={(e) => setEndDate(e.target.value)}
+              style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
+            />
             <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
               <File className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
