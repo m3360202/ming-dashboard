@@ -181,7 +181,7 @@ export default function CustomersPage() {
         ) : (
           <div className="space-y-4">
             {/* 表头 */}
-            <div className="grid grid-cols-7 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
+            <div className="grid grid-cols-6 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
               <div>姓名</div>
               <div>用户名</div>
               <div>公司</div>
@@ -192,7 +192,7 @@ export default function CustomersPage() {
 
             {/* 数据行 */}
             {data.map((user: any) => (
-              <div key={user.id} className="grid grid-cols-7 gap-4 p-4 border rounded-lg">
+              <div key={user.id} className="grid grid-cols-6 gap-4 p-4 border rounded-lg">
                 <div style={{fontWeight: '400', fontSize: '14px', color: '#1485ee'}}>{user.real_name}</div>
                 <div style={{fontWeight: '400', fontSize: '14px', color: '#1485ee'}}>{user.username}</div>
                 <div style={{minWidth: '300px',fontWeight: '400', fontSize: '14px', color: '#fa9d3b'}}>{user.company || '无'}</div>

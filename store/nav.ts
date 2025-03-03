@@ -14,6 +14,7 @@ type User = {
   realname?: String;
   token?: String;
   role: Number;
+  userId: Number;
 }
 
 export const useUser = create(
@@ -22,7 +23,8 @@ export const useUser = create(
     username: 'unknown',
     realname: '',
     token: '',
-    role: 0
+    role: 0,
+    userId: 0
 }),
 { name: 'user' })
 );

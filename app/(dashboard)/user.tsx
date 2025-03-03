@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { useUser } from '@/store/nav';
 import Avatar from '@/images/a2.jpg';
+import UserPng from '@/images/user.png';
 
 export function User() {
   const { username, role } = useUser();
@@ -26,7 +27,7 @@ export function User() {
           className="overflow-hidden rounded-full"
         >
           <Image
-            src={Avatar.src}
+            src={role === 1 ? Avatar.src : UserPng.src}
             width={36}
             height={36}
             alt="Avatar"

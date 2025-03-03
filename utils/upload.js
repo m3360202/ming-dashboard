@@ -27,6 +27,7 @@ export async function uploadFile(file) {
 
     // 更新useCurrentFile store
     useCurrentFile.setState({ id: fileId, url: url });
+    return fileName;
   } catch (error) {
     console.error("发生错误:", error);
     // 在此处添加错误处理逻辑。

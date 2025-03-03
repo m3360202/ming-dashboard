@@ -36,8 +36,8 @@ export function ItemsTable8() {
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [endDate, setEndDate] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string | null>('');
+  const [endDate, setEndDate] = useState<string | null>('');
 
   useEffect(() => {
     const generateDates = () => {
