@@ -6,9 +6,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clsData } from '@/utils/trademarkCls';
 import { useTrademarkCheck } from '@/store/trademarkPicQDS';
-import { PlusCircle } from 'lucide-react';
+
 import axios from 'axios';
 import './style.css';
+import { ImageCompressor } from '@/utils/ImageCropComponent';
 
 interface TrademarkItem {
   // 根据你的数据结构添加属性
@@ -42,6 +43,11 @@ export function ItemsTablePicQDS({modal}: {modal: number}) {
   const [data, setData] = useState<any[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // 处理压缩完成后的图片
+  const handleCompressComplete = (base64: string) => {
+    setImageBase64(base64.split('base64,')[1]); // 保存压缩后的 base64
+  };
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -212,12 +218,8 @@ export function ItemsTablePicQDS({modal}: {modal: number}) {
           <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start">
             {image && (<img src={image} width={80} height={80} alt="Uploaded Logo" />)}
             <div className="flex flex-row items-center gap-4">
-              <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  图片上传
-                </span>
-              </Button>
+            <ImageCompressor onCompressComplete={handleCompressComplete} image={image} setImage={setImage} />
+              {/*  */}
               <div style={{ width: '85%' }} className="max-w-[85%] flex flex-col flex-wrap justify-between gap-4 items-start ">
                 {!loading && (<Button size="sm" className="h-8 gap-1 my-6" onClick={submitCheck}>
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
