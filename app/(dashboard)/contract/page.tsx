@@ -30,6 +30,8 @@ export default function ContractPage() {
   const [customerPerson, setCustomerPerson] = useState<string>('');
   const [customerAddress, setCustomerAddress] = useState<string>('');
   const [contractBak, setContractBak] = useState<string>('');
+  const [price, setPrice] = useState<string>('');
+  const [tax, setTax] = useState<string>('');
   const [url, setUrl] = useState<string>('');
   const [file, setFile] = useState<any | null>(null);
   const [step, setStep] = useState<number>(0);
@@ -166,6 +168,8 @@ export default function ContractPage() {
         setContractBak(contract.contract_no);
         setUrl(contract.contract_origin);
         setStep(contract.step);
+        setPrice(contract.contract_price);
+        setTax(contract.contract_tax);
         setContractType(contract.contract_type);
       }
     } else {
@@ -176,6 +180,8 @@ export default function ContractPage() {
       setContractBak('');
       setUrl('');
       setStep(0);
+      setPrice('');
+      setTax('');
       setContractType('无效答辩');
     }
   };
@@ -323,28 +329,50 @@ export default function ContractPage() {
                 </div>
               </div>
               <div className="flex flex-row justify-between items-center">
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">联系电话</label>
-                <Input
-                  name="customerMb"
-                  value={customerMb}
-                  onChange={(e) => setCustomerMb(e.target.value)}
-                  placeholder="请输入联系电话..."
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
-                />
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">联系电话</label>
+                  <Input
+                    name="customerMb"
+                    value={customerMb}
+                    onChange={(e) => setCustomerMb(e.target.value)}
+                    placeholder="请输入联系电话..."
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                  />
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">客户地址</label>
+                  <Input
+                    name="price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="请输入合同价格..."
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                  />
+                </div>
+
               </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">客户地址</label>
-                <Input
-                  name="customerAddress"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  placeholder="请输入客户地址..."
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
-                />
+              <div className="flex flex-row justify-between items-center">
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">合同价格</label>
+                  <Input
+                    name="tax"
+                    value={tax}
+                    onChange={(e) => setTax(e.target.value)}
+                    placeholder="请输入税费..."
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                  />
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">合同税费</label>
+                  <Input
+                    name="customerAddress"
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    placeholder="请输入客户地址..."
+                    className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                  />
+                </div>
               </div>
-              </div>
-              
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">服务类型</label>
                 <select
@@ -372,9 +400,9 @@ export default function ContractPage() {
               </div>
               {contractBak && (
                 <div className="mt-4">
-                <label style={{ color: '#FA5151'}} className="block text-sm font-medium text-gray-700">驳回说明</label>
-                <span style={{fontSize: '12px', color: '#FA5151', margin: '15px 0'}}>{contractBak}</span>
-              </div>
+                  <label style={{ color: '#FA5151' }} className="block text-sm font-medium text-gray-700">驳回说明</label>
+                  <span style={{ fontSize: '12px', color: '#FA5151', margin: '15px 0' }}>{contractBak}</span>
+                </div>
               )}
               <Button disabled={loading} className="w-full mt-8" onClick={handleSubmit}>
                 {type === 1 ? '更新' : '创建'}

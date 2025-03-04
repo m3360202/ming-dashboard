@@ -6,6 +6,7 @@ import axios from 'axios';
 import './style.css';
 import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
+import { LoadingSvg } from '@/images/loading';
 
 interface TrademarkItem {
   contactAddress: any;
@@ -40,8 +41,10 @@ export function ItemsTable7() {
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [endDate, setEndDate] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const generateDates = () => {
@@ -60,6 +63,7 @@ export function ItemsTable7() {
   const getData = async () => {
     if (startDate && endDate) {
       try {
+        setLoading(true);
         const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData7', {
           startDate,
           endDate
@@ -68,10 +72,14 @@ export function ItemsTable7() {
         if (res?.data?.success) {
           setData(res?.data?.data);
           setPageTotal(res?.data?.total);
+          setLoading(false);
         } else {
+          setLoading(false);
           alert('请求失败');
         }
       } catch (error) {
+
+        setLoading(false);
         console.log('error', error);
         alert('请求失败');
       }
@@ -185,7 +193,7 @@ export function ItemsTable7() {
     <Card>
       <CardHeader>
         <div className='flex flex-row justify-between items-center'>
-          <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，正在驳回的快照，的潜在用户将会被列出在这里，具体算法请看PDF</span>
+          <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400' }}>经过AI比对，正在驳回的快照，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
             <input
               type="date"
@@ -201,12 +209,16 @@ export function ItemsTable7() {
               max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
               style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
             />
-            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
-              <File className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                导出数据
-              </span>
-            </Button>
+            {loading ? (
+              <LoadingSvg />
+            ) : (
+              <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
+                <File className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  导出数据
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -222,28 +234,28 @@ export function ItemsTable7() {
                 />
               </div>
               <div className='flex flex-col'>
-              <div className='flex flex-col ml-4'>
-                <div className='w-full gap-4 flex items-center justify-start gap-2'>
-                  <span className="text-[14px] font-[800]">{product.tmName}</span>
-                  <span style={{ color: '#fa9d3b' }} className="text-[14px] font-[800]">{product.statusName}</span>
-                  <span style={{ color: '#f30000', backgroundColor: '#FFF0F5', borderRadius: '6px' }} className="text-[14px] px-4 py-1">{calculateDaysOrApply(product.rejectDate)}</span>
-                  <span style={{color: '#fa9d3'}} className="text-[14px] font-[800]">申请人：{product?.applicantCn}</span>
-                  <span style={{ color: '#6f67f0' }} className="text-[14px] font-[800]">代理机构：{product.agent}</span>
+                <div className='flex flex-col ml-4'>
+                  <div className='w-full gap-4 flex items-center justify-start gap-2'>
+                    <span className="text-[14px] font-[800]">{product.tmName}</span>
+                    <span style={{ color: '#fa9d3b' }} className="text-[14px] font-[800]">{product.statusName}</span>
+                    <span style={{ color: '#f30000', backgroundColor: '#FFF0F5', borderRadius: '6px' }} className="text-[14px] px-4 py-1">{calculateDaysOrApply(product.rejectDate)}</span>
+                    <span style={{ color: '#fa9d3' }} className="text-[14px] font-[800]">申请人：{product?.applicantCn}</span>
+                    <span style={{ color: '#6f67f0' }} className="text-[14px] font-[800]">代理机构：{product.agent}</span>
+                  </div>
+                  <div className='w-full mt-2 gap-4 flex items-center justify-start gap-2'>
+                    <span style={{ color: '#1485ee' }} className="text-[14px] font-[800]">类目：{product.intCls}</span>
+                    <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
+                    <span style={{ color: '#ffc300' }} className="text-[14px] font-[800] ">注册号：{product.regNo}</span>
+                  </div>
+                  <div className='w-full mt-2 gap-4 flex items-center justify-start gap-2'>
+                    <span style={{ color: '#637381' }} className="text-[14px] font-[800] ">申请日期: {product.appDate}</span>
+                    <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
+                    <span style={{ color: '#637381' }} className="text-[14px] font-[800] ">更新日期: {product.createTime}</span>
+                    <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
+                    <span style={{ color: '#f30000' }} className="text-[14px] font-[800] ">驳回发文: {product.rejectDate}</span>
+                  </div>
                 </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-start gap-2'>
-                  <span style={{ color: '#1485ee' }} className="text-[14px] font-[800]">类目：{product.intCls}</span>
-                  <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
-                  <span style={{ color: '#ffc300' }} className="text-[14px] font-[800] ">注册号：{product.regNo}</span>
-                </div>
-                <div className='w-full mt-2 gap-4 flex items-center justify-start gap-2'>
-                  <span style={{ color: '#637381' }} className="text-[14px] font-[800] ">申请日期: {product.appDate}</span>
-                  <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
-                  <span style={{ color: '#637381' }} className="text-[14px] font-[800] ">更新日期: {product.createTime}</span>
-                  <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
-                  <span style={{ color: '#f30000' }} className="text-[14px] font-[800] ">驳回发文: {product.rejectDate}</span>
-                </div>
-              </div>
-              <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-start gap-2'>
+                <div className='w-full ml-4 mt-2 gap-4 flex items-center justify-start gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800]">联系人：{product.operName}</span>
                   <span style={{ color: '#ccc' }} className="text-[14px] font-[800]"> | </span>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">申请地址: {product.contactAddress}</span>

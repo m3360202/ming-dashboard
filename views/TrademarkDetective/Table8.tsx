@@ -6,6 +6,7 @@ import axios from 'axios';
 import './style.css';
 import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
+import { LoadingSvg } from '@/images/loading';
 
 interface TrademarkItem {
   add_time: string;
@@ -36,8 +37,10 @@ export function ItemsTable8() {
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<string | null>('');
-  const [endDate, setEndDate] = useState<string | null>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const generateDates = () => {
@@ -56,6 +59,7 @@ export function ItemsTable8() {
   const getData = async () => {
     if (startDate && endDate) {
       try {
+        setLoading(true);
         const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData8', {
           startDate,
           endDate
@@ -64,10 +68,13 @@ export function ItemsTable8() {
         if (res?.data?.success) {
           setData(res?.data?.data);
           setPageTotal(res?.data?.total);
+          setLoading(false);
         } else {
+          setLoading(false);
           alert('请求失败');
         }
       } catch (error) {
+        setLoading(false);
         console.log('error', error);
         alert('请求失败');
       }
@@ -195,12 +202,16 @@ export function ItemsTable8() {
               max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
               style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
             />
-            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
-              <File className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                导出数据
-              </span>
-            </Button>
+            {loading ? (
+              <LoadingSvg />
+            ) : (
+              <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
+                <File className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  导出数据
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>

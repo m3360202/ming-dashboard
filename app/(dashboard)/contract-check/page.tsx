@@ -11,30 +11,27 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import * as Dialog from '@radix-ui/react-dialog';
-import { useUser } from '@/store/nav';
-import { uploadFile } from '@/utils/upload';
+import ContractPreview  from '@/components/PdfViewer';
 
 export default function ContractCheckPage() {
-  const { role, userId } = useUser();
   const [data, setData] = useState<any[]>([]);
   const [pageStart, setPageStart] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchCustomer, setSearchCustomer] = useState<string>(''); // 搜索的客户名称
 
-  const [type, setType] = useState<number | null>(null); // 1: update, 2: create
   const [open, setOpen] = useState<boolean>(false);
 
-  const [contractType, setContractType] = useState<string>('无效答辩');
-  const [customer, setCustomer] = useState<string>('');
-  const [customerMb, setCustomerMb] = useState<string>('');
-  const [customerPerson, setCustomerPerson] = useState<string>('');
-  const [customerAddress, setCustomerAddress] = useState<string>('');
-  const [url, setUrl] = useState<string>('');
-  const [file, setFile] = useState<any | null>(null);
-  const [step, setStep] = useState<number>(0);
+  const [currentContract, setCurrentContract] = useState<any | null>(null);
 
   const [currentId, setCurrentId] = useState<number | null>(null); // 当前编辑的用户 ID
+  const [pdfUrl, setPdfUrl] = useState<string>('');
+
+  const [checkLoading, setCheckLoading] = useState<boolean>(false);
+  const [sign1Loading, setSign1Loading] = useState<boolean>(false);
+  const [sign2Loading, setSign2Loading] = useState<boolean>(false);
+
+  
 
   const getContract = async () => {
     setLoading(true);
@@ -48,6 +45,7 @@ export default function ContractCheckPage() {
 
       if (res?.data?.data) {
         setData(res?.data?.data);
+        
         setTotal(res?.data?.total);
       } else {
         alert('请求失败');
@@ -72,69 +70,15 @@ export default function ContractCheckPage() {
     setPageStart((prev) => Math.max(prev - 20, 0));
   };
 
-  // 处理创建或更新用户
-  const handleSubmit = () => {
-    if (type === 1) {
-      handleUpdateContract();
-    } else {
-      handleSaveContract();
-    }
-  }
-
-  const handleSaveContract = async () => {
+  const handleSubmit = async () => {
     try {
-      if (!customer || !file) {
-        alert('请填写合同名称以及上传文件');
-        return;
-      }
-      setLoading(true);
-      const result = await uploadFile(file[0]);
-      // 更新
-      const updateData: any = {
-        userId: userId,
-        customer,
-        customer_mb: customerMb,
-        customer_person: customerPerson,
-        customer_address: customerAddress,
-        contract_origin: result,
-        add_time: Date.now(),
-        step: 0,
-        status: 0,
-        contract_type: contractType
-      };
 
-      await axios.post('https://ai.aliensoft.com.cn/api/saveContract', updateData);
-      alert('上传成功');
-      // 关闭 Dialog 并刷新数据
-      setOpen(false);
-      getContract();
-      setLoading(false);
-    } catch (error) {
-      console.log('error', error);
-      setLoading(false);
-      alert('操作失败');
-    }
-  };
-
-  const handleUpdateContract = async () => {
-    try {
-      if (!customer || !url) {
-        alert('请填写合同名称以及上传文件');
-        return;
-      }
       setLoading(true);
       // 更新用户
       const updateData: any = {
         id: currentId,
-        customer,
-        customer_mb: customerMb,
-        customer_person: customerPerson,
-        customer_address: customerAddress,
-        contract_origin: url,
         add_time: Date.now(),
-        step,
         status: 0,
-        contract_type: contractType
       };
 
       await axios.post('https://ai.aliensoft.com.cn/api/editContract', updateData);
@@ -170,29 +114,18 @@ export default function ContractCheckPage() {
 
   // 打开 Dialog 并设置类型
   const openDialog = (type: number, contractId?: number) => {
-    setType(type);
     setOpen(true);
     if (type === 1 && contractId) {
       setCurrentId(contractId);
       // 设置当前编辑用户的用户名（如果需要）
       const contract: any = data.find((u: any) => u.id === contractId);
       if (contract) {
-        setCustomer(contract.customer);
-        setCustomerMb(contract.customer_mb);
-        setCustomerPerson(contract.customer_person);
-        setCustomerAddress(contract.customer_address);
-        setUrl(contract.contract_origin);
-        setStep(contract.step);
-        setContractType(contract.contract_type);
+        setCurrentContract(contract);
+        console.log('controct---',contract)
+        setPdfUrl(contract?.contract_origin);
       }
     } else {
-      setCustomer('');
-      setCustomerMb('');
-      setCustomerPerson('');
-      setCustomerAddress('');
-      setUrl('');
-      setStep(0);
-      setContractType('无效答辩');
+      setCurrentContract(null);
     }
   };
 
@@ -269,7 +202,7 @@ export default function ContractCheckPage() {
                 <div className="flex flex-row justify-start gap-8">
                   {(contract.step === 0 || contract.step === 3) && (
                     <span
-                      onClick={() => alert('开发中')}
+                      onClick={() => openDialog(1, contract.id)}
                       style={{ color: '#10AEEF', fontSize: '14px', cursor: 'pointer' }}
                       className="sr-only sm:not-sr-only sm:whitespace-nowrap"
                     >
@@ -277,12 +210,12 @@ export default function ContractCheckPage() {
                     </span>
                   )}
                   <span
-                      onClick={() => handleDeleteContract(contract.id)}
-                      style={{ color: '#FA5151', fontSize: '14px', cursor: 'pointer' }}
-                      className="sr-only sm:not-sr-only sm:whitespace-nowrap"
-                    >
-                      删除
-                    </span>
+                    onClick={() => handleDeleteContract(contract.id)}
+                    style={{ color: '#FA5151', fontSize: '14px', cursor: 'pointer' }}
+                    className="sr-only sm:not-sr-only sm:whitespace-nowrap"
+                  >
+                    删除
+                  </span>
                 </div>
               </div>
             ))}
@@ -311,79 +244,79 @@ export default function ContractCheckPage() {
         <Dialog.Root open={open} onOpenChange={setOpen}>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-            <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[90vw] max-w-md">
+            {currentContract && (
+              <Dialog.Content style={{ height: '800px', overflowY: 'scroll' }} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[1200px]">
               <Dialog.Title className="text-lg font-bold mb-4">
-                {type === 1 ? '更新客户合同' : '新建客户合同'}
+                {'审核合同'}
               </Dialog.Title>
+              <div className="flex justify-center items-start mt-8 gap-8">
+                <div className="flex flex-col items-center gap-4">
+                  <label className="block text-md font-[600] text-gray-700">合同内容</label>
+                  {pdfUrl && <ContractPreview pdfUrl={pdfUrl} />}
+                  {/* <textarea onChange={()=>{}} value={'aaaaa'} style={{ width: '760px', padding: '10px', height: '400px', overflowY: 'scroll', border: '#ccc 1px solid', color: '#999', fontSize: '14px', lineHeight: '24px'  }} /> */}
+                </div>
+                <div className="flex flex-col justify-center items-center gap-4">
+                  <label className="block text-md font-[600] text-gray-700">法务校验结果</label>
+                  <textarea onChange={()=>{}} value='校验合同中错别字，存在风险的措辞，以及合同计价等' 
+                  style={{ width: '350px', padding: '10px', height: '400px', overflowY: 'scroll', border: '#ccc 1px solid', color: '#999', fontSize: '14px', lineHeight: '24px' }} />
+                  <Button disabled={loading} onClick={handleSubmit}>
+                    {'AI 校验'}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="w-full my-4">
+                <label className="block text-md font-[600] text-gray-700" style={{ color: '#1c252e' }}>合同信息</label>
+                <div className="w-full flex justify-start items-center mt-4 gap-8">
+                  <span style={{ color: '#FA5151', fontSize: '14px', fontWeight: '400' }}>服务类型：{currentContract.contract_type}</span>
+                  <span style={{ color: '#FA5151', fontSize: '14px', fontWeight: '400' }}>合同价格：￥{currentContract.contract_price}</span>
+                  <span style={{ color: '#FA5151', fontSize: '14px', fontWeight: '400' }}>税费：￥{currentContract.contract_tax}</span>
+                </div>
+              </div>
+
+              <div className="my-8">
+                <label className="block text-md font-[600] text-gray-700" style={{ color: '#1c252e' }}>客户信息</label>
+
+                <div className="w-full flex justify-start items-center mt-4 gap-8">
+                  <span style={{ color: '#FA9D3B', fontSize: '14px', fontWeight: '400' }}>客户名称：{currentContract.customer}</span>
+                  <span style={{ color: '#FA9D3B', fontSize: '14px', fontWeight: '400' }}>客户联系人：{currentContract.customer_person}</span>
+                </div>
+                <div className="w-full flex justify-start items-center mt-2 gap-8">
+                  <span style={{ color: '#FA9D3B', fontSize: '14px', fontWeight: '400' }}>联系电话：{currentContract.customer_mb}</span>
+                  <span style={{ color: '#FA9D3B', fontSize: '14px', fontWeight: '400' }}>联系地址：{currentContract.customer_address}</span>
+                </div>
+              </div>
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">客户名称</label>
+                <label className="block text-sm font-medium text-gray-700">合同编号</label>
+                <div className="w-full flex justify-start items-center mt-2 gap-8">
+                  <Input
+
+                  />
+                  <Button disabled={loading} onClick={handleSubmit}>
+                    {'生成'}
+                  </Button>
+                </div>
+
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">驳回意见</label>
                 <Input
-                  name="customer"
-                  value={customer}
-                  onChange={(e) => setCustomer(e.target.value)}
-                  placeholder="请输入客户名称..."
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                  style={{ marginTop: '6px' }}
+
                 />
               </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">客户联系人</label>
-                <Input
-                  name="customerPerson"
-                  value={customerPerson}
-                  onChange={(e) => setCustomerPerson(e.target.value)}
-                  placeholder="请输入客户联系人..."
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
-                />
+
+              <div className="flex justify-center items-center mt-8 gap-8">
+                <Button disabled={loading} onClick={handleSubmit}>
+                  {'审核通过'}
+                </Button>
+                <Button disabled={loading} onClick={handleSubmit}>
+                  {'驳回'}
+                </Button>
               </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">联系电话</label>
-                <Input
-                  name="customerMb"
-                  value={customerMb}
-                  onChange={(e) => setCustomerMb(e.target.value)}
-                  placeholder="请输入联系电话..."
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
-                />
-              </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">客户地址</label>
-                <Input
-                  name="customerAddress"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  placeholder="请输入客户地址..."
-                  className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
-                />
-              </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">服务类型</label>
-                <select
-                  value={contractType as string}
-                  onChange={(e) => setContractType(e.target.value)}
-                  className="block w-full p-2 border rounded-md shadow-sm focus:ring focus:ring-opacity-50 mt-2"
-                >
-                  <option value='无效答辩'>无效答辩</option>
-                  <option value='撤三答辩'>撤三答辩</option>
-                  <option value='驳回复审'>驳回复审</option>
-                </select>
-              </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">合同文件</label>
-                <Input
-                  type="file"
-                  id="fileInput"
-                  onChange={(e) => {
-                    const files = e.target.files;
-                    if (files && files.length > 0) {
-                      setFile(files);
-                    }
-                  }}
-                />
-              </div>
-              <Button disabled={loading} className="w-full mt-8" onClick={handleSubmit}>
-                {type === 1 ? '更新' : '创建'}
-              </Button>
             </Dialog.Content>
+            )}
+            
           </Dialog.Portal>
         </Dialog.Root>
       </CardContent>
