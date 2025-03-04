@@ -1204,7 +1204,7 @@ caniuse-lite@^1.0.30001579, caniuse-lite@^1.0.30001646, caniuse-lite@^1.0.300016
   resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001699.tgz#a102cf330d153bf8c92bfb5be3cd44c0a89c8c12"
   integrity sha512-b+uH5BakXZ9Do9iK+CkDmctUSEqZl+SP056vc5usa0PL+ev5OHw003rZXcnjNDv3L8P5j6rwT6C0BPKSikW08w==
 
-canvas@^2.11.2, canvas@^2.8.0:
+canvas@^2.11.2:
   version "2.11.2"
   resolved "https://registry.npmjs.org/canvas/-/canvas-2.11.2.tgz#553d87b1e0228c7ac0fc72887c3adbac4abbd860"
   integrity sha512-ItanGBMrmRV7Py2Z+Xhs7cT+FNt5K0vPL4p9EZ/UX/Mu7hFbkxSjKF2KVtPwX7UYWp7dRKnrTvReflgrItJbdw==
@@ -2192,14 +2192,6 @@ make-dir@^3.1.0:
   integrity sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
   dependencies:
     semver "^6.0.0"
-
-martin-fabric@^6.0.0-beta8.9:
-  version "6.0.0-beta8.9"
-  resolved "https://registry.npmjs.org/martin-fabric/-/martin-fabric-6.0.0-beta8.9.tgz#5931f61517feeec30d1c79cbba5b1ba5c7902834"
-  integrity sha512-FXyBA7VpYjtSNyX9zWAP5XkQtFG/BxYL9zUQ8qRpk+Z/TXrRra7Au9TsCz5wq4VviaaRqwL918Ln8lzUA6RmWQ==
-  optionalDependencies:
-    canvas "^2.8.0"
-    jsdom "^20.0.1"
 
 math-intrinsics@^1.1.0:
   version "1.1.0"

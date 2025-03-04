@@ -4,7 +4,6 @@ import * as pdfjsLib from 'pdfjs-dist';
 import * as fabric from 'fabric';
 import { PDFDocument } from 'pdf-lib';
 import { Button } from '@/components/ui/button';
-import Zhang from '@/images/testzhang.png';
 
 // 设置 PDF.js Worker 路径
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
@@ -112,7 +111,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     if (!fabricCanvas) return;
   
     const imgElement = new Image();
-    imgElement.src = Zhang.src; // 设置图片路径
+    imgElement.src = '/images/testzhang.png';; // 设置图片路径
   
     imgElement.onload = () => {
       const img = new fabric.Image(imgElement, {
@@ -138,7 +137,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     if (!fabricCanvas) return;
   
     const imgElement = new Image();
-    imgElement.src = Zhang.src; // 设置图片路径
+    imgElement.src = '/images/testzhang.png';; // 设置图片路径
   
     imgElement.onload = async () => {
       const totalPages = await getPDFPageCount(); // 获取PDF总页数
