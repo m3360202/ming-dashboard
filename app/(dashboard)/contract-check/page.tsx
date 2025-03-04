@@ -25,13 +25,17 @@ export default function ContractCheckPage() {
   const [currentContract, setCurrentContract] = useState<any | null>(null);
 
   const [currentId, setCurrentId] = useState<number | null>(null); // 当前编辑的用户 ID
+  const [contractNo, setContractNo] = useState<string>('');
   const [pdfUrl, setPdfUrl] = useState<string>('');
 
   const [checkLoading, setCheckLoading] = useState<boolean>(false);
   const [sign1Loading, setSign1Loading] = useState<boolean>(false);
   const [sign2Loading, setSign2Loading] = useState<boolean>(false);
 
-  
+  const createContractNo = () => {
+    const code = 'ZHS' + '07' + 'BJ' + Date.now();
+    setContractNo(code);
+  }
 
   const getContract = async () => {
     setLoading(true);
@@ -290,9 +294,10 @@ export default function ContractCheckPage() {
                 <label className="block text-sm font-medium text-gray-700">合同编号</label>
                 <div className="w-full flex justify-start items-center mt-2 gap-8">
                   <Input
-
+                    value={contractNo as string}
+                    disabled
                   />
-                  <Button disabled={loading} onClick={handleSubmit}>
+                  <Button disabled={loading} onClick={createContractNo}>
                     {'生成'}
                   </Button>
                 </div>

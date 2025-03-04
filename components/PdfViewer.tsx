@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import * as fabric from 'fabric';
@@ -15,6 +15,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
   const [scrollTop, setScrollTop] = useState(0); // 当前滚动高度
   let canvas: any;
+
   useEffect(() => {
     if (!canvasRef.current) return;
     if (pdfUrl) {
@@ -68,7 +69,6 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
       };
 
       loadPDF();
-
     }
 
     // 监听父容器的滚动事件
@@ -81,10 +81,10 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     if (containerRef.current) {
       containerRef.current.addEventListener('scroll', handleScroll);
     }
+
     // 监听键盘事件
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Delete') {
-        
         const activeObject = canvas.getActiveObject(); // 获取当前选中的对象
         if (activeObject) {
           canvas.remove(activeObject); // 删除选中的对象
@@ -94,6 +94,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       if (canvas) {
         canvas.dispose(); // 清理画布
@@ -109,26 +110,84 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
   // 添加本地图片（合同章）
   const addStamp = () => {
     if (!fabricCanvas) return;
-
+  
     const imgElement = new Image();
     imgElement.src = Zhang.src; // 设置图片路径
-
+  
     imgElement.onload = () => {
       const img = new fabric.Image(imgElement, {
         left: 100, // 设置图片的 X 坐标
         top: scrollTop + 100, // 根据滚动高度设置图片的 Y 坐标
-        scaleX: 0.5, // 设置图片的宽度缩放比例
-        scaleY: 0.5, // 设置图片的高度缩放比例
+        scaleX: 0.75, // 150 / 200 (原图大小为 200x200)
+        scaleY: 0.75, // 150 / 200 (原图大小为 200x200)
         selectable: true, // 允许选中
       });
-
+  
       fabricCanvas.add(img);
       fabricCanvas.renderAll();
     };
-
+  
     imgElement.onerror = (error) => {
       console.error('图片加载失败:', error);
     };
+  };
+  
+
+  // 添加骑缝章
+  const addSeal = async () => {
+    if (!fabricCanvas) return;
+  
+    const imgElement = new Image();
+    imgElement.src = Zhang.src; // 设置图片路径
+  
+    imgElement.onload = async () => {
+      const totalPages = await getPDFPageCount(); // 获取PDF总页数
+      const imgWidth = 200; // 设置图片的原始宽度为200
+      const imgHeight = 200; // 设置图片的原始高度为200
+      const segmentWidth = imgWidth / totalPages; // 每部分的宽度
+  
+      for (let i = 0; i < totalPages; i++) {
+        const canvasElement = document.createElement('canvas');
+        canvasElement.width = segmentWidth;
+        canvasElement.height = imgHeight;
+  
+        const context = canvasElement.getContext('2d')!;
+        context.drawImage(
+          imgElement,
+          i * segmentWidth,
+          0,
+          segmentWidth,
+          imgHeight,
+          0,
+          0,
+          canvasElement.width,
+          canvasElement.height
+        );
+  
+        const sealImage = new fabric.Image(canvasElement, {
+          left: fabricCanvas.getWidth() - segmentWidth, // 设置在右侧边缘
+          top: i * (fabricCanvas.getHeight() / totalPages) + (fabricCanvas.getHeight() / totalPages) / 2 - imgHeight / 2, // 设置每部分的垂直位置，居中
+          selectable: false, // 禁止选中
+          scaleX: 0.75, // 保持原始大小
+          scaleY: 0.75, // 保持原始大小
+        });
+  
+        fabricCanvas.add(sealImage);
+      }
+  
+      fabricCanvas.renderAll();
+    };
+  
+    imgElement.onerror = (error) => {
+      console.error('图片加载失败:', error);
+    };
+  };
+
+  // 获取PDF总页数
+  const getPDFPageCount = async () => {
+    const loadingTask = pdfjsLib.getDocument('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/' + pdfUrl);
+    const pdf = await loadingTask.promise;
+    return pdf.numPages;
   };
 
   // 生成 PDF
@@ -179,7 +238,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
       {/* 操作按钮 */}
       <div className="flex justify-center items-center gap-4 mt-4">
         <Button onClick={addStamp}>加盖合同章</Button>
-        <Button onClick={addStamp}>加盖骑缝章</Button>
+        <Button onClick={addSeal}>加盖骑缝章</Button>
         <Button onClick={generatePDF}>保存为 PDF</Button>
       </div>
     </div>
