@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import * as fabric from 'fabric';
@@ -10,63 +11,98 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs
 
 const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null); // 父容器引用
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
-
+  const [scrollTop, setScrollTop] = useState(0); // 当前滚动高度
+  let canvas: any;
   useEffect(() => {
     if (!canvasRef.current) return;
+    if (pdfUrl) {
+      // 初始化 Fabric.js 画布
+      canvas = new fabric.Canvas(canvasRef.current, {
+        width: 750, // 固定宽度
+        height: 0, // 初始高度为 0，动态调整
+        backgroundColor: '#fff',
+      });
+      setFabricCanvas(canvas);
 
-    // 初始化 Fabric.js 画布
-    const canvas = new fabric.Canvas(canvasRef.current, {
-      width: 750, // 固定宽度
-      height: 0, // 初始高度为 0，动态调整
-      backgroundColor: '#fff',
-    });
-    setFabricCanvas(canvas);
+      // 加载 PDF 并渲染所有页面
+      const loadPDF = async () => {
+        const loadingTask = pdfjsLib.getDocument('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/' + pdfUrl);
+        const pdf = await loadingTask.promise;
+        const numPages = pdf.numPages; // 获取总页数
 
-    // 加载 PDF 并渲染所有页面
-    const loadPDF = async () => {
-    
-      const loadingTask = pdfjsLib.getDocument('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/' + pdfUrl);
-      const pdf = await loadingTask.promise;
-      const numPages = pdf.numPages; // 获取总页数
+        let totalHeight = 0; // 所有页面的总高度
 
-      let totalHeight = 0; // 所有页面的总高度
+        for (let i = 1; i <= numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvasElement = document.createElement('canvas');
+          const context = canvasElement.getContext('2d')!;
+          canvasElement.height = viewport.height;
+          canvasElement.width = viewport.width;
 
-      for (let i = 1; i <= numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvasElement = document.createElement('canvas');
-        const context = canvasElement.getContext('2d')!;
-        canvasElement.height = viewport.height;
-        canvasElement.width = viewport.width;
+          await page.render({ canvasContext: context, viewport }).promise;
 
-        await page.render({ canvasContext: context, viewport }).promise;
+          // 将每一页转换为 Fabric.js 的 Image 对象
+          const pdfImage = new fabric.Image(canvasElement, {
+            left: 0,
+            top: totalHeight, // 设置每一页的垂直位置
+            selectable: false, // 禁止选中
+            scaleX: canvas.width / canvasElement.width,
+            scaleY: canvas.width / canvasElement.width, // 保持宽高比一致
+          });
 
-        // 将每一页转换为 Fabric.js 的 Image 对象
-        const pdfImage = new fabric.Image(canvasElement, {
-          left: 0,
-          top: totalHeight, // 设置每一页的垂直位置
-          selectable: false, // 禁止选中
-          scaleX: canvas.width / canvasElement.width,
-          scaleY: canvas.width / canvasElement.width, // 保持宽高比一致
-        });
-        if (!canvas) return;
-        // 将每一页添加到画布
-        canvas.add(pdfImage);
+          // 将每一页添加到画布
+          canvas.add(pdfImage);
 
-        // 更新总高度
-        totalHeight += viewport.height * (canvas.width / canvasElement.width);
+          // 更新总高度
+          totalHeight += viewport.height * (canvas.width / canvasElement.width);
+        }
+
+        // 动态调整画布高度
+        console.log('totalHeight:', totalHeight);
+        canvas.setHeight(totalHeight);
+        canvas.calcOffset(); // 重新计算画布偏移量
+        canvas.renderAll();
+      };
+
+      loadPDF();
+
+    }
+
+    // 监听父容器的滚动事件
+    const handleScroll = () => {
+      if (containerRef.current) {
+        setScrollTop(containerRef.current.scrollTop);
       }
-
-      // 动态调整画布高度
-      canvas.setHeight(totalHeight);
-      canvas.renderAll();
     };
 
-    loadPDF();
+    if (containerRef.current) {
+      containerRef.current.addEventListener('scroll', handleScroll);
+    }
+    // 监听键盘事件
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Delete') {
+        
+        const activeObject = canvas.getActiveObject(); // 获取当前选中的对象
+        if (activeObject) {
+          canvas.remove(activeObject); // 删除选中的对象
+          canvas.renderAll(); // 重新渲染画布
+        }
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      canvas.dispose(); // 清理画布
+      if (canvas) {
+        canvas.dispose(); // 清理画布
+      }
+
+      if (containerRef.current) {
+        containerRef.current.removeEventListener('scroll', handleScroll);
+      }
+      window.removeEventListener('keydown', handleKeyDown); // 移除键盘事件监听
     };
   }, [pdfUrl]);
 
@@ -80,9 +116,10 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     imgElement.onload = () => {
       const img = new fabric.Image(imgElement, {
         left: 100, // 设置图片的 X 坐标
-        top: 100, // 设置图片的 Y 坐标
+        top: scrollTop + 100, // 根据滚动高度设置图片的 Y 坐标
         scaleX: 0.5, // 设置图片的宽度缩放比例
         scaleY: 0.5, // 设置图片的高度缩放比例
+        selectable: true, // 允许选中
       });
 
       fabricCanvas.add(img);
@@ -132,7 +169,10 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
   return (
     <div>
       {/* 父容器，支持滚动 */}
-      <div style={{ border: '#ccc 2px solid', boxShadow: 'inherit', height: '600px', overflow: 'auto' }}>
+      <div
+        ref={containerRef}
+        style={{ border: '#ccc 2px solid', boxShadow: 'inherit', height: '600px', overflow: 'auto' }}
+      >
         <canvas ref={canvasRef} />
       </div>
 
