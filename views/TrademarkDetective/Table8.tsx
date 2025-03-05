@@ -41,7 +41,7 @@ export function ItemsTable8() {
   const [endDate, setEndDate] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
-
+  console.log('-----------',new Date().toISOString().split('T')[0])
   useEffect(() => {
     const generateDates = () => {
       const startDate = new Date('2025-02-18');

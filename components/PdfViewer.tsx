@@ -224,6 +224,11 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     link.click();
   };
 
+  const stampAll = () => {
+    addStamp();
+    addSeal();
+  }
+
   return (
     <div>
       {/* 父容器，支持滚动 */}
@@ -236,8 +241,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
 
       {/* 操作按钮 */}
       <div className="flex justify-center items-center gap-4 mt-4">
-        <Button onClick={addStamp}>加盖合同章</Button>
-        <Button onClick={addSeal}>加盖骑缝章</Button>
+        <Button onClick={stampAll}>一键盖章</Button>
         <Button onClick={generatePDF}>保存为 PDF</Button>
       </div>
     </div>

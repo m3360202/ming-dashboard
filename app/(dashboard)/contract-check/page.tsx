@@ -259,14 +259,6 @@ export default function ContractCheckPage() {
                   {pdfUrl && <ContractPreview pdfUrl={pdfUrl} />}
                   {/* <textarea onChange={()=>{}} value={'aaaaa'} style={{ width: '760px', padding: '10px', height: '400px', overflowY: 'scroll', border: '#ccc 1px solid', color: '#999', fontSize: '14px', lineHeight: '24px'  }} /> */}
                 </div>
-                <div className="flex flex-col justify-center items-center gap-4">
-                  <label className="block text-md font-[600] text-gray-700">法务校验结果</label>
-                  <textarea onChange={()=>{}} value='校验合同中错别字，存在风险的措辞，以及合同计价等' 
-                  style={{ width: '350px', padding: '10px', height: '400px', overflowY: 'scroll', border: '#ccc 1px solid', color: '#999', fontSize: '14px', lineHeight: '24px' }} />
-                  <Button disabled={loading} onClick={handleSubmit}>
-                    {'AI 校验'}
-                  </Button>
-                </div>
               </div>
 
               <div className="w-full my-4">

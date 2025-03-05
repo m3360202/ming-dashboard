@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import {
   Card,
@@ -13,6 +14,12 @@ import { Input } from '@/components/ui/input';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useUser } from '@/store/nav';
 import { uploadFile } from '@/utils/upload';
+import Docxtemplater from 'docxtemplater';
+import PizZip from 'pizzip';
+
+import { clsData } from '@/utils/trademarkCls';
+// import JSZipUtils from 'jszip-utils';
+// import { saveAs } from 'file-saver';
 
 export default function ContractPage() {
   const { role, userId } = useUser();
@@ -24,15 +31,30 @@ export default function ContractPage() {
   const [type, setType] = useState<number | null>(null); // 1: update, 2: create
   const [open, setOpen] = useState<boolean>(false);
 
-  const [contractType, setContractType] = useState<string>('无效答辩');
+  const [contractType, setContractType] = useState<string>('商标服务');
+
   const [customer, setCustomer] = useState<string>('');
   const [customerMb, setCustomerMb] = useState<string>('');
   const [customerPerson, setCustomerPerson] = useState<string>('');
   const [customerAddress, setCustomerAddress] = useState<string>('');
-  const [contractBak, setContractBak] = useState<string>('');
+
+  const [other, setOther] = useState<string>('');
+  const [items, setItems] = useState<string[]>([]);
+  const [tradeMarkName, setTradeMarkName] = useState<string>('');
+  const [tradeMarkRegNo, setTradeMarkRegNo] = useState<string>('');
+  const [tradeMarkCls, setTradeMarkCls] = useState<string[]>([]);
+  const [serverContent, setServerContent] = useState<string>('');
+  const [tradeMarkNum, setTradeMarkNum] = useState<string>('');
+
   const [price, setPrice] = useState<string>('');
+  const [priceCNY, setPriceCNY] = useState<string>('');
   const [tax, setTax] = useState<string>('');
-  const [url, setUrl] = useState<string>('');
+
+  const [year, setYear] = useState<string>('');
+  const [month, setMonth] = useState<string>('');
+  const [day, setDay] = useState<string>('');
+
+  const [contractBack, setContractBack] = useState<string>('');
   const [file, setFile] = useState<any | null>(null);
   const [step, setStep] = useState<number>(0);
 
@@ -74,7 +96,7 @@ export default function ContractPage() {
     setPageStart((prev) => Math.max(prev - 20, 0));
   };
 
-  // 处理创建或更新用户
+  // 处理创建或更新合同
   const handleSubmit = () => {
     if (type === 1) {
       handleUpdateContract();
@@ -85,28 +107,36 @@ export default function ContractPage() {
 
   const handleSaveContract = async () => {
     try {
-      if (!customer || !file) {
-        alert('请填写合同名称以及上传文件');
-        return;
-      }
+
       setLoading(true);
-      const result = await uploadFile(file[0]);
+      // const result = await uploadFile(file[0]);
       // 更新
-      const updateData: any = {
+      const saveData: any = {
         userId: userId,
         customer,
         customer_mb: customerMb,
         customer_person: customerPerson,
         customer_address: customerAddress,
-        contract_origin: result,
+        contract_origin: '1',
+        contract_price: price,
+        contract_tax: tax,
+        data: JSON.stringify({
+          items,
+          tradeMarkCls,
+          tradeMarkName,
+          tradeMarkNum,
+          tradeMarkRegNo,
+          other,
+          serverContent,
+        }),
         add_time: Date.now(),
         step: 0,
         status: 0,
         contract_type: contractType
       };
 
-      await axios.post('https://ai.aliensoft.com.cn/api/saveContract', updateData);
-      alert('上传成功');
+      await axios.post('https://ai.aliensoft.com.cn/api/saveContract', saveData);
+      alert('上传成功,请等待审批');
       // 关闭 Dialog 并刷新数据
       setOpen(false);
       getContract();
@@ -120,19 +150,27 @@ export default function ContractPage() {
 
   const handleUpdateContract = async () => {
     try {
-      if (!customer || !url) {
-        alert('请填写合同名称以及上传文件');
-        return;
-      }
       setLoading(true);
       // 更新用户
       const updateData: any = {
+        userId: userId,
         id: currentId,
         customer,
         customer_mb: customerMb,
         customer_person: customerPerson,
         customer_address: customerAddress,
-        contract_origin: url,
+        contract_origin: '1',
+        contract_price: price,
+        contract_tax: tax,
+        data: JSON.stringify({
+          items,
+          tradeMarkCls,
+          tradeMarkName,
+          tradeMarkNum,
+          tradeMarkRegNo,
+          other,
+          serverContent,
+        }),
         add_time: Date.now(),
         step,
         status: 0,
@@ -161,12 +199,20 @@ export default function ContractPage() {
       // 设置当前编辑用户的用户名（如果需要）
       const contract: any = data.find((u: any) => u.id === contractId);
       if (contract) {
+        const data = JSON.parse(contract.data);
+        console.log('aaaaaa',contract,data)
+        setItems(data.items);
+        setTradeMarkCls(data.tradeMarkCls);
+        setTradeMarkName(data.tradeMarkName);
+        setTradeMarkNum(data.tradeMarkNum);
+        setTradeMarkRegNo(data.tradeMarkRegNo);
+        setServerContent(data.serverContent);
+        setOther(data.other);
         setCustomer(contract.customer);
         setCustomerMb(contract.customer_mb);
         setCustomerPerson(contract.customer_person);
         setCustomerAddress(contract.customer_address);
-        setContractBak(contract.contract_no);
-        setUrl(contract.contract_origin);
+        setContractBack(contract.refuse_text);
         setStep(contract.step);
         setPrice(contract.contract_price);
         setTax(contract.contract_tax);
@@ -177,12 +223,12 @@ export default function ContractPage() {
       setCustomerMb('');
       setCustomerPerson('');
       setCustomerAddress('');
-      setContractBak('');
-      setUrl('');
+      setOther('');
+      setContractBack('');
       setStep(0);
       setPrice('');
       setTax('');
-      setContractType('无效答辩');
+      setContractType('商标服务');
     }
   };
 
@@ -204,12 +250,25 @@ export default function ContractPage() {
         return <div className={`${baseStyle} bg-[#6467F0]`}>未知状态</div>;
     }
   }
+
+  const handleCheckboxChange = (item: string) => {
+    setItems((prevItems) =>
+      prevItems.includes(item) ? prevItems.filter((i) => i !== item) : [...prevItems, item]
+    );
+  };
+
+  const handleClsCheckboxChange = (item: string) => {
+    setTradeMarkCls((prevItems) =>
+      prevItems.includes(item) ? prevItems.filter((i) => i !== item) : [...prevItems, item]
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>合同模板列表</CardTitle>
+        <CardTitle>新建客户业务合同</CardTitle>
         <CardDescription style={{ marginTop: '10px' }}>
-          浏览并下载您企业下的签约合同模板。
+          填写并自动生成待审批的业务合同
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -231,11 +290,8 @@ export default function ContractPage() {
         ) : (
           <div className="space-y-4">
             {/* 表头 */}
-            <div className="w-full grid grid-cols-9 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
+            <div className="w-full grid grid-cols-6 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
               <div>客户名称</div>
-              <div>联系人</div>
-              <div>联系电话</div>
-              <div>联系地址</div>
               <div>合同类型</div>
               <div>提交日期</div>
               <div>查看附件</div>
@@ -245,11 +301,8 @@ export default function ContractPage() {
 
             {/* 数据行 */}
             {data.map((contract: any) => (
-              <div key={contract.id} className="w-full grid grid-cols-9 gap-4 p-4 border rounded-lg">
+              <div key={contract.id} className="w-full grid grid-cols-6 gap-4 p-4 border rounded-lg">
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer_person}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer_mb}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer_address}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_type}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.created_at}</div>
                 <div
@@ -302,10 +355,299 @@ export default function ContractPage() {
         <Dialog.Root open={open} onOpenChange={setOpen}>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-            <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[860px]">
+            <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[860px] h-[650px]" style={{ overflowY: 'scroll' }}>
               <Dialog.Title className="text-lg font-bold mb-4">
                 {type === 1 ? '更新客户合同' : '新建客户合同'}
               </Dialog.Title>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">服务类型</label>
+                <select
+                  value={contractType as string}
+                  onChange={(e) => setContractType(e.target.value)}
+                  className="block w-full p-2 border rounded-md shadow-sm focus:ring focus:ring-opacity-50 mt-2"
+                >
+                  <option value='商标服务'>商标服务</option>
+                  <option value='版权服务'>版权服务</option>
+                  {/* <option value='专利服务'>专利服务</option>
+                  <option value='诉讼服务'>诉讼服务</option>
+                  <option value='认证服务'>认证服务</option>
+                  <option value='广告服务'>广告服务</option>
+                  <option value='其他服务'>其他服务</option> */}
+                </select>
+              </div>
+              {contractType === '商标服务' && (
+                <div>
+                  <div className="flex flex-col justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">服务内容</label>
+                      <div className="p-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标注册')}
+                              checked={items.includes('商标注册')}
+                            />
+                            <span className="ml-2 text-sm">商标注册</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标驳回复审')}
+                              checked={items.includes('商标驳回复审')}
+                            />
+                            <span className="ml-2 text-sm">商标驳回复审</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标异议')}
+                              checked={items.includes('商标异议')}
+                            />
+                            <span className="ml-2 text-sm">商标异议</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标撤三')}
+                              checked={items.includes('商标撤三')}
+                            />
+                            <span className="ml-2 text-sm">商标撤三</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标不予注册复审')}
+                              checked={items.includes('商标不予注册复审')}
+                            />
+                            <span className="ml-2 text-sm">商标不予注册复审</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('撤销复审')}
+                              checked={items.includes('撤销复审')}
+                            />
+                            <span className="ml-2 text-sm">撤销复审</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标无效宣告')}
+                              checked={items.includes('商标无效宣告')}
+                            />
+                            <span className="ml-2 text-sm">商标无效宣告</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标异议答辩')}
+                              checked={items.includes('商标异议答辩')}
+                            />
+                            <span className="ml-2 text-sm">商标异议答辩</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('撤销复审答辩')}
+                              checked={items.includes('撤销复审答辩')}
+                            />
+                            <span className="ml-2 text-sm">撤销复审答辩</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标撤三答辩')}
+                              checked={items.includes('商标撤三答辩')}
+                            />
+                            <span className="ml-2 text-sm">商标撤三答辩</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标不予注册复审答辩')}
+                              checked={items.includes('商标不予注册复审答辩')}
+                            />
+                            <span className="ml-2 text-sm">商标不予注册复审答辩</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('无效宣告答辩')}
+                              checked={items.includes('无效宣告答辩')}
+                            />
+                            <span className="ml-2 text-sm">无效宣告答辩</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标变更')}
+                              checked={items.includes('商标变更')}
+                            />
+                            <span className="ml-2 text-sm">商标变更</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标转让')}
+                              checked={items.includes('商标转让')}
+                            />
+                            <span className="ml-2 text-sm">商标转让</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标续展')}
+                              checked={items.includes('商标续展')}
+                            />
+                            <span className="ml-2 text-sm">商标续展</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标注销')}
+                              checked={items.includes('商标注销')}
+                            />
+                            <span className="ml-2 text-sm">商标注销</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标撤销')}
+                              checked={items.includes('商标撤销')}
+                            />
+                            <span className="ml-2 text-sm">商标撤销</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标许可合同备案')}
+                              checked={items.includes('商标许可合同备案')}
+                            />
+                            <span className="ml-2 text-sm">商标许可合同备案</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('商标监测')}
+                              checked={items.includes('商标监测')}
+                            />
+                            <span className="ml-2 text-sm">商标监测</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('补办注册证')}
+                              checked={items.includes('补办注册证')}
+                            />
+                            <span className="ml-2 text-sm">补办注册证</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('补办续展证明')}
+                              checked={items.includes('补办续展证明')}
+                            />
+                            <span className="ml-2 text-sm">补办续展证明</span>
+                          </label>
+                        </div>
+                        <div className="mt-4 flex items-center">
+                          <span className="text-sm mr-2">其他:</span>
+                          <input
+                            type="text"
+                            value={other}
+                            onChange={(e) => setOther(e.target.value)}
+                            className="border-b border-gray-300 focus:outline-none focus:border-blue-600"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">商标类别</label>
+                      <div className="p-4">
+                        <div className="w-full grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {clsData.map((item, index)=>(
+                          <label key={index} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleClsCheckboxChange(item.name)}
+                              checked={tradeMarkCls.includes(item.name)}
+                            />
+                            <span className="ml-2 text-sm">{item.name}</span>
+                          </label>))}
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">商标名称</label>
+                      <Input
+                        name="tradeMarkName"
+                        value={tradeMarkName}
+                        onChange={(e) => setTradeMarkName(e.target.value)}
+                        placeholder="请输入商标名称..."
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">注册号</label>
+                      <Input
+                        name="tradeMarkRegNo"
+                        value={tradeMarkRegNo}
+                        onChange={(e) => setTradeMarkRegNo(e.target.value)}
+                        placeholder="请输入注册号..."
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">商标数量</label>
+                      <Input
+                        name="tradeMarkNum"
+                        value={tradeMarkNum}
+                        onChange={(e) => setTradeMarkNum(e.target.value)}
+                        placeholder="请输入商标数量..."
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">工作内容</label>
+                      <Input
+                        value={serverContent}
+                        onChange={(e) => { setServerContent(e.target.value) }}
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>)}
+
               <div className="flex flex-row justify-between items-center">
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">客户名称</label>
@@ -342,10 +684,10 @@ export default function ContractPage() {
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">客户地址</label>
                   <Input
-                    name="price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="请输入合同价格..."
+                    name="customerAddress"
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    placeholder="请输入客户地址..."
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
                   />
                 </div>
@@ -355,37 +697,26 @@ export default function ContractPage() {
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">合同价格</label>
                   <Input
-                    name="tax"
-                    value={tax}
-                    onChange={(e) => setTax(e.target.value)}
-                    placeholder="请输入税费..."
+                    name="price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="请输入合同价格.."
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
                   />
                 </div>
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">合同税费</label>
                   <Input
-                    name="customerAddress"
-                    value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                    placeholder="请输入客户地址..."
+                    name="tax"
+                    value={tax}
+                    onChange={(e) => setTax(e.target.value)}
+                    placeholder="请输入合同税费..."
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
                   />
                 </div>
               </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">服务类型</label>
-                <select
-                  value={contractType as string}
-                  onChange={(e) => setContractType(e.target.value)}
-                  className="block w-full p-2 border rounded-md shadow-sm focus:ring focus:ring-opacity-50 mt-2"
-                >
-                  <option value='无效答辩'>无效答辩</option>
-                  <option value='撤三答辩'>撤三答辩</option>
-                  <option value='驳回复审'>驳回复审</option>
-                </select>
-              </div>
-              <div className="mt-4">
+
+              {/* <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">合同文件</label>
                 <Input
                   type="file"
@@ -397,11 +728,11 @@ export default function ContractPage() {
                     }
                   }}
                 />
-              </div>
-              {contractBak && (
+              </div> */}
+              {contractBack && (
                 <div className="mt-4">
                   <label style={{ color: '#FA5151' }} className="block text-sm font-medium text-gray-700">驳回说明</label>
-                  <span style={{ fontSize: '12px', color: '#FA5151', margin: '15px 0' }}>{contractBak}</span>
+                  <span style={{ fontSize: '12px', color: '#FA5151', margin: '15px 0' }}>{contractBack}</span>
                 </div>
               )}
               <Button disabled={loading} className="w-full mt-8" onClick={handleSubmit}>
