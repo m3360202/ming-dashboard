@@ -124,21 +124,22 @@ export function ItemsTable8() {
     }
   }
 
-  const escapeCommas = (value: string) => {
-    if (value && value.includes(',')) {
-      return `"${value}"`;
+  const escapeCommas = (field: string) => {
+    if (field && field.includes(',')) {
+      return `"${field.replace(/"/g, '""')}"`; // 替换字段中的双引号为两个双引号，并包围整个字段
     }
-    return value;
+    return field;
   };
+  
 
   const exportToCSV = () => {
     const headers = [
-      '商标名称',
-      '类目',
       '申请人',
       '联系人',
       '联系电话',
       '联系邮箱',
+      '商标名称',
+      '类目',
       '申请地址',
       '注册号',
       '状态',
@@ -150,13 +151,13 @@ export function ItemsTable8() {
     const csvData = [
       headers.join(','),
       ...data.map(product => [
-        product.tmName,
-        product.intCls,
         product.applicantCn,
         product.operName,
-        product.contactPhone,
+        escapeCommas(product.contactPhone),
         escapeCommas(product.contactEmail),
         product.addressCn,
+        product.tmName,
+        product.intCls,
         product.regNo,
         product.statusName,
         product.acceptDate,
