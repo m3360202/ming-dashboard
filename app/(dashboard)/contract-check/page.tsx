@@ -28,6 +28,8 @@ export default function ContractCheckPage() {
   const [contractNo, setContractNo] = useState<string>('');
   const [pdfUrl, setPdfUrl] = useState<string>('');
 
+  const [back, setBack] = useState<string>('');
+
   const [checkLoading, setCheckLoading] = useState<boolean>(false);
   const [sign1Loading, setSign1Loading] = useState<boolean>(false);
   const [sign2Loading, setSign2Loading] = useState<boolean>(false);
@@ -98,6 +100,30 @@ export default function ContractCheckPage() {
     }
   };
 
+  const handleRefuse = async () => {
+    try {
+
+      setLoading(true);
+      // 更新用户
+      const updateData: any = {
+        id: currentId,
+        refuse_text: back,
+        step: 1,
+      };
+
+      await axios.post('https://ai.aliensoft.com.cn/api/editContract', updateData);
+      alert('驳回成功');
+      // 关闭 Dialog 并刷新数据
+      setOpen(false);
+      setLoading(false);
+      getContract();
+    } catch (error) {
+      console.log('error', error);
+      setLoading(false);
+      alert('操作失败');
+    }
+  };
+
   const handleDeleteContract = async (id: number) => {
     try {
       // 更新用户
@@ -139,12 +165,12 @@ export default function ContractCheckPage() {
     switch (step) {
       case 0:
         return <div className={`${baseStyle} bg-[#FA5151]`}>待审核</div>;
-      case 1:
-        return <div className={`${baseStyle} bg-[#FA9D3B]`}>已盖章，待签约</div>;
       case 2:
-        return <div className={`${baseStyle} bg-[#FFC300]`}>已签约，已支付</div>;
+        return <div className={`${baseStyle} bg-[#FA9D3B]`}>已盖章，待签约</div>;
       case 3:
-        return <div className={`${baseStyle} bg-[#91D300]`}>已驳回，待编辑</div>;
+        return <div className={`${baseStyle} bg-[#FFC300]`}>已签约，已支付</div>;
+      case 1:
+        return <div className={`${baseStyle} bg-[#FA5151]`}>已驳回，待编辑</div>;
       case 4:
         return <div className={`${baseStyle} bg-[#10AEEF]`}>已归档</div>;
       default:
@@ -299,7 +325,8 @@ export default function ContractCheckPage() {
                 <label className="block text-sm font-medium text-gray-700">驳回意见</label>
                 <Input
                   style={{ marginTop: '6px' }}
-
+                  value={back}
+                  onChange={(e)=>setBack(e.target.value)}
                 />
               </div>
 
@@ -307,7 +334,7 @@ export default function ContractCheckPage() {
                 <Button disabled={loading} onClick={handleSubmit}>
                   {'审核通过'}
                 </Button>
-                <Button disabled={loading} onClick={handleSubmit}>
+                <Button disabled={loading} onClick={handleRefuse}>
                   {'驳回'}
                 </Button>
               </div>

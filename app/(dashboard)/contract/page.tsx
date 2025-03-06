@@ -16,10 +16,13 @@ import { useUser } from '@/store/nav';
 import { uploadFile } from '@/utils/upload';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
+import { PDFDocument } from 'pdf-lib';
 
 import { clsData } from '@/utils/trademarkCls';
-// import JSZipUtils from 'jszip-utils';
-// import { saveAs } from 'file-saver';
+//@ts-ignore
+import { saveAs } from 'file-saver';
+
+import { convertToChineseCurrency, docxToPdf } from '@/utils/index';
 
 export default function ContractPage() {
   const { role, userId } = useUser();
@@ -32,6 +35,7 @@ export default function ContractPage() {
   const [open, setOpen] = useState<boolean>(false);
 
   const [contractType, setContractType] = useState<string>('商标服务');
+  const [template, setTemplate] = useState<string>('/contracts/tradeMark.docx');
 
   const [customer, setCustomer] = useState<string>('');
   const [customerMb, setCustomerMb] = useState<string>('');
@@ -46,16 +50,11 @@ export default function ContractPage() {
   const [serverContent, setServerContent] = useState<string>('');
   const [tradeMarkNum, setTradeMarkNum] = useState<string>('');
 
-  const [price, setPrice] = useState<string>('');
+  const [price, setPrice] = useState<any>(0);
   const [priceCNY, setPriceCNY] = useState<string>('');
   const [tax, setTax] = useState<string>('');
 
-  const [year, setYear] = useState<string>('');
-  const [month, setMonth] = useState<string>('');
-  const [day, setDay] = useState<string>('');
-
   const [contractBack, setContractBack] = useState<string>('');
-  const [file, setFile] = useState<any | null>(null);
   const [step, setStep] = useState<number>(0);
 
   const [currentId, setCurrentId] = useState<number | null>(null); // 当前编辑的用户 ID
@@ -104,20 +103,74 @@ export default function ContractPage() {
       handleSaveContract();
     }
   }
+  const getTemplate = (type: string) => {
+    switch (type) {
+      case '商标服务':
+        return '/contracts/tradeMark.docx';
+      case '版权服务':
+        return '/contracts/zhuzuo.docx';
+      default:
+        return '/contracts/tradeMark.docx';
+    }
+  }
 
   const handleSaveContract = async () => {
     try {
-
       setLoading(true);
-      // const result = await uploadFile(file[0]);
-      // 更新
-      const saveData: any = {
+  
+      // 加载模板文件
+      const templatePath = template;
+      const templateResponse = await fetch(templatePath);
+      const templateArrayBuffer = await templateResponse.arrayBuffer();
+      const zip = new PizZip(templateArrayBuffer);
+      const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+  
+      const today = new Date();
+      // 设置模板变量
+      doc.setData({
+        customer,
+        customerMb,
+        customerPerson,
+        customerAddress,
+        contractPrice: price,
+        contractPriceCny: priceCNY,
+        items: items.join(', '),
+        tradeMarkCls: tradeMarkCls.join(', '),
+        tradeMarkName,
+        tradeMarkNum,
+        tradeMarkRegNo,
+        other,
+        serverContent,
+        year: today.getFullYear(),
+        month: today.getMonth() + 1,
+        day: today.getDate(),
+      });
+  
+      // 生成文档
+      doc.render();
+  
+      // 获取生成的文档内容
+      const generatedDocumentBlob = doc.getZip().generate({ type: 'blob' });
+      const generatedDocumentFile = new File([generatedDocumentBlob], 'contract.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+      // 下载生成的 DOCX 文件
+      // saveAs(generatedDocument, 'contract.docx');
+      // 将文档内容转换为 PDF
+      const pdfBlob = await docxToPdf(generatedDocumentFile);
+       // 下载生成的 PDF 文件
+      saveAs(pdfBlob, 'contract.pdf');
+  
+      // 上传文档
+      // const result = await uploadFile(generatedDocumentArrayBuffer);
+  
+      // 保存合同信息
+      const saveData = {
         userId: userId,
         customer,
         customer_mb: customerMb,
         customer_person: customerPerson,
         customer_address: customerAddress,
-        contract_origin: '1',
+        contract_origin: result,
         contract_price: price,
         contract_tax: tax,
         data: JSON.stringify({
@@ -134,10 +187,9 @@ export default function ContractPage() {
         status: 0,
         contract_type: contractType
       };
-
+  
       await axios.post('https://ai.aliensoft.com.cn/api/saveContract', saveData);
       alert('上传成功,请等待审批');
-      // 关闭 Dialog 并刷新数据
       setOpen(false);
       getContract();
       setLoading(false);
@@ -147,6 +199,49 @@ export default function ContractPage() {
       alert('操作失败');
     }
   };
+  
+  // const handleSaveContract = async () => {
+  //   try {
+
+  //     setLoading(true);
+  //     // const result = await uploadFile(file[0]);
+  //     // 更新
+  //     const saveData: any = {
+  //       userId: userId,
+  //       customer,
+  //       customer_mb: customerMb,
+  //       customer_person: customerPerson,
+  //       customer_address: customerAddress,
+  //       contract_origin: '1',
+  //       contract_price: price,
+  //       contract_tax: tax,
+  //       data: JSON.stringify({
+  //         items,
+  //         tradeMarkCls,
+  //         tradeMarkName,
+  //         tradeMarkNum,
+  //         tradeMarkRegNo,
+  //         other,
+  //         serverContent,
+  //       }),
+  //       add_time: Date.now(),
+  //       step: 0,
+  //       status: 0,
+  //       contract_type: contractType
+  //     };
+
+  //     await axios.post('https://ai.aliensoft.com.cn/api/saveContract', saveData);
+  //     alert('上传成功,请等待审批');
+  //     // 关闭 Dialog 并刷新数据
+  //     setOpen(false);
+  //     getContract();
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.log('error', error);
+  //     setLoading(false);
+  //     alert('操作失败');
+  //   }
+  // };
 
   const handleUpdateContract = async () => {
     try {
@@ -226,7 +321,7 @@ export default function ContractPage() {
       setOther('');
       setContractBack('');
       setStep(0);
-      setPrice('');
+      setPrice(0);
       setTax('');
       setContractType('商标服务');
     }
@@ -243,7 +338,7 @@ export default function ContractPage() {
       case 3:
         return <div className={`${baseStyle} bg-[#FFC300]`}>已签约，已支付</div>;
       case 1:
-        return <div className={`${baseStyle} bg-[#91D300]`}>已驳回，待编辑</div>;
+        return <div className={`${baseStyle} bg-[#FA5151]`}>已驳回，待编辑</div>;
       case 4:
         return <div className={`${baseStyle} bg-[#10AEEF]`}>已归档</div>;
       default:
@@ -367,7 +462,7 @@ export default function ContractPage() {
                   className="block w-full p-2 border rounded-md shadow-sm focus:ring focus:ring-opacity-50 mt-2"
                 >
                   <option value='商标服务'>商标服务</option>
-                  <option value='版权服务'>版权服务</option>
+                  {/* <option value='版权服务'>版权服务</option> */}
                   {/* <option value='专利服务'>专利服务</option>
                   <option value='诉讼服务'>诉讼服务</option>
                   <option value='认证服务'>认证服务</option>
@@ -592,7 +687,10 @@ export default function ContractPage() {
                             <input
                               type="checkbox"
                               className="form-checkbox h-5 w-5 text-blue-600"
-                              onChange={() => handleClsCheckboxChange(item.name)}
+                              onChange={() => {
+                                handleClsCheckboxChange(item.name);
+                                setTemplate(getTemplate(item.name));
+                              }}
                               checked={tradeMarkCls.includes(item.name)}
                             />
                             <span className="ml-2 text-sm">{item.name}</span>
@@ -699,7 +797,10 @@ export default function ContractPage() {
                   <Input
                     name="price"
                     value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    onChange={(e) => {setPrice(e.target.value);
+                      console.log('aaaaaaaaaa',e.target.value,convertToChineseCurrency(e.target.value))
+                      setPriceCNY(convertToChineseCurrency(e.target.value))
+                    }}
                     placeholder="请输入合同价格.."
                     className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
                   />
@@ -736,7 +837,7 @@ export default function ContractPage() {
                 </div>
               )}
               <Button disabled={loading} className="w-full mt-8" onClick={handleSubmit}>
-                {type === 1 ? '更新' : '创建'}
+                {type === 1 ? '修改合同' : '创建合同'}
               </Button>
             </Dialog.Content>
           </Dialog.Portal>
