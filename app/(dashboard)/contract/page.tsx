@@ -104,11 +104,11 @@ export default function ContractPage() {
   const getTemplate = (type: string) => {
     switch (type) {
       case '商标服务':
-        return '/contracts/tradeMark.docx';
+        return '/contracts/trademark.docx';
       case '版权服务':
         return '/contracts/zhuzuo.docx';
       default:
-        return '/contracts/tradeMark.docx';
+        return '/contracts/trademark.docx';
     }
   }
 
