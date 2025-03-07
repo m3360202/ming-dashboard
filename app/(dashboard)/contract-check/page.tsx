@@ -35,7 +35,14 @@ export default function ContractCheckPage() {
   const [sign2Loading, setSign2Loading] = useState<boolean>(false);
 
   const createContractNo = () => {
-    const code = 'ZHS' + '07' + 'BJ' + Date.now();
+    let no = '01' ;
+    if(currentContract?.contract_type === '商标服务') {
+      no = '01'
+    }
+    if(currentContract?.contract_type === '版权服务') {
+      no = '02'
+    }
+    const code = 'ZHS' + no + 'BJ' + Date.now();
     setContractNo(code);
   }
 
@@ -83,8 +90,10 @@ export default function ContractCheckPage() {
       // 更新用户
       const updateData: any = {
         id: currentId,
-        add_time: Date.now(),
+        confirm_time: Date.now(),
         status: 0,
+        contract_no: contractNo,
+        step: 2
       };
 
       await axios.post('https://ai.aliensoft.com.cn/api/editContract', updateData);

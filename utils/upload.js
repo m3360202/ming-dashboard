@@ -14,7 +14,7 @@ export async function uploadFile(file) {
 
   // 确保文件名没有斜杠开头
   let fileId = `${Date.now()}`;
-  let fileName = `images/${Date.now()}.${file.name.split(".").pop()}`;
+  let fileName = `contracts/${Date.now()}.${file.name.split(".").pop()}`;
   let url = `https://hypergpt.oss-ap-southeast-1.aliyuncs.com/${fileName}`;
 
   try {

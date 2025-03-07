@@ -14,15 +14,13 @@ import { Input } from '@/components/ui/input';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useUser } from '@/store/nav';
 import { uploadFile } from '@/utils/upload';
+
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
-import { PDFDocument } from 'pdf-lib';
 
 import { clsData } from '@/utils/trademarkCls';
-//@ts-ignore
-import { saveAs } from 'file-saver';
 
-import { convertToChineseCurrency, docxToPdf } from '@/utils/index';
+import { convertToChineseCurrency } from '@/utils/index';
 
 export default function ContractPage() {
   const { role, userId } = useUser();
@@ -156,13 +154,12 @@ export default function ContractPage() {
       // 下载生成的 DOCX 文件
       // saveAs(generatedDocument, 'contract.docx');
       // 将文档内容转换为 PDF
-      const pdfBlob = await docxToPdf(generatedDocumentFile);
-       // 下载生成的 PDF 文件
-      saveAs(pdfBlob, 'contract.pdf');
+      // const pdfBlob = await docxToPdf(generatedDocumentFile);
+      //  // 下载生成的 PDF 文件
+      // saveAs(pdfBlob, 'contract.pdf');
   
       // 上传文档
-      // const result = await uploadFile(generatedDocumentArrayBuffer);
-  
+      const result = await uploadFile(generatedDocumentFile);
       // 保存合同信息
       const saveData = {
         userId: userId,
@@ -170,7 +167,7 @@ export default function ContractPage() {
         customer_mb: customerMb,
         customer_person: customerPerson,
         customer_address: customerAddress,
-        contract_origin: result,
+        contract_origin: result?.replace('.docx','.pdf'),
         contract_price: price,
         contract_tax: tax,
         data: JSON.stringify({
@@ -199,62 +196,64 @@ export default function ContractPage() {
       alert('操作失败');
     }
   };
-  
-  // const handleSaveContract = async () => {
-  //   try {
-
-  //     setLoading(true);
-  //     // const result = await uploadFile(file[0]);
-  //     // 更新
-  //     const saveData: any = {
-  //       userId: userId,
-  //       customer,
-  //       customer_mb: customerMb,
-  //       customer_person: customerPerson,
-  //       customer_address: customerAddress,
-  //       contract_origin: '1',
-  //       contract_price: price,
-  //       contract_tax: tax,
-  //       data: JSON.stringify({
-  //         items,
-  //         tradeMarkCls,
-  //         tradeMarkName,
-  //         tradeMarkNum,
-  //         tradeMarkRegNo,
-  //         other,
-  //         serverContent,
-  //       }),
-  //       add_time: Date.now(),
-  //       step: 0,
-  //       status: 0,
-  //       contract_type: contractType
-  //     };
-
-  //     await axios.post('https://ai.aliensoft.com.cn/api/saveContract', saveData);
-  //     alert('上传成功,请等待审批');
-  //     // 关闭 Dialog 并刷新数据
-  //     setOpen(false);
-  //     getContract();
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.log('error', error);
-  //     setLoading(false);
-  //     alert('操作失败');
-  //   }
-  // };
 
   const handleUpdateContract = async () => {
     try {
       setLoading(true);
+
+      // 加载模板文件
+      const templatePath = template;
+      const templateResponse = await fetch(templatePath);
+      const templateArrayBuffer = await templateResponse.arrayBuffer();
+      const zip = new PizZip(templateArrayBuffer);
+      const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+  
+      const today = new Date();
+      // 设置模板变量
+      doc.setData({
+        customer,
+        customerMb,
+        customerPerson,
+        customerAddress,
+        contractPrice: price,
+        contractPriceCny: priceCNY,
+        items: items.join(', '),
+        tradeMarkCls: tradeMarkCls.join(', '),
+        tradeMarkName,
+        tradeMarkNum,
+        tradeMarkRegNo,
+        other,
+        serverContent,
+        year: today.getFullYear(),
+        month: today.getMonth() + 1,
+        day: today.getDate(),
+      });
+  
+      // 生成文档
+      doc.render();
+  
+      // 获取生成的文档内容
+      const generatedDocumentBlob = doc.getZip().generate({ type: 'blob' });
+      const generatedDocumentFile = new File([generatedDocumentBlob], 'contract.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+      // 下载生成的 DOCX 文件
+      // saveAs(generatedDocument, 'contract.docx');
+      // 将文档内容转换为 PDF
+      // const pdfBlob = await docxToPdf(generatedDocumentFile);
+      //  // 下载生成的 PDF 文件
+      // saveAs(pdfBlob, 'contract.pdf');
+  
+      // 上传文档
+      const result = await uploadFile(generatedDocumentFile);
       // 更新用户
       const updateData: any = {
-        userId: userId,
         id: currentId,
+        userId: userId,
         customer,
         customer_mb: customerMb,
         customer_person: customerPerson,
         customer_address: customerAddress,
-        contract_origin: '1',
+        contract_origin: result?.replace('.docx','.pdf'),
         contract_price: price,
         contract_tax: tax,
         data: JSON.stringify({
@@ -267,7 +266,7 @@ export default function ContractPage() {
           serverContent,
         }),
         add_time: Date.now(),
-        step,
+        step: 0,
         status: 0,
         contract_type: contractType
       };
