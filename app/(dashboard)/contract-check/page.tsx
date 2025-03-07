@@ -29,7 +29,7 @@ export default function ContractCheckPage() {
   const [pdfUrl, setPdfUrl] = useState<string>('');
 
   const [back, setBack] = useState<string>('');
-
+  const [pdf, setPdf] = useState<string>('');
   const [checkLoading, setCheckLoading] = useState<boolean>(false);
   const [sign1Loading, setSign1Loading] = useState<boolean>(false);
   const [sign2Loading, setSign2Loading] = useState<boolean>(false);
@@ -85,14 +85,22 @@ export default function ContractCheckPage() {
 
   const handleSubmit = async () => {
     try {
-
+      if(!pdf || pdf === ''){
+        alert('请确认后盖章');
+        return false;
+      }
+      if(!contractNo){
+        alert('请生成合同编号');
+        return false;
+      }
       setLoading(true);
       // 更新用户
       const updateData: any = {
         id: currentId,
-        confirm_time: Date.now(),
+        confirm_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
         status: 0,
         contract_no: contractNo,
+        contract_origin: pdf,
         step: 2
       };
 
@@ -291,7 +299,7 @@ export default function ContractCheckPage() {
               <div className="flex justify-center items-start mt-8 gap-8">
                 <div className="flex flex-col items-center gap-4">
                   <label className="block text-md font-[600] text-gray-700">合同内容</label>
-                  {pdfUrl && <ContractPreview pdfUrl={pdfUrl} />}
+                  {pdfUrl && <ContractPreview pdfUrl={pdfUrl} pdf={pdf} setPdf={setPdf} />}
                   {/* <textarea onChange={()=>{}} value={'aaaaa'} style={{ width: '760px', padding: '10px', height: '400px', overflowY: 'scroll', border: '#ccc 1px solid', color: '#999', fontSize: '14px', lineHeight: '24px'  }} /> */}
                 </div>
               </div>

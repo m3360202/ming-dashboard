@@ -4,15 +4,18 @@ import * as pdfjsLib from 'pdfjs-dist';
 import * as fabric from 'fabric';
 import { PDFDocument } from 'pdf-lib';
 import { Button } from '@/components/ui/button';
+import { uploadFile } from '@/utils/upload';
 
 // 设置 PDF.js Worker 路径
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
-const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
+const ContractPreview = ({ pdfUrl, pdf, setPdf }: { pdfUrl: string; pdf: string; setPdf:any }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null); // 父容器引用
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
   const [scrollTop, setScrollTop] = useState(0); // 当前滚动高度
+
+  const [loading, setLoading] = useState(false)
   let canvas: any;
 
   useEffect(() => {
@@ -192,6 +195,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
   // 生成 PDF
   const generatePDF = async () => {
     if (!fabricCanvas) return;
+    setLoading(true);
 
     // 将画布内容导出为图片
     //@ts-ignore
@@ -216,12 +220,19 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
     // 保存并下载 PDF
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
+    
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'contract.pdf';
-    link.click();
+    // const url = URL.createObjectURL(blob);
+    // const link = document.createElement('a');
+    // link.href = url;
+    // link.download = 'contract.pdf';
+    // link.click();
+    const file =  new File([pdfBytes], 'temp.pdf', { type: 'application/pdf' });
+    const result = await uploadFile(file);
+    setPdf(result);
+    setLoading(false);
+    alert('已更新盖章版本')
+    
   };
 
   const stampAll = () => {
@@ -242,7 +253,7 @@ const ContractPreview = ({ pdfUrl }: { pdfUrl: string }) => {
       {/* 操作按钮 */}
       <div className="flex justify-center items-center gap-4 mt-4">
         <Button onClick={stampAll}>一键盖章</Button>
-        <Button onClick={generatePDF}>保存为 PDF</Button>
+        <Button disabled={loading} onClick={generatePDF}>保存合同</Button>
       </div>
     </div>
   );

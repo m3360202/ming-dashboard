@@ -179,7 +179,7 @@ export default function ContractPage() {
           other,
           serverContent,
         }),
-        add_time: Date.now(),
+        add_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
         step: 0,
         status: 0,
         contract_type: contractType

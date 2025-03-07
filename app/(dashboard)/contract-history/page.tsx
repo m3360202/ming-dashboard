@@ -96,12 +96,12 @@ export default function ContractHistoryPage() {
         ) : (
           <div className="space-y-4">
             {/* 表头 */}
-            <div className="w-full grid grid-cols-10 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
-              <div>客户名称</div>
+            <div className="w-full grid grid-cols-9 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
+              
               <div>合同编号</div>
+              <div>客户名称</div>
               <div>合同类型</div>
               <div>业务状态</div>
-              <div>提交日期</div>
               <div>审查日期</div>
               <div>签约日期</div>
               <div>实收金额</div>
@@ -111,15 +111,15 @@ export default function ContractHistoryPage() {
 
             {/* 数据行 */}
             {data.map((contract: any) => (
-              <div key={contract.id} className="w-full grid grid-cols-10 gap-4 p-4 border rounded-lg">
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer}</div>
+              <div key={contract.id} className="w-full grid grid-cols-9 gap-4 p-4 border rounded-lg">
+                
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_no}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_type}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px' }}>{getStep(contract.step)}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.created_at}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.confirm_time}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{new Date(contract.confirm_time).toLocaleDateString('en-CA').split('/').join('-')}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.sign_time}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_fee}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_fee || 0}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_tax}</div>
                 <div
                   onClick={() => {
