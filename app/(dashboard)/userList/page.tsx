@@ -65,13 +65,13 @@ export default function CustomersPage() {
   const getRoleTag = (role: number) => {
     switch (role) {
       case 1:
-        return <span style={{ fontSize: '14px'}} className="bg-blue-500 text-white px-2 py-1 rounded">平台所有者</span>;
+        return <span style={{ fontSize: '12px'}} className="bg-blue-500 text-white px-2 py-1 rounded">平台所有者</span>;
       case 2:
-        return <span className="bg-green-500 text-white px-2 py-1 rounded">企业员工</span>;
+        return <span style={{ fontSize: '12px'}} className="bg-green-500 text-white px-2 py-1 rounded">企业员工</span>;
       case 3:
-        return <span className="bg-purple-500 text-white px-2 py-1 rounded">加盟管理员</span>;
+        return <span style={{ fontSize: '12px'}} className="bg-purple-500 text-white px-2 py-1 rounded">加盟管理员</span>;
       default:
-        return <span className="bg-gray-500 text-white px-2 py-1 rounded">未知</span>;
+        return <span style={{ fontSize: '12px'}} className="bg-gray-500 text-white px-2 py-1 rounded">未知</span>;
     }
   };
 

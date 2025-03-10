@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -14,16 +14,19 @@ import { Input } from '@/components/ui/input';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useUser } from '@/store/nav';
 import { uploadFile } from '@/utils/upload';
+import { PlusCircle } from 'lucide-react';
 
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
+//@ts-ignore
+import ImageModule from 'docxtemplater-image-module';
 
 import { clsData } from '@/utils/trademarkCls';
 
-import { convertToChineseCurrency } from '@/utils/index';
+import { convertToChineseCurrency, base64Parser } from '@/utils/index';
 
 export default function ContractPage() {
-  const { role, userId } = useUser();
+  const { role, userId, username, realname } = useUser();
   const [data, setData] = useState<any[]>([]);
   const [pageStart, setPageStart] = useState(0);
   const [total, setTotal] = useState(0);
@@ -48,15 +51,19 @@ export default function ContractPage() {
   const [serverContent, setServerContent] = useState<string>('');
   const [tradeMarkNum, setTradeMarkNum] = useState<string>('');
 
-  const [price, setPrice] = useState<any>(0);
+  const [zhuzuo ,setZhuzuo] = useState<any | null>(null)
+
+  const [price, setPrice] = useState<string>('');
   const [priceCNY, setPriceCNY] = useState<string>('');
   const [tax, setTax] = useState<string>('');
 
   const [contractBack, setContractBack] = useState<string>('');
   const [step, setStep] = useState<number>(0);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageBase64, setImageBase64] = useState<string>('');
   const [currentId, setCurrentId] = useState<number | null>(null); // 当前编辑的用户 ID
-
+  const [file, setFile] = useState<any | null>(null);
   const getContract = async () => {
     setLoading(true);
     try {
@@ -105,7 +112,7 @@ export default function ContractPage() {
     switch (type) {
       case '商标服务':
         return '/contracts/trademark.docx';
-      case '版权服务':
+      case '著作权服务':
         return '/contracts/zhuzuo.docx';
       default:
         return '/contracts/trademark.docx';
@@ -120,11 +127,22 @@ export default function ContractPage() {
       const templatePath = template;
       const templateResponse = await fetch(templatePath);
       const templateArrayBuffer = await templateResponse.arrayBuffer();
+
+      const imageOptions = {
+        getImage(tagValue: any) {
+            return base64Parser(tagValue);
+        },
+        getSize(img: any, tagValue: any, tagName: any, context: any) {
+            return [100, 100];
+        },
+    };
+
       const zip = new PizZip(templateArrayBuffer);
       const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
   
       const today = new Date();
-      // 设置模板变量
+      if(contractType === '商标服务') {
+        // 设置模板变量
       doc.setData({
         customer,
         customerMb,
@@ -143,6 +161,29 @@ export default function ContractPage() {
         month: today.getMonth() + 1,
         day: today.getDate(),
       });
+      }
+    
+      if(contractType === '著作权服务') {
+        // 设置模板变量
+      doc.setData({
+        customer,
+        customerMb,
+        customerPerson,
+        customerAddress,
+        contractPrice: price,
+        contractPricePer: zhuzuo.pricePer,
+        contractPriceCny: priceCNY,
+        contractPriceType: zhuzuo.priceType,
+        items: items.join(', '),
+        myImage: imageBase64,
+        shenqingren: zhuzuo.shenqingren,
+        other,
+        serverContent,
+        year: today.getFullYear(),
+        month: today.getMonth() + 1,
+        day: today.getDate(),
+      });
+      }
   
       // 生成文档
       doc.render();
@@ -161,30 +202,61 @@ export default function ContractPage() {
       // 上传文档
       const result = await uploadFile(generatedDocumentFile);
       // 保存合同信息
-      const saveData = {
-        userId: userId,
-        customer,
-        customer_mb: customerMb,
-        customer_person: customerPerson,
-        customer_address: customerAddress,
-        contract_origin: result?.replace('.docx','.pdf'),
-        contract_price: price,
-        contract_tax: tax,
-        data: JSON.stringify({
-          items,
-          tradeMarkCls,
-          tradeMarkName,
-          tradeMarkNum,
-          tradeMarkRegNo,
-          other,
-          serverContent,
-        }),
-        add_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
-        step: 0,
-        status: 0,
-        contract_type: contractType
-      };
-  
+      let saveData ;
+      if(contractType === '商标服务') {
+        saveData = {
+          userId: userId,
+          customer,
+          customer_mb: customerMb,
+          customer_person: customerPerson,
+          customer_address: customerAddress,
+          contract_origin: result?.replace('.docx','.pdf'),
+          contract_price: price,
+          contract_tax: tax,
+          username: realname,
+          data: JSON.stringify({
+            items,
+            tradeMarkCls,
+            tradeMarkName,
+            tradeMarkNum,
+            tradeMarkRegNo,
+            other,
+            serverContent,
+          }),
+          add_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
+          step: 0,
+          status: 0,
+          contract_type: contractType
+        };
+      }
+      
+      if(contractType === '著作权服务') {
+        saveData = {
+          userId: userId,
+          customer,
+          customer_mb: customerMb,
+          customer_person: customerPerson,
+          customer_address: customerAddress,
+          contract_origin: result?.replace('.docx','.pdf'),
+          contract_price: price,
+          contract_tax: tax,
+          username: realname,
+          data: JSON.stringify({
+            items,
+            tradeMarkCls,
+            tradeMarkName,
+            tradeMarkNum,
+            tradeMarkRegNo,
+            other,
+            serverContent,
+          }),
+          add_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
+          step: 0,
+          status: 0,
+          contract_type: contractType
+        };
+      }
+
       await axios.post('https://ai.aliensoft.com.cn/api/saveContract', saveData);
       alert('上传成功,请等待审批');
       setOpen(false);
@@ -295,13 +367,13 @@ export default function ContractPage() {
       if (contract) {
         const data = JSON.parse(contract.data);
         console.log('aaaaaa',contract,data)
-        setItems(data.items);
-        setTradeMarkCls(data.tradeMarkCls);
-        setTradeMarkName(data.tradeMarkName);
-        setTradeMarkNum(data.tradeMarkNum);
-        setTradeMarkRegNo(data.tradeMarkRegNo);
-        setServerContent(data.serverContent);
-        setOther(data.other);
+        setItems(data?.items);
+        setTradeMarkCls(data?.tradeMarkCls);
+        setTradeMarkName(data?.tradeMarkName);
+        setTradeMarkNum(data?.tradeMarkNum);
+        setTradeMarkRegNo(data?.tradeMarkRegNo);
+        setServerContent(data?.serverContent);
+        setOther(data?.other);
         setCustomer(contract.customer);
         setCustomerMb(contract.customer_mb);
         setCustomerPerson(contract.customer_person);
@@ -311,6 +383,7 @@ export default function ContractPage() {
         setPrice(contract.contract_price);
         setTax(contract.contract_tax);
         setContractType(contract.contract_type);
+        setZhuzuo(data)
       }
     } else {
       setCustomer('');
@@ -320,7 +393,7 @@ export default function ContractPage() {
       setOther('');
       setContractBack('');
       setStep(0);
-      setPrice(0);
+      setPrice('');
       setTax('');
       setContractType('商标服务');
     }
@@ -349,6 +422,27 @@ export default function ContractPage() {
     setItems((prevItems) =>
       prevItems.includes(item) ? prevItems.filter((i) => i !== item) : [...prevItems, item]
     );
+  };
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result as string);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const base64 = await convertToBase64(file);
+      setImageBase64(base64);
+    }
   };
 
   const handleClsCheckboxChange = (item: string) => {
@@ -457,11 +551,14 @@ export default function ContractPage() {
                 <label className="block text-sm font-medium text-gray-700">服务类型</label>
                 <select
                   value={contractType as string}
-                  onChange={(e) => setContractType(e.target.value)}
+                  onChange={(e) => {setContractType(e.target.value);
+                    setTemplate(getTemplate(e.target.value));
+                    console.log('---------------',template)
+                  }}
                   className="block w-full p-2 border rounded-md shadow-sm focus:ring focus:ring-opacity-50 mt-2"
                 >
                   <option value='商标服务'>商标服务</option>
-                  {/* <option value='版权服务'>版权服务</option> */}
+                  <option value='著作权服务'>著作权服务</option>
                   {/* <option value='专利服务'>专利服务</option>
                   <option value='诉讼服务'>诉讼服务</option>
                   <option value='认证服务'>认证服务</option>
@@ -688,7 +785,6 @@ export default function ContractPage() {
                               className="form-checkbox h-5 w-5 text-blue-600"
                               onChange={() => {
                                 handleClsCheckboxChange(item.name);
-                                setTemplate(getTemplate(item.name));
                               }}
                               checked={tradeMarkCls.includes(item.name)}
                             />
@@ -742,6 +838,136 @@ export default function ContractPage() {
                         className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
                       />
                     </div>
+                  </div>
+                </div>)}
+                {contractType === '著作权服务' && (
+                <div>
+                  <div className="flex flex-col justify-between items-start">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">服务内容</label>
+                      <div className="p-4">
+                        <div className="grid grid-cols-5 gap-4">
+                        <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('版权申请')}
+                              checked={items.includes('版权申请')}
+                            />
+                            <span className="ml-2 text-sm">版权申请</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('软著申请')}
+                              checked={items.includes('软著申请')}
+                            />
+                            <span className="ml-2 text-sm">软著申请</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('版权变更')}
+                              checked={items.includes('版权变更')}
+                            />
+                            <span className="ml-2 text-sm">版权变更</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('版权转让')}
+                              checked={items.includes('版权转让')}
+                            />
+                            <span className="ml-2 text-sm">版权转让</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-blue-600"
+                              onChange={() => handleCheckboxChange('版权撤销')}
+                              checked={items.includes('版权撤销')}
+                            />
+                            <span className="ml-2 text-sm">版权撤销</span>
+                          </label>
+                        </div>
+                        <div className="mt-4 flex items-center">
+                          <span className="text-sm mr-2">其他:</span>
+                          <input
+                            type="text"
+                            value={other}
+                            onChange={(e) => setOther(e.target.value)}
+                            className="border-b border-gray-300 focus:outline-none focus:border-blue-600"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">协议内容</label>
+                      <Input
+                        name="priceType"
+                        value={zhuzuo?.priceType || ''}
+                        onChange={(e) => setZhuzuo({...zhuzuo, priceType:e.target.value})}
+                        placeholder="本协议为XXXX费用共计,填写xxx部分"
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">申请人</label>
+                      <Input
+                        name="shenqingren"
+                        value={zhuzuo?.shenqingren || ''}
+                        onChange={(e) => setZhuzuo({...zhuzuo, shenqingren:e.target.value})}
+                        placeholder="请输入申请人.."
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">单件价格</label>
+                      <Input
+                        name="zhuzuoPricePer"
+                        value={zhuzuo?.pricePer || ''}
+                        onChange={(e) => setZhuzuo({...zhuzuo, pricePer:e.target.value})}
+                        placeholder="请输入单件价格..."
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-[85%] flex flex-row justify-between items-center">
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">工作内容</label>
+                      <Input
+                        value={serverContent}
+                        onChange={(e) => { setServerContent(e.target.value) }}
+                        placeholder='代理甲方 xxxx 申请,填写xxx部分'
+                        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px] mt-2"
+                      />
+                    </div>
+                    <div className="mt-4 flex flex-col items-center justify-start gap-4">
+                      <label className="block text-sm font-medium text-gray-700">图样</label>
+                      {imageBase64 && (<img src={imageBase64} width={80} height={80} alt="Uploaded Logo" />)}
+                      <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
+                        <PlusCircle className="h-3.5 w-3.5" />
+                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                          图片上传
+                        </span>
+                      </Button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="fileInput"
+                      />
+                    </div>
+                    
                   </div>
                 </div>)}
 

@@ -49,18 +49,19 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { navItem } = useNav();
-  const { username, role } = useUser();
+  const { username, role, isHydrated } = useUser();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
+  
   const checkUser = async () => {
-    if (username && username === 'unknown' && role && role === 0) {
-
+    // 确保状态已经加载完成
+    if (!isHydrated) return;
+  
+    if (isHydrated && username === 'unknown' && role === 0) {
       window.location.href = '/login';
     }
     if (username && username !== 'unknown' && role && role !== 0) {
-
       try {
         const res = await axios.post('https://ai.aliensoft.com.cn/api/mingchengscheckUser', { username }, {
           headers: {
@@ -68,7 +69,7 @@ export default function DashboardLayout({
             'Accept': 'application/json'
           }
         });
-
+  
         if (res?.data?.success === true) {
           const role = res?.data?.data?.role;
           if (role === 0) {
@@ -78,7 +79,6 @@ export default function DashboardLayout({
           } else {
             useUser.setState({ username: res?.data?.data?.username, role: res?.data?.data?.role, realname: res?.data?.data?.real_name, userId: res?.data?.data?.id });
           }
-
         } else {
           alert(res?.data?.message);
         }
@@ -87,10 +87,11 @@ export default function DashboardLayout({
         alert('请求失败');
       }
     }
-  }
+  };
+  
   useEffect(() => {
     checkUser();
-  }, [username, role])
+  }, [username, role, isHydrated]);
 
   return (
     <Providers>
@@ -176,19 +177,19 @@ function DesktopNav({ role }: { role: number }) {
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         <div className="flex flex-col items-center">
           <Image alt='智慧树' src={logoPng} width="120" height="40" />
-          <span className="text-[#637381] mt-2">知产数据探测系统</span>
+          <span className="text-[#637381] mt-2">知产行业服务系统</span>
         </div>
-        <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
+        {role && role === 1 && ( <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
           <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-6 justify-start">
             <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M358.869333 370.304c32.768-158.523733 187.733333-260.411733 346.24-227.643733 158.5152 32.810667 260.181333 187.9296 227.413334 346.581333-32.7168 158.523733-187.733333 260.4032-346.24 227.643733-158.506667-32.810667-260.266667-188.0576-227.413334-346.581333z m329.216-154.8544c-117.504-24.260267-232.405333 51.285333-256.64 168.8832-24.234667 117.640533 51.2 232.6528 168.746667 256.8704 117.504 24.260267 232.413867-51.242667 256.768-168.8832 24.234667-117.469867-51.2-232.482133-168.874667-256.8704zM125.44 790.144h551.125333c22.144 0 40.106667 17.962667 40.106667 40.149333a40.106667 40.106667 0 0 1-40.106667 40.106667H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 830.250667c0-22.144 17.92-40.106667 40.106667-40.106667z m0-259.498667h160.341333c22.144 0 40.106667 17.954133 40.106667 40.149334a40.106667 40.106667 0 0 1-40.106667 40.106666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 570.743467c0-22.144 17.92-40.1408 40.106667-40.1408v0.042666z m0-267.921066h160.341333a40.149333 40.149333 0 0 1 0 80.298666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 302.8736c0-22.152533 17.92-40.149333 40.106667-40.149333z" fill="#607D8B" p-id="5258"></path><path d="M813.781333 641.621333L932.693333 812.202667c12.288 17.7408 4.992 40.5504-16.341333 50.7392l-5.12 2.474666c-21.333333 10.2656-48.725333 4.164267-61.013333-13.610666l-118.929067-170.666667c-12.288-17.7408-4.992-40.5504 16.341333-50.773333l5.12-2.474667c21.333333-10.231467 48.725333-4.130133 61.013334 13.738667z"></path></svg>
             <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">近似商标查询</span>
           </div>
-        </NavItem>
+        </NavItem>)}
         {role && role === 1 && (
           <NavItem href="#" label="TradeMark">
             <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
               <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" p-id="4238"></path><path d="M599.5 549.3c34.8-12.8 78.4-49 78.4-119.2 0-71.2-45.5-131.1-144.2-131.1H378c-4.4 0-8 3.6-8 8v410c0 4.4 3.6 8 8 8h54.5c4.4 0 8-3.6 8-8V561.2h88.7l74.6 159.2c1.3 2.8 4.1 4.6 7.2 4.6h62c1.2 0 2.4-0.3 3.5-0.8 4-2 5.6-6.7 3.6-10.7l-80.6-164.2zM522 505h-81.5V357h83.4c48 0 80.9 25.3 80.9 75.5 0 46.9-29.8 72.5-82.8 72.5z"></path></svg>
-              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">商标目标探测</span>
+              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">商标目标客户</span>
             </div>
           </NavItem>
         )}
@@ -246,14 +247,12 @@ function DesktopNav({ role }: { role: number }) {
             </div>
           </NavItem>
         )}
-        {role && role === 1 && (
-          <NavItem href="contract-history" label="ContractHistory" nav1={'在线签约'} nav2={'历史合同'}>
+        <NavItem href="contract-history" label="ContractHistory" nav1={'在线签约'} nav2={'历史合同'}>
             <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
               -
-              <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史签约合同</span>
+              <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史合同记录</span>
             </div>
-          </NavItem>
-        )}
+        </NavItem>
         {/* <NavItem href="#" label="Dashboard">
           <div className="flex flex-col items-start">
             <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
@@ -340,53 +339,78 @@ function MobileNav({ role }: { role: number }) {
       </SheetTrigger>
       <SheetContent side="left" className="sm:max-w-xs">
         <nav className="grid gap-6 text-lg font-medium">
-          <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
-            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-6 justify-start">
-              <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M358.869333 370.304c32.768-158.523733 187.733333-260.411733 346.24-227.643733 158.5152 32.810667 260.181333 187.9296 227.413334 346.581333-32.7168 158.523733-187.733333 260.4032-346.24 227.643733-158.506667-32.810667-260.266667-188.0576-227.413334-346.581333z m329.216-154.8544c-117.504-24.260267-232.405333 51.285333-256.64 168.8832-24.234667 117.640533 51.2 232.6528 168.746667 256.8704 117.504 24.260267 232.413867-51.242667 256.768-168.8832 24.234667-117.469867-51.2-232.482133-168.874667-256.8704zM125.44 790.144h551.125333c22.144 0 40.106667 17.962667 40.106667 40.149333a40.106667 40.106667 0 0 1-40.106667 40.106667H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 830.250667c0-22.144 17.92-40.106667 40.106667-40.106667z m0-259.498667h160.341333c22.144 0 40.106667 17.954133 40.106667 40.149334a40.106667 40.106667 0 0 1-40.106667 40.106666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 570.743467c0-22.144 17.92-40.1408 40.106667-40.1408v0.042666z m0-267.921066h160.341333a40.149333 40.149333 0 0 1 0 80.298666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 302.8736c0-22.152533 17.92-40.149333 40.106667-40.149333z" fill="#607D8B" p-id="5258"></path><path d="M813.781333 641.621333L932.693333 812.202667c12.288 17.7408 4.992 40.5504-16.341333 50.7392l-5.12 2.474666c-21.333333 10.2656-48.725333 4.164267-61.013333-13.610666l-118.929067-170.666667c-12.288-17.7408-4.992-40.5504 16.341333-50.773333l5.12-2.474667c21.333333-10.231467 48.725333-4.130133 61.013334 13.738667z"></path></svg>
-              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">近似商标查询</span>
+        {role && role === 1 && ( <NavItem href="trade-mark-check" label="TradeMarkCompare" nav1={'近似商标查询'} nav2={'查询器'}>
+          <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-6 justify-start">
+            <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M358.869333 370.304c32.768-158.523733 187.733333-260.411733 346.24-227.643733 158.5152 32.810667 260.181333 187.9296 227.413334 346.581333-32.7168 158.523733-187.733333 260.4032-346.24 227.643733-158.506667-32.810667-260.266667-188.0576-227.413334-346.581333z m329.216-154.8544c-117.504-24.260267-232.405333 51.285333-256.64 168.8832-24.234667 117.640533 51.2 232.6528 168.746667 256.8704 117.504 24.260267 232.413867-51.242667 256.768-168.8832 24.234667-117.469867-51.2-232.482133-168.874667-256.8704zM125.44 790.144h551.125333c22.144 0 40.106667 17.962667 40.106667 40.149333a40.106667 40.106667 0 0 1-40.106667 40.106667H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 830.250667c0-22.144 17.92-40.106667 40.106667-40.106667z m0-259.498667h160.341333c22.144 0 40.106667 17.954133 40.106667 40.149334a40.106667 40.106667 0 0 1-40.106667 40.106666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 570.743467c0-22.144 17.92-40.1408 40.106667-40.1408v0.042666z m0-267.921066h160.341333a40.149333 40.149333 0 0 1 0 80.298666H125.44a39.6544 39.6544 0 0 1-28.270933-11.6736A40.6016 40.6016 0 0 1 85.333333 302.8736c0-22.152533 17.92-40.149333 40.106667-40.149333z" fill="#607D8B" p-id="5258"></path><path d="M813.781333 641.621333L932.693333 812.202667c12.288 17.7408 4.992 40.5504-16.341333 50.7392l-5.12 2.474666c-21.333333 10.2656-48.725333 4.164267-61.013333-13.610666l-118.929067-170.666667c-12.288-17.7408-4.992-40.5504 16.341333-50.773333l5.12-2.474667c21.333333-10.231467 48.725333-4.130133 61.013334 13.738667z"></path></svg>
+            <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">近似商标查询</span>
+          </div>
+        </NavItem>)}
+        {role && role === 1 && (
+          <NavItem href="#" label="TradeMark">
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
+              <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" p-id="4238"></path><path d="M599.5 549.3c34.8-12.8 78.4-49 78.4-119.2 0-71.2-45.5-131.1-144.2-131.1H378c-4.4 0-8 3.6-8 8v410c0 4.4 3.6 8 8 8h54.5c4.4 0 8-3.6 8-8V561.2h88.7l74.6 159.2c1.3 2.8 4.1 4.6 7.2 4.6h62c1.2 0 2.4-0.3 3.5-0.8 4-2 5.6-6.7 3.6-10.7l-80.6-164.2zM522 505h-81.5V357h83.4c48 0 80.9 25.3 80.9 75.5 0 46.9-29.8 72.5-82.8 72.5z"></path></svg>
+              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">商标目标探测</span>
             </div>
           </NavItem>
-          {role && role === 1 && (
-            <NavItem href="#" label="TradeMark">
-              <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
-                <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" p-id="4238"></path><path d="M599.5 549.3c34.8-12.8 78.4-49 78.4-119.2 0-71.2-45.5-131.1-144.2-131.1H378c-4.4 0-8 3.6-8 8v410c0 4.4 3.6 8 8 8h54.5c4.4 0 8-3.6 8-8V561.2h88.7l74.6 159.2c1.3 2.8 4.1 4.6 7.2 4.6h62c1.2 0 2.4-0.3 3.5-0.8 4-2 5.6-6.7 3.6-10.7l-80.6-164.2zM522 505h-81.5V357h83.4c48 0 80.9 25.3 80.9 75.5 0 46.9-29.8 72.5-82.8 72.5z"></path></svg>
-                <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">商标目标探测</span>
-              </div>
-            </NavItem>
-          )}
-          {role && role === 1 && (
-            <NavItem href="trade-mark-agent" label="TradeMarkAi" nav1={'商标目标探测'} nav2={'商户需求AI探测'}>
-              <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
-                -
-                <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">AI客户探测</span>
-              </div>
-            </NavItem>
-          )}
-          {role && role === 1 && (
-            <NavItem href="trade-mark-bak" label="TradeMarkRecord" nav1={'商标目标探测'} nav2={'客户收藏夹'}>
-              <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
-                -
-                <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">客户收藏夹</span>
-              </div>
-            </NavItem>
-          )}
-          {role && role === 1 && (
-            <NavItem href="userList" label="Account" nav1={'账号管理'} nav2={'用户列表'}>
-              <div className="flex flex-col items-start">
-                <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
-                  <Users2 className="h-5 w-5" />
-                  <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">企业账号管理</span>
-                </div>
-              </div>
-            </NavItem>
-          )}
-          <NavItem href="order" label="Order">
+        )}
+        {role && role === 1 && (
+          <NavItem href="trade-mark-agent" label="TradeMarkAi" nav1={'商标目标探测'} nav2={'商户需求AI探测'}>
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+              -
+              <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">AI客户探测</span>
+            </div>
+          </NavItem>
+        )}
+        {role && role === 1 && (
+          <NavItem href="trade-mark-bak" label="TradeMarkRecord" nav1={'商标目标探测'} nav2={'客户收藏夹'}>
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+              -
+              <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">客户收藏夹</span>
+            </div>
+          </NavItem>
+        )}
+        {role && role === 1 && (
+          <NavItem href="userList" label="Account" nav1={'账号管理'} nav2={'用户列表'}>
             <div className="flex flex-col items-start">
               <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
-                <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9436" width="20" height="20"><path d="M43.047925 318.945371l-0.217999 0.332999 453.813104 262.014483a29.879941 29.879941 0 0 0 14.946971 4.019992c5.392989 0 10.686979-1.451997 15.26397-4.183991l450.339111-259.994487c14.252972-8.253984 19.133962-26.569948 10.874979-40.82792-2.681995-4.634991-6.561987-8.462983-11.163978-11.039978L528.287968 9.121982a29.850941 29.850941 0 0 0-14.945971-4.025992 29.859941 29.859941 0 0 0-16.493967 4.94499L46.870918 269.829468c-14.257972 8.189984-19.193962 26.457948-11.001979 40.721919a29.784941 29.784941 0 0 0 7.179986 8.392984zM513.234998 69.459863l389.320232 225.769555-390.939229 225.711554-390.179231-225.279555L513.234998 69.459863z m463.669085 419.147173l-84.437834-48.964903-59.686882 34.459932 69.780863 40.46992L511.616001 740.27854l-390.179231-225.272556 69.929862-40.37392-59.655882-34.442932-84.838832 48.985903c-14.257972 8.189984-19.195962 26.456948-11.001979 40.71592a29.803941 29.803941 0 0 0 7.328986 8.517983l-0.19 0.317999 453.638105 261.909484a29.875941 29.875941 0 0 0 30.209941-0.16L977.193082 540.478934c14.253972-8.257984 19.134962-26.571948 10.875979-40.82592-2.688995-4.636991-6.563987-8.466983-11.165978-11.044978z m0 219.343567l-84.089834-48.766903-59.681882 34.457932 69.427863 40.26992-390.944229 225.711555-390.179231-225.274556 69.581863-40.17992-59.653882-34.436932-84.492833 48.785903c-14.257972 8.188984-19.193962 26.457948-11.001979 40.71692a29.742941 29.742941 0 0 0 7.233986 8.436983l-0.207 0.329 453.747105 261.974483a29.895941 29.895941 0 0 0 14.946971 4.024992 29.875941 29.875941 0 0 0 15.26397-4.178992l450.339111-259.999487c14.252972-8.259984 19.133962-26.577948 10.874979-40.825919-2.681995-4.636991-6.557987-8.467983-11.164978-11.044979z" p-id="9437"></path></svg>
-                <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">在线签约记录</span>
+                <Users2 className="h-5 w-5" />
+                <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">企业账号管理</span>
               </div>
-              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">（开发中）</span>
+            </div>
+          </NavItem>
+        )}
+        <NavItem href="order" label="Order">
+          <div className="flex flex-col items-start">
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
+              <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9436" width="20" height="20"><path d="M43.047925 318.945371l-0.217999 0.332999 453.813104 262.014483a29.879941 29.879941 0 0 0 14.946971 4.019992c5.392989 0 10.686979-1.451997 15.26397-4.183991l450.339111-259.994487c14.252972-8.253984 19.133962-26.569948 10.874979-40.82792-2.681995-4.634991-6.561987-8.462983-11.163978-11.039978L528.287968 9.121982a29.850941 29.850941 0 0 0-14.945971-4.025992 29.859941 29.859941 0 0 0-16.493967 4.94499L46.870918 269.829468c-14.257972 8.189984-19.193962 26.457948-11.001979 40.721919a29.784941 29.784941 0 0 0 7.179986 8.392984zM513.234998 69.459863l389.320232 225.769555-390.939229 225.711554-390.179231-225.279555L513.234998 69.459863z m463.669085 419.147173l-84.437834-48.964903-59.686882 34.459932 69.780863 40.46992L511.616001 740.27854l-390.179231-225.272556 69.929862-40.37392-59.655882-34.442932-84.838832 48.985903c-14.257972 8.189984-19.195962 26.456948-11.001979 40.71592a29.803941 29.803941 0 0 0 7.328986 8.517983l-0.19 0.317999 453.638105 261.909484a29.875941 29.875941 0 0 0 30.209941-0.16L977.193082 540.478934c14.253972-8.257984 19.134962-26.571948 10.875979-40.82592-2.688995-4.636991-6.563987-8.466983-11.165978-11.044978z m0 219.343567l-84.089834-48.766903-59.681882 34.457932 69.427863 40.26992-390.944229 225.711555-390.179231-225.274556 69.581863-40.17992-59.653882-34.436932-84.492833 48.785903c-14.257972 8.188984-19.193962 26.457948-11.001979 40.71692a29.742941 29.742941 0 0 0 7.233986 8.436983l-0.207 0.329 453.747105 261.974483a29.895941 29.895941 0 0 0 14.946971 4.024992 29.875941 29.875941 0 0 0 15.26397-4.178992l450.339111-259.999487c14.252972-8.259984 19.133962-26.577948 10.874979-40.825919-2.681995-4.636991-6.557987-8.467983-11.164978-11.044979z" p-id="9437"></path></svg>
+              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">在线合同签约</span>
+            </div>
+          </div>
+        </NavItem>
+        <NavItem href="contract-template" label="ContractTemplate" nav1={'在线签约'} nav2={'合同模板'}>
+          <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+            -
+            <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">合同模板下载</span>
+          </div>
+        </NavItem>
+        <NavItem href="contract" label="ContractTemplate" nav1={'在线签约'} nav2={'在线签约提交'}>
+          <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+            -
+            <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">在线签约提交</span>
+          </div>
+        </NavItem>
+        {role && role === 1 && (
+          <NavItem href="contract-check" label="ContractConfirm" nav1={'在线签约'} nav2={'在线签约审批'}>
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+              -
+              <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">在线签约审批</span>
+            </div>
+          </NavItem>
+        )}
+        <NavItem href="contract-history" label="ContractHistory" nav1={'在线签约'} nav2={'历史合同'}>
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+              -
+              <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史合同记录</span>
             </div>
           </NavItem>
         </nav>

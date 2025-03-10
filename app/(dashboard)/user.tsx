@@ -17,7 +17,16 @@ import UserPng from '@/images/user.png';
 
 export function User() {
   const { username, role } = useUser();
-
+  const getRole = (role: Number) => {
+    switch (role) {
+      case 1:
+        return '平台所有者';
+      case 2:
+        return '企业员工';
+      default:
+        return '代理管理员';
+    }
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -38,7 +47,7 @@ export function User() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>我的账号</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>权限: <span style={{color: '#1485ee', marginLeft: '8px'}}>平台所有者</span></DropdownMenuItem>
+        <DropdownMenuItem>权限: <span style={{color: '#1485ee', marginLeft: '8px'}}>{getRole(role)}</span></DropdownMenuItem>
         {/* <DropdownMenuItem>技术支持</DropdownMenuItem> */}
         <DropdownMenuSeparator />
         {username && username !== 'unknown' ? (

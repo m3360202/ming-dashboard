@@ -15,6 +15,7 @@ type User = {
   token?: String;
   role: Number;
   userId: Number;
+  isHydrated: Boolean;
 }
 
 export const useUser = create(
@@ -24,9 +25,12 @@ export const useUser = create(
     realname: '',
     token: '',
     role: 0,
-    userId: 0
+    userId: 0,
+    isHydrated: false,
 }),
-{ name: 'user' })
+{ name: 'user',onRehydrateStorage: () => (state: any) => {
+  state.isHydrated = true;
+}, })
 );
 
 export const useSearchKey = create(

@@ -9,9 +9,10 @@ import {
 } from '@/components/ui/card';
 import axios from 'axios';
 import { Input } from '@/components/ui/input';
+import { useUser } from '@/store/nav';
 
 export default function ContractHistoryPage() {
-
+  const { role, userId } = useUser();
   const [data, setData] = useState<any[]>([]);
   const [pageStart, setPageStart] = useState(0);
   const [total, setTotal] = useState(0);
@@ -24,7 +25,9 @@ export default function ContractHistoryPage() {
       const res = await axios.post('https://ai.aliensoft.com.cn/api/listHistoryContract', {
         pageStart,
         pageSize: 20,
-        customer: searchCustomer // 添加搜索的客户名称
+        customer: searchCustomer,
+        role,
+        userId
       });
 
       if (res?.data?.data) {
@@ -55,18 +58,23 @@ export default function ContractHistoryPage() {
 
   const getStep = (step: number) => {
     const baseStyle = "w-[fit-content] px-4 py-1 rounded-full text-white text-xs font-semibold";
-
     switch (step) {
       case 0:
-        return <div className={`${baseStyle} bg-[#FA5151]`}>待审核</div>;
-      case 2:
-        return <div className={`${baseStyle} bg-[#FA9D3B]`}>已盖章，待签约</div>;
-      case 3:
-        return <div className={`${baseStyle} bg-[#FFC300]`}>已签约，已支付</div>;
+        return <div className={`${baseStyle} bg-[#FA5151]`}>待支付</div>;
       case 1:
-        return <div className={`${baseStyle} bg-[#91D300]`}>已驳回，待编辑</div>;
-      case 4:
-        return <div className={`${baseStyle} bg-[#10AEEF]`}>已归档</div>;
+        return <div className={`${baseStyle} bg-[#FFC300]`}>已支付</div>;
+      default:
+        return <div className={`${baseStyle} bg-[#6467F0]`}>未知状态</div>;
+    }
+  }
+
+  const getStep2 = (step: number) => {
+    const baseStyle = "w-[fit-content] px-4 py-1 rounded-full text-white text-xs font-semibold";
+    switch (step) {
+      case 0:
+        return <div className={`${baseStyle} bg-[#FA5151]`}>待签约</div>;
+      case 1:
+        return <div className={`${baseStyle} bg-[#FFC300]`}>已签约</div>;
       default:
         return <div className={`${baseStyle} bg-[#6467F0]`}>未知状态</div>;
     }
@@ -101,11 +109,11 @@ export default function ContractHistoryPage() {
               <div>合同编号</div>
               <div>客户名称</div>
               <div>合同类型</div>
-              <div>业务状态</div>
-              <div>审查日期</div>
-              <div>签约日期</div>
+              <div>支付状态</div>
+              <div>签约状态</div>
+              <div>提交日期</div>
               <div>实收金额</div>
-              <div>税费</div>
+              <div>提交人</div>
               <div>查看附件</div>
             </div>
 
@@ -116,11 +124,11 @@ export default function ContractHistoryPage() {
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_no}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_type}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px' }}>{getStep(contract.step)}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px' }}>{getStep(contract.is_pay)}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px' }}>{getStep2(contract.is_back)}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{new Date(contract.confirm_time).toLocaleDateString('en-CA').split('/').join('-')}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.sign_time}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_fee || 0}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_tax}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_price || 0}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.username}</div>
                 <div
                   onClick={() => {
                     window.open('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/' + contract.contract_origin, '_blank')
