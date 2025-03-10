@@ -78,6 +78,9 @@ export default function DashboardLayout({
             window.location.href = '/login';
           } else {
             useUser.setState({ username: res?.data?.data?.username, role: res?.data?.data?.role, realname: res?.data?.data?.real_name, userId: res?.data?.data?.id });
+            if(res?.data?.data?.role !== 1) {
+              window.location.href = '/contract';
+            }
           }
         } else {
           alert(res?.data?.message);

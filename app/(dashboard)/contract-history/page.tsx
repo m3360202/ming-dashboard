@@ -10,6 +10,9 @@ import {
 import axios from 'axios';
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/store/nav';
+import * as Dialog from '@radix-ui/react-dialog';
+import { Button } from '@/components/ui/button';
+import { uploadFile } from '@/utils/upload';
 
 export default function ContractHistoryPage() {
   const { role, userId } = useUser();
@@ -17,7 +20,21 @@ export default function ContractHistoryPage() {
   const [pageStart, setPageStart] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+
   const [searchCustomer, setSearchCustomer] = useState<string>(''); // 搜索的客户名称
+  const [searchIsPay, setSearchIsPay] = useState('');
+  const [searchIsBack, setSearchIsBack] = useState('');
+
+  const [open, setOpen] = useState<boolean>(false);
+
+  const [currentId, setCurrentId] = useState<number | null>(null);
+  const [contract, setContract] = useState<any | null>(null);
+
+  const [isPay, setIsPay] = useState<boolean>(false);
+  const [isBack, setIsBack] = useState<boolean>(false);
+  const [file, setFile] = useState<any | null>(null);
+
+
 
   const getContract = async () => {
     setLoading(true);
@@ -26,6 +43,8 @@ export default function ContractHistoryPage() {
         pageStart,
         pageSize: 20,
         customer: searchCustomer,
+        isPay: parseInt(searchIsPay),
+        isBack: parseInt(searchIsBack),
         role,
         userId
       });
@@ -46,7 +65,7 @@ export default function ContractHistoryPage() {
 
   useEffect(() => {
     getContract();
-  }, [pageStart, searchCustomer]);
+  }, [pageStart, searchCustomer, searchIsPay, searchIsBack]);
 
   const handleNextPage = () => {
     setPageStart((prev) => prev + 20);
@@ -62,7 +81,7 @@ export default function ContractHistoryPage() {
       case 0:
         return <div className={`${baseStyle} bg-[#FA5151]`}>待支付</div>;
       case 1:
-        return <div className={`${baseStyle} bg-[#FFC300]`}>已支付</div>;
+        return <div className={`${baseStyle} bg-[#07C160]`}>已支付</div>;
       default:
         return <div className={`${baseStyle} bg-[#6467F0]`}>未知状态</div>;
     }
@@ -74,10 +93,29 @@ export default function ContractHistoryPage() {
       case 0:
         return <div className={`${baseStyle} bg-[#FA5151]`}>待签约</div>;
       case 1:
-        return <div className={`${baseStyle} bg-[#FFC300]`}>已签约</div>;
+        return <div className={`${baseStyle} bg-[#07C160]`}>已签约</div>;
       default:
         return <div className={`${baseStyle} bg-[#6467F0]`}>未知状态</div>;
     }
+  }
+  const handleSubmit = async () => {
+    setLoading(true);
+    const result = file && file[0] ? await uploadFile(file[0]) : null;
+    const updateData = {
+      id: currentId,
+      type: 'finish',
+      userId: userId,
+      isPay: isPay ? 1 : 0,
+      isBack: isBack ? 1 : 0,
+      resultContract: result
+    };
+
+    await axios.post('https://ai.aliensoft.com.cn/api/editContract', updateData);
+    alert('更新成功');
+    // 关闭 Dialog 并刷新数据
+    setOpen(false);
+    setLoading(false);
+    getContract();
   }
 
   return (
@@ -90,13 +128,33 @@ export default function ContractHistoryPage() {
       </CardHeader>
       <CardContent>
         {/* 搜索框 */}
-        <div className="w-full flex justify-end mb-4">
+        <div className="w-full flex justify-end mb-4 gap-4">
           <Input
             placeholder="请输入客户名称或合同编号搜索..."
             value={searchCustomer}
             onChange={(e) => setSearchCustomer(e.target.value)}
             className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
           />
+          <select
+            value={searchIsPay}
+            onChange={(e) => setSearchIsPay(e.target.value)}
+            style={{border: '#ccc 1px solid', borderRadius: '8px'}}
+            className="px-4 py-2 "
+          >
+            <option value="">付款状态</option>
+            <option value={1}>已支付</option>
+            <option value={0}>待支付</option>
+          </select>
+          <select
+            value={searchIsBack}
+            onChange={(e) => setSearchIsBack(e.target.value)}
+            style={{border: '#ccc 1px solid', borderRadius: '8px'}}
+            className="px-4 py-2"
+          >
+            <option value="">签约状态</option>
+            <option value={1}>已签约</option>
+            <option value={0}>待签约</option>
+          </select>
         </div>
 
         {loading ? (
@@ -105,33 +163,36 @@ export default function ContractHistoryPage() {
           <div className="space-y-4">
             {/* 表头 */}
             <div className="w-full grid grid-cols-9 gap-4 p-4 bg-gray-100 rounded-lg font-semibold">
-              
+
               <div>合同编号</div>
-              <div>客户名称</div>
               <div>合同类型</div>
-              <div>支付状态</div>
-              <div>签约状态</div>
+              <div>客户名称</div>
+              <div>合同状态</div>
               <div>提交日期</div>
-              <div>实收金额</div>
+              <div>合同价格</div>
               <div>提交人</div>
               <div>查看附件</div>
+              <div>操作</div>
             </div>
 
             {/* 数据行 */}
             {data.map((contract: any) => (
               <div key={contract.id} className="w-full grid grid-cols-9 gap-4 p-4 border rounded-lg">
-                
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_no}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer}</div>
+
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.contract_no}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>{contract.contract_type}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px' }}>{getStep(contract.is_pay)}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px' }}>{getStep2(contract.is_back)}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>{contract.customer}</div>
+
+                <div style={{ fontWeight: '400', fontSize: '14px' }} className="flex gap-2">{getStep(contract.is_pay)} {getStep2(contract.is_back)}</div>
+
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{new Date(contract.confirm_time).toLocaleDateString('en-CA').split('/').join('-')}</div>
-                <div style={{ fontWeight: '400', fontSize: '14px', color: '#FA9D3B' }}>￥{contract.contract_price || 0}</div>
+                <div style={{ fontWeight: '400', fontSize: '14px', color: '#1485EE' }}>￥{contract.contract_price}</div>
                 <div style={{ fontWeight: '400', fontSize: '14px', color: '#6467F0' }}>{contract.username}</div>
+
                 <div
                   onClick={() => {
-                    window.open('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/' + contract.contract_origin, '_blank')
+                    const file = contract.contract_result || contract.contract_origin;
+                    window.open('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/' + file, '_blank')
                   }}
                   style={{ fontWeight: '400', fontSize: '14px' }}
                   className="flex items-center cursor-pointer justify-start pl-4">
@@ -140,7 +201,13 @@ export default function ContractHistoryPage() {
                     </path>
                   </svg>
                 </div>
-
+                {role === 1 && (<div style={{ cursor: 'pointer', fontWeight: '400', fontSize: '14px', color: '#1485EE' }} onClick={() => {
+                  setContract(contract);
+                  setOpen(true);
+                  setCurrentId(contract.id);
+                  setIsBack(contract.is_back === 1);
+                  setIsPay(contract.is_pay === 1);
+                }}>编辑</div>)}
               </div>
             ))}
           </div>
@@ -163,6 +230,92 @@ export default function ContractHistoryPage() {
             下一页
           </button>
         </div>
+
+        {/* Dialog */}
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+            <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg w-[860px] h-[650px]" style={{ overflowY: 'scroll' }}>
+              <Dialog.Title className="text-lg font-bold mb-4">
+                {'编辑合同'}
+              </Dialog.Title>
+
+
+              <div className="flex flex-col justify-start items-start gap-4">
+                <div className="mt-4 flex gap-4">
+                  <label className="block text-gray-700">付款状态</label>
+                  <div className='flex flex-row justify-start gap-2'>
+                    <label className='flex items-center gap-2'>
+                      <span>是</span>
+                      <input
+                        type="radio"
+                        name="isPay"
+                        value="true"
+                        checked={isPay === true}
+                        onChange={(e) => setIsPay(true)}
+                      />
+
+                    </label>
+                  </div>
+                  <div className='flex flex-row justify-start gap-2'>
+                    <label className='flex items-center gap-2'>
+                      <span>否</span>
+                      <input
+                        type="radio"
+                        name="isPay"
+                        value="false"
+                        checked={isPay === false}
+                        onChange={(e) => setIsPay(false)}
+                      />
+
+                    </label>
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-4">
+                  <label className="block text-gray-700">合同签署</label>
+                  <label className='flex items-center gap-2'>
+                    <span>是</span>
+                    <input
+                      type="radio"
+                      name="isBack"
+                      value="true"
+                      checked={isBack === true}
+                      onChange={(e) => setIsBack(true)}
+                    />
+
+                  </label>
+                  <label className='flex items-center gap-2'>
+                    <span>否</span>
+                    <input
+                      type="radio"
+                      name="isBack"
+                      value="false"
+                      checked={isBack === false}
+                      onChange={(e) => setIsBack(false)}
+                    />
+
+                  </label>
+                </div>
+                <div className="mt-2">
+                  <label className="block text-gray-700">合同文件</label>
+                  <Input
+                    type="file"
+                    id="fileInput"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        setFile(files);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              <Button disabled={loading} className="w-full mt-8" onClick={handleSubmit}>
+                {'更新合同状态'}
+              </Button>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
       </CardContent>
     </Card>
   );

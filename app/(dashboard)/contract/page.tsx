@@ -63,7 +63,7 @@ export default function ContractPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageBase64, setImageBase64] = useState<string>('');
   const [currentId, setCurrentId] = useState<number | null>(null); // 当前编辑的用户 ID
-  const [file, setFile] = useState<any | null>(null);
+  
   const getContract = async () => {
     setLoading(true);
     try {
@@ -223,7 +223,7 @@ export default function ContractPage() {
             other,
             serverContent,
           }),
-          add_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
+          add_time: new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toLocaleDateString('zh-CN').split('/').join('-'),
           step: 0,
           status: 0,
           contract_type: contractType
@@ -281,7 +281,8 @@ export default function ContractPage() {
       const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
   
       const today = new Date();
-      // 设置模板变量
+      if(contractType === '商标服务') {
+        // 设置模板变量
       doc.setData({
         customer,
         customerMb,
@@ -300,6 +301,29 @@ export default function ContractPage() {
         month: today.getMonth() + 1,
         day: today.getDate(),
       });
+      }
+    
+      if(contractType === '著作权服务') {
+        // 设置模板变量
+      doc.setData({
+        customer,
+        customerMb,
+        customerPerson,
+        customerAddress,
+        contractPrice: price,
+        contractPricePer: zhuzuo.pricePer,
+        contractPriceCny: priceCNY,
+        contractPriceType: zhuzuo.priceType,
+        items: items.join(', '),
+        myImage: imageBase64,
+        shenqingren: zhuzuo.shenqingren,
+        other,
+        serverContent,
+        year: today.getFullYear(),
+        month: today.getMonth() + 1,
+        day: today.getDate(),
+      });
+      }
   
       // 生成文档
       doc.render();
@@ -317,31 +341,64 @@ export default function ContractPage() {
   
       // 上传文档
       const result = await uploadFile(generatedDocumentFile);
-      // 更新用户
-      const updateData: any = {
-        id: currentId,
-        userId: userId,
-        customer,
-        customer_mb: customerMb,
-        customer_person: customerPerson,
-        customer_address: customerAddress,
-        contract_origin: result?.replace('.docx','.pdf'),
-        contract_price: price,
-        contract_tax: tax,
-        data: JSON.stringify({
-          items,
-          tradeMarkCls,
-          tradeMarkName,
-          tradeMarkNum,
-          tradeMarkRegNo,
-          other,
-          serverContent,
-        }),
-        add_time: Date.now(),
-        step: 0,
-        status: 0,
-        contract_type: contractType
-      };
+
+      // 保存合同信息
+      let updateData ;
+      if(contractType === '商标服务') {
+        updateData = {
+          id: currentId,
+          userId: userId,
+          customer,
+          customer_mb: customerMb,
+          customer_person: customerPerson,
+          customer_address: customerAddress,
+          contract_origin: result?.replace('.docx','.pdf'),
+          contract_price: price,
+          contract_tax: tax,
+          username: realname,
+          data: JSON.stringify({
+            items,
+            tradeMarkCls,
+            tradeMarkName,
+            tradeMarkNum,
+            tradeMarkRegNo,
+            other,
+            serverContent,
+          }),
+          add_time: new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toLocaleDateString('zh-CN').split('/').join('-'),
+          step: 0,
+          status: 0,
+          contract_type: contractType
+        };
+      }
+      
+      if(contractType === '著作权服务') {
+        updateData = {
+          id: currentId,
+          userId: userId,
+          customer,
+          customer_mb: customerMb,
+          customer_person: customerPerson,
+          customer_address: customerAddress,
+          contract_origin: result?.replace('.docx','.pdf'),
+          contract_price: price,
+          contract_tax: tax,
+          username: realname,
+          data: JSON.stringify({
+            items,
+            tradeMarkCls,
+            tradeMarkName,
+            tradeMarkNum,
+            tradeMarkRegNo,
+            other,
+            serverContent,
+          }),
+          add_time: new Date().toLocaleDateString('en-CA').split('/').join('-'),
+          step: 0,
+          status: 0,
+          contract_type: contractType
+        };
+      }
 
       await axios.post('https://ai.aliensoft.com.cn/api/editContract', updateData);
       alert('更新成功');
