@@ -18,12 +18,12 @@ import { PlusCircle } from 'lucide-react';
 
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
-//@ts-ignore
-import ImageModule from 'docxtemplater-image-module';
 
 import { clsData } from '@/utils/trademarkCls';
 
 import { convertToChineseCurrency, base64Parser } from '@/utils/index';
+
+import { addImageToPDF } from '@/utils/generalPdf';
 
 export default function ContractPage() {
   const { role, userId, username, realname } = useUser();
@@ -60,6 +60,7 @@ export default function ContractPage() {
   const [contractBack, setContractBack] = useState<string>('');
   const [step, setStep] = useState<number>(0);
 
+  const [file, setFile] = useState<any | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageBase64, setImageBase64] = useState<string>('');
   const [currentId, setCurrentId] = useState<number | null>(null); // 当前编辑的用户 ID
@@ -119,6 +120,19 @@ export default function ContractPage() {
     }
   }
 
+  async function delayAsyncOperation(pdfUrl: string, imageUrl: string, position: { x: number; y: number }): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          const pdfResult = await addImageToPDF({ pdfUrl, imageUrl, position });
+          resolve(pdfResult);
+        } catch (error) {
+          reject(error);
+        }
+      }, 20000);
+    });
+  }
+
   const handleSaveContract = async () => {
     try {
       setLoading(true);
@@ -127,15 +141,6 @@ export default function ContractPage() {
       const templatePath = template;
       const templateResponse = await fetch(templatePath);
       const templateArrayBuffer = await templateResponse.arrayBuffer();
-
-      const imageOptions = {
-        getImage(tagValue: any) {
-            return base64Parser(tagValue);
-        },
-        getSize(img: any, tagValue: any, tagName: any, context: any) {
-            return [100, 100];
-        },
-    };
 
       const zip = new PizZip(templateArrayBuffer);
       const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
@@ -175,7 +180,6 @@ export default function ContractPage() {
         contractPriceCny: priceCNY,
         contractPriceType: zhuzuo.priceType,
         items: items.join(', '),
-        myImage: imageBase64,
         shenqingren: zhuzuo.shenqingren,
         other,
         serverContent,
@@ -201,6 +205,7 @@ export default function ContractPage() {
   
       // 上传文档
       const result = await uploadFile(generatedDocumentFile);
+
       // 保存合同信息
       let saveData ;
       if(contractType === '商标服务') {
@@ -231,13 +236,15 @@ export default function ContractPage() {
       }
       
       if(contractType === '著作权服务') {
+        let pdfResult = await delayAsyncOperation('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+result,'https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+file,{x:100,y:400})
+
         saveData = {
           userId: userId,
           customer,
           customer_mb: customerMb,
           customer_person: customerPerson,
           customer_address: customerAddress,
-          contract_origin: result?.replace('.docx','.pdf'),
+          contract_origin: pdfResult,
           contract_price: price,
           contract_tax: tax,
           username: realname,
@@ -497,8 +504,13 @@ export default function ContractPage() {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const base64 = await convertToBase64(file);
-      setImageBase64(base64);
+      // const base64 = await convertToBase64(file);
+      // setImageBase64(base64);
+
+      const result = await uploadFile(file);
+      console.log('result-----',result);
+      setFile(result);
+
     }
   };
 
@@ -1008,7 +1020,7 @@ export default function ContractPage() {
                     </div>
                     <div className="mt-4 flex flex-col items-center justify-start gap-4">
                       <label className="block text-sm font-medium text-gray-700">图样</label>
-                      {imageBase64 && (<img src={imageBase64} width={80} height={80} alt="Uploaded Logo" />)}
+                      {file && (<img src={'https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+file} width={80} height={80} alt="Uploaded Logo" />)}
                       <Button size="sm" className="h-8 gap-1" onClick={() => fileInputRef.current?.click()}>
                         <PlusCircle className="h-3.5 w-3.5" />
                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">

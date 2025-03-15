@@ -7,7 +7,7 @@ import './style.css';
 import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
 import { LoadingSvg } from '@/images/loading';
-
+import { useUser } from '@/store/nav';
 interface TrademarkItem {
   contactAddress: any;
   rejectDate: string;
@@ -34,6 +34,7 @@ interface TrademarkItem {
 }
 
 export function ItemsTable7() {
+  const {username} = useUser();
   const productsPerPage = 20;
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [data, setData] = useState<TrademarkItem[]>([]);
@@ -136,7 +137,11 @@ export function ItemsTable7() {
     return field;
   };
 
-  const exportToCSV = () => {
+  const exportToCSV = async() => {
+    await axios.post('https://ai.aliensoft.com.cn/api/saveRecord', {
+      username,
+      item:7
+    });
     const headers = [
       '申请人',
       '联系人',
