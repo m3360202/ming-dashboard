@@ -34,12 +34,13 @@ interface TrademarkItem {
 }
 
 export function ItemsTable7() {
-  const {username} = useUser();
+  const { username } = useUser();
   const productsPerPage = 20;
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [data, setData] = useState<TrademarkItem[]>([]);
   const [pageTotal, setPageTotal] = useState(0);
   const [date, setDate] = useState<string | null>(null);
+  const [dateList, setDateList] = useState<any[]>([]);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
   const [dates, setDates] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>('');
@@ -87,6 +88,32 @@ export function ItemsTable7() {
     }
   };
 
+  const getDateList = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/dataList', {
+
+      });
+
+      if (res?.data?.success) {
+        setDateList(res?.data?.data);
+        console.log('---------datelist', res?.data?.data)
+        setStartDate(res?.data?.data[0].item)
+        setEndDate(res?.data?.data[0].item)
+        setLoading(false);
+      } else {
+        setLoading(false);
+        alert('请求失败');
+      }
+    } catch (error) {
+
+      setLoading(false);
+      console.log('error', error);
+      alert('请求失败');
+    }
+  };
+
+
   const getListData = async () => {
     try {
       const res = await axios.post('https://ai.aliensoft.com.cn/api/getData7List', {
@@ -94,6 +121,7 @@ export function ItemsTable7() {
       });
 
       if (res?.data?.success) {
+        console.log('listdata00----------', res?.data?.data)
         setListData(res?.data?.data);
         setPageTotal(res?.data?.total);
       } else {
@@ -112,6 +140,10 @@ export function ItemsTable7() {
   useEffect(() => {
     getData();
   }, [startDate, endDate]);
+
+  useEffect(() => {
+    getDateList();
+  }, []);
 
   const currentData = data.slice(
     (pageIndex - 1) * productsPerPage,
@@ -137,10 +169,10 @@ export function ItemsTable7() {
     return field;
   };
 
-  const exportToCSV = async() => {
+  const exportToCSV = async () => {
     await axios.post('https://ai.aliensoft.com.cn/api/saveRecord', {
       username,
-      item:7
+      item: 7
     });
     const headers = [
       '申请人',
@@ -183,7 +215,7 @@ export function ItemsTable7() {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
 
-      const fileName = `${formattedDate} 驳回申请潜在客户数据.csv`;
+      const fileName = `${startDate} 驳回申请潜在客户数据.csv`;
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
       link.setAttribute('download', fileName);
@@ -200,7 +232,7 @@ export function ItemsTable7() {
         <div className='flex flex-row justify-between items-center'>
           <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400' }}>经过AI比对，正在驳回的快照，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            <input
+            {/* <input
               type="date"
               value={startDate as string}
               onChange={(e) => setStartDate(e.target.value)}
@@ -213,7 +245,18 @@ export function ItemsTable7() {
               onChange={(e) => setEndDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
               style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
-            />
+            /> */}
+            <select
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setEndDate(e.target.value);
+              }
+              }
+              style={{ border: '#ccc 1px solid', padding: '10px 5px', borderRadius: '8px' }}>
+              {dateList.map((item, index) => (
+                <option key={index} value={item.item}>{item.item} {index === 0 ? '最近更新' : ''}</option>
+              ))}
+            </select>
             {loading ? (
               <LoadingSvg />
             ) : (

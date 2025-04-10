@@ -30,19 +30,21 @@ interface TrademarkItem {
 }
 
 export function ItemsTable8() {
-  const {username} = useUser();
+  const { username } = useUser();
   const productsPerPage = 20;
   const [pageIndex, setPageIndex] = useState<number>(1);
   const [data, setData] = useState<TrademarkItem[]>([]);
   const [pageTotal, setPageTotal] = useState(0);
   const [date, setDate] = useState<string | null>(null);
   const [listData, setListData] = useState<TrademarkItem[]>([]);
+  const [dateList, setDateList] = useState<any[]>([]);
+
   const [dates, setDates] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
-  console.log('-----------',new Date().toISOString().split('T')[0])
+  // console.log('-----------',new Date().toISOString().split('T')[0])
   useEffect(() => {
     const generateDates = () => {
       const startDate = new Date('2025-02-18');
@@ -82,6 +84,31 @@ export function ItemsTable8() {
     }
   };
 
+  const getDateList = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/dataList', {
+
+      });
+
+      if (res?.data?.success) {
+        setDateList(res?.data?.data);
+        console.log('---------datelist', res?.data?.data)
+        setStartDate(res?.data?.data[0].item)
+        setEndDate(res?.data?.data[0].item)
+        setLoading(false);
+      } else {
+        setLoading(false);
+        alert('请求失败');
+      }
+    } catch (error) {
+
+      setLoading(false);
+      console.log('error', error);
+      alert('请求失败');
+    }
+  };
+
   const getListData = async () => {
     try {
       const res = await axios.post('https://ai.aliensoft.com.cn/api/getData8List', {
@@ -108,6 +135,10 @@ export function ItemsTable8() {
     getData();
   }, [startDate, endDate]);
 
+  useEffect(() => {
+    getDateList();
+  }, []);
+
   const currentData = data.slice(
     (pageIndex - 1) * productsPerPage,
     pageIndex * productsPerPage
@@ -131,12 +162,12 @@ export function ItemsTable8() {
     }
     return field;
   };
-  
 
-  const exportToCSV = async() => {
+
+  const exportToCSV = async () => {
     await axios.post('https://ai.aliensoft.com.cn/api/saveRecord', {
       username,
-      item:8
+      item: 8
     });
     const headers = [
       '申请人',
@@ -177,7 +208,7 @@ export function ItemsTable8() {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
 
-      const fileName = `${formattedDate} 无效答辩潜在客户数据.csv`;
+      const fileName = `${startDate} 无效答辩潜在客户数据.csv`;
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
       link.setAttribute('download', fileName);
@@ -192,9 +223,9 @@ export function ItemsTable8() {
     <Card>
       <CardHeader>
         <div className='flex flex-row justify-between items-center'>
-          <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400'}}>经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
+          <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400' }}>经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            <input
+            {/* <input
               type="date"
               value={startDate as string}
               onChange={(e) => setStartDate(e.target.value)}
@@ -207,7 +238,18 @@ export function ItemsTable8() {
               onChange={(e) => setEndDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
               style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
-            />
+            /> */}
+            <select
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setEndDate(e.target.value);
+              }
+              }
+              style={{ border: '#ccc 1px solid', padding: '10px 5px', borderRadius: '8px' }}>
+              {dateList.map((item, index) => (
+                <option key={index} value={item.item}>{item.item} {index === 0 ? '最近更新' : ''}</option>
+              ))}
+            </select>
             {loading ? (
               <LoadingSvg />
             ) : (
@@ -237,7 +279,7 @@ export function ItemsTable8() {
                   <span className="text-[14px] font-[800]">{product.tmName}</span>
                   <span style={{ color: '#fa9d3b' }} className="text-[14px] font-[800]">{product.statusName}</span>
                   <span style={{ color: '#f30000', backgroundColor: '#FFF0F5', borderRadius: '6px' }} className="text-[14px] px-4 py-1">{calculateDaysOrApply(product.acceptDate)}</span>
-                  <span style={{color: '#fa9d3'}} className="text-[14px] font-[800]">申请人：{product?.applicantCn}</span>
+                  <span style={{ color: '#fa9d3' }} className="text-[14px] font-[800]">申请人：{product?.applicantCn}</span>
                   <span style={{ color: '#6f67f0' }} className="text-[14px] font-[800]">代理机构：{product.agent}</span>
                 </div>
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
@@ -260,7 +302,7 @@ export function ItemsTable8() {
                 <div className='w-full mt-2 gap-4 flex items-center justify-between gap-2'>
                   <span style={{ color: '#1c252e' }} className="text-[14px] font-[800] ">联系邮箱：{product.contactEmail}</span>
                 </div>
-                
+
               </div>
             </div>
           ))}
