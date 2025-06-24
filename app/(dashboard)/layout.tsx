@@ -100,7 +100,7 @@ export default function DashboardLayout({
     <Providers>
       {role && role !== 0 && username && username !== "" && (
         <main className="flex min-h-screen w-full flex-col bg-muted/40">
-          <DesktopNav role={role as number} />
+          <DesktopNav role={role as number} username={username} />
           <div className="w-full flex flex-col sm:gap-4 sm:py-4 sm:pl-48">
             <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
               <MobileNav role={role as number} />
@@ -174,7 +174,7 @@ export default function DashboardLayout({
   );
 }
 
-function DesktopNav({ role }: { role: number }) {
+function DesktopNav({ role, username }: { role: number; username: String; }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-48 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
@@ -204,7 +204,7 @@ function DesktopNav({ role }: { role: number }) {
             </div>
           </NavItem>
         )}
-        {role && role === 1 && (
+        {role && role === 1 && username ==='mingcheng' && (
           <NavItem href="trade-mark-bak" label="TradeMarkRecord" nav1={'商标目标探测'} nav2={'客户收藏夹'}>
             <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
               -
@@ -212,7 +212,7 @@ function DesktopNav({ role }: { role: number }) {
             </div>
           </NavItem>
         )}
-        {role && role === 1 && (
+        {role && role === 1 && username ==='mingcheng' && (
           <NavItem href="userList" label="Account" nav1={'账号管理'} nav2={'用户列表'}>
             <div className="flex flex-col items-start">
               <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
@@ -230,12 +230,12 @@ function DesktopNav({ role }: { role: number }) {
             </div>
           </div>
         </NavItem>
-        <NavItem href="contract-template" label="ContractTemplate" nav1={'在线签约'} nav2={'合同模板'}>
+        {role && role === 1 && username ==='mingcheng' && (<NavItem href="contract-template" label="ContractTemplate" nav1={'在线签约'} nav2={'合同模板'}>
           <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
             -
             <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">合同模板下载</span>
           </div>
-        </NavItem>
+        </NavItem>)}
         <NavItem href="contract" label="ContractTemplate" nav1={'在线签约'} nav2={'在线签约提交'}>
           <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
             -

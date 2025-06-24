@@ -31,11 +31,11 @@ export default function ItemsTable() {
         setPages(res?.data?.data?.pages);
         return res?.data?.data?.list;
       } else {
-        alert('请求失败');
+        // alert('请求失败');
       }
     } catch (error) {
       console.log('error', error);
-      alert('请求失败');
+      // alert('请求失败');
     }
   };
 
@@ -59,19 +59,19 @@ export default function ItemsTable() {
 
         
       } else {
-        alert('请求失败');
+        // alert('请求失败');
         setIsWriting(false);
       }
     } catch (error) {
       console.log('error', error);
-      alert('请求失败');
+      // alert('请求失败');
       setIsWriting(false);
     }
   };
 
   const writeToDB = async (dataList: any) => {
     try {
-      const data= {dataList: dataList, add_time: '2025-04-11'}
+      const data= {dataList: dataList, add_time: '2025-06-23'}
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData7', data, {
         headers: {
           'Content-Type': 'application/json',
@@ -85,12 +85,12 @@ export default function ItemsTable() {
 
         
       } else {
-        alert('请求失败');
+        // alert('请求失败');
         setIsWriting(false);
       }
     } catch (error) {
       console.log('error', error);
-      alert('请求失败');
+      // alert('请求失败');
       setIsWriting(false);
     }
   };
@@ -99,12 +99,13 @@ export default function ItemsTable() {
     let pageStart = 1;
     // return console.log('------------',pages,pageStart + 1)
     aaa = setInterval(async() => {
-      if (pageStart <= 40) {
+      if (pageStart <= 20) {
       getData(pageStart).then((res) => {
         console.log('res',res)
         writeToDB(res); // 在获取数据后继续写入下一页
+        pageStart = pageStart + 1;
       });
-      pageStart = pageStart + 1;
+      
     }else{
       clearInterval(aaa);
       console.log('所有数据已写入完毕');

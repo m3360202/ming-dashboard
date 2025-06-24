@@ -232,20 +232,32 @@ export function ItemsTable7() {
         <div className='flex flex-row justify-between items-center'>
           <span style={{ color: '#637381', fontSize: '14px', fontWeight: '400' }}>经过AI比对，正在驳回的快照，的潜在用户将会被列出在这里，具体算法请看PDF</span>
           <div className="flex flex-row gap-4 items-center">
-            {/* <input
+            <input
               type="date"
               value={startDate as string}
-              onChange={(e) => setStartDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              onChange={(e) => {setStartDate(e.target.value);
+                setEndDate(e.target.value);
+              }}
+              max="2025-04-01"// 限制最大日期为今天
               style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
             />
-            <input
+            {/* <input
               type="date"
               value={endDate as string}
               onChange={(e) => setEndDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]} // 限制最大日期为今天
+              max="2025-04-01" // 限制最大日期为2025-04-01
               style={{ padding: '8px 10px', border: '#ccc 1px solid', borderRadius: '8px' }}
             /> */}
+            {loading ? (
+              <LoadingSvg />
+            ) : (
+              <Button size="sm" variant="outline" className="h-8 gap-1" onClick={exportToCSV}>
+                <File className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  导出历史数据
+                </span>
+              </Button>
+            )}
             <select
               onChange={(e) => {
                 setStartDate(e.target.value);

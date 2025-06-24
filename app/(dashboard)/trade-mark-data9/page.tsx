@@ -71,7 +71,7 @@ export default function ItemsTable() {
 
   const writeToDB = async (dataList: any) => {
     try {
-      const data= {dataList: dataList, add_time: '2025-04-11'}
+      const data= {dataList: dataList, add_time: '2025-06-23'}
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export default function ItemsTable() {
     let pageStart =1;
     // return console.log('------------',pages,pageStart + 1)
     aaa = setInterval(async() => {
-      if (pageStart <=5) {
+      if (pageStart <=3) {
       getData(pageStart).then((res) => {
         console.log('res',res)
         writeToDB(res); // 在获取数据后继续写入下一页
