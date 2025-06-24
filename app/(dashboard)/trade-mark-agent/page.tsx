@@ -19,7 +19,6 @@ import { exportToCSV, loadData } from '@/utils/exportCvs';
 
 export default function CustomersPage() {
   const { username } = useUser();
-  const [loadingStates, setLoadingStates] = useState<boolean[]>(new Array(10).fill(false));
   const [dataStates, setDataStates] = useState<TrademarkItem[][]>(new Array(10).fill([]));
   const [dateList, setDateList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState<string>('');
@@ -108,6 +107,7 @@ export default function CustomersPage() {
       <CardContent>
         {/* Date Selection Controls */}
         <div className="flex flex-row gap-4 items-center mb-6">
+          <span>2025-4-11 前数据</span>
           <input
             type="date"
             value={startDate}
@@ -124,6 +124,7 @@ export default function CustomersPage() {
               opacity: loading ? 0.6 : 1
             }}
           />
+          <span>2025-4-11 后数据</span>
           <select
             disabled={loading}
             onChange={(e) => {
@@ -164,16 +165,16 @@ export default function CustomersPage() {
             <div key={config.id} className="flex flex-col gap-2">
               <Button
                 onClick={() => exportToCSV(String(username), config, dataStates[index] as any)}
-                disabled={loadingStates[index] || loading}
+                disabled={loading}
                 variant="outline"
                 className="h-16 flex flex-col items-center justify-center"
                 style={{ 
                   borderColor: config.color, 
                   color: config.color,
-                  opacity: (loadingStates[index] || loading) ? 0.6 : 1
+                  opacity: loading ? 0.6 : 1
                 }}
               >
-                {(loadingStates[index] || loading) ? (
+                {loading ? (
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-4 h-4">
                       <LoadingSvg />
@@ -185,7 +186,11 @@ export default function CustomersPage() {
                 ) : (
                   <div className="flex flex-col items-center gap-1">
                     <span className="font-bold">{config.name}</span>
-                    <span className="text-xs">{dataStates[index]?.length || 0} 条数据</span>
+                    {config.id < 10 ? (
+                      <span className="text-xs">{dataStates[index]?.length || 0} 条数据</span>
+                      ) : (
+                        <span className="text-xs">开发中</span>
+                      )}
                   </div>
                 )}
               </Button>

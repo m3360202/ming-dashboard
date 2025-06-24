@@ -51,13 +51,13 @@ export default function CustomersPage() {
     { id: 7, name: '驳回复审', api: 'loadData7', color: '#f30000', description: '经过AI比对，正在驳回的快照，的潜在用户将会被列出在这里' },
     { id: 8, name: '无效答辩', api: 'loadData8', color: '#fa9d3b', description: '经过AI比对，无效答辩风险大于60分，的潜在用户将会被列出在这里' },
     { id: 9, name: '撤三答辩', api: 'loadData9', color: '#6f67f0', description: '经过AI比对，撤三答辩风险大于60分，的潜在用户将会被列出在这里' },
-    { id: 10, name: '撤三风险', api: 'loadData7', color: '#1485ee', description: '经过AI比对分析的撤三风险数据' },
-    { id: 11, name: '驳回风险', api: 'loadData8', color: '#ffc300', description: '经过AI比对分析的驳回风险数据' },
-    { id: 12, name: '等待注册', api: 'loadData9', color: '#07c160', description: '等待注册的商标数据' },
-    { id: 13, name: '等待异议', api: 'loadData7', color: '#fa9d3b', description: '等待异议的商标数据' },
-    { id: 14, name: '等待答辩', api: 'loadData8', color: '#f30000', description: '等待答辩的商标数据' },
-    { id: 15, name: '等待续展', api: 'loadData9', color: '#6f67f0', description: '等待续展的商标数据' },
-    { id: 16, name: '等待变更', api: 'loadData7', color: '#1485ee', description: '等待变更的商标数据' }
+    // { id: 10, name: '撤三风险', api: 'loadData7', color: '#1485ee', description: '经过AI比对分析的撤三风险数据' },
+    // { id: 11, name: '驳回风险', api: 'loadData8', color: '#ffc300', description: '经过AI比对分析的驳回风险数据' },
+    { id: 12, name: '专利申请', api: 'loadData9', color: '#07c160', description: '等待注册的商标数据' },
+    // { id: 13, name: '等待异议', api: 'loadData7', color: '#fa9d3b', description: '等待异议的商标数据' },
+    // { id: 14, name: '等待答辩', api: 'loadData8', color: '#f30000', description: '等待答辩的商标数据' },
+    // { id: 15, name: '等待续展', api: 'loadData9', color: '#6f67f0', description: '等待续展的商标数据' },
+    // { id: 16, name: '等待变更', api: 'loadData7', color: '#1485ee', description: '等待变更的商标数据' }
   ];
 
   // Date functions from the original components

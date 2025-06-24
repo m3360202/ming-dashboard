@@ -274,8 +274,8 @@ export const buttonConfigs = [
   },
   { 
     id: 12, 
-    name: '等待注册', 
-    api: 'loadData9', 
+    name: '专利申请需求', 
+    api: 'loadData11', 
     color: '#07c160', 
     description: '等待注册的商标数据',
     type: 'table9' as const,
@@ -283,56 +283,56 @@ export const buttonConfigs = [
   },
   { 
     id: 17, 
-    name: '驳回历史数据', 
+    name: '企业信用证书需求', 
     api: 'getData7List', 
     color: '#ff6b6b', 
     description: '驳回复审的历史数据列表',
     type: 'table7' as const,
     dateType: 'reject'
   },
-  { 
-    id: 18, 
-    name: '无效历史数据', 
-    api: 'getData8List', 
-    color: '#ffa726', 
-    description: '无效答辩的历史数据列表',
-    type: 'table8' as const,
-    dateType: 'accept'
-  },
-  { 
-    id: 19, 
-    name: '撤三历史数据', 
-    api: 'getData9List', 
-    color: '#ab47bc', 
-    description: '撤三答辩的历史数据列表',
-    type: 'table9' as const,
-    dateType: 'rescind'
-  },
-  { 
-    id: 20, 
-    name: '综合风险评估', 
-    api: 'loadData7', 
-    color: '#26a69a', 
-    description: '综合多种风险因素的评估数据',
-    type: 'table7' as const,
-    dateType: 'reject'
-  },
-  { 
-    id: 21, 
-    name: '高风险商标', 
-    api: 'loadData8', 
-    color: '#ef5350', 
-    description: '高风险商标的预警数据',
-    type: 'table8' as const,
-    dateType: 'accept'
-  },
-  { 
-    id: 22, 
-    name: '待处理事项', 
-    api: 'loadData9', 
-    color: '#42a5f5', 
-    description: '需要及时处理的商标事项',
-    type: 'table9' as const,
-    dateType: 'rescind'
-  }
+  // { 
+  //   id: 18, 
+  //   name: '无效历史数据', 
+  //   api: 'getData8List', 
+  //   color: '#ffa726', 
+  //   description: '无效答辩的历史数据列表',
+  //   type: 'table8' as const,
+  //   dateType: 'accept'
+  // },
+  // { 
+  //   id: 19, 
+  //   name: '撤三历史数据', 
+  //   api: 'getData9List', 
+  //   color: '#ab47bc', 
+  //   description: '撤三答辩的历史数据列表',
+  //   type: 'table9' as const,
+  //   dateType: 'rescind'
+  // },
+  // { 
+  //   id: 20, 
+  //   name: '综合风险评估', 
+  //   api: 'loadData7', 
+  //   color: '#26a69a', 
+  //   description: '综合多种风险因素的评估数据',
+  //   type: 'table7' as const,
+  //   dateType: 'reject'
+  // },
+  // { 
+  //   id: 21, 
+  //   name: '高风险商标', 
+  //   api: 'loadData8', 
+  //   color: '#ef5350', 
+  //   description: '高风险商标的预警数据',
+  //   type: 'table8' as const,
+  //   dateType: 'accept'
+  // },
+  // { 
+  //   id: 22, 
+  //   name: '待处理事项', 
+  //   api: 'loadData9', 
+  //   color: '#42a5f5', 
+  //   description: '需要及时处理的商标事项',
+  //   type: 'table9' as const,
+  //   dateType: 'rescind'
+  // }
 ]; 
