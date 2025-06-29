@@ -71,7 +71,7 @@ export default function ItemsTable() {
 
   const writeToDB = async (dataList: any) => {
     try {
-      const data= {dataList: dataList, add_time: '2025-06-23'}
+      const data= {dataList: dataList, add_time: '2025-06-30'}
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData9', data, {
         headers: {
           'Content-Type': 'application/json',

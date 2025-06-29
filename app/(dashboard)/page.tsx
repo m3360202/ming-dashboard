@@ -18,14 +18,14 @@ import axios from 'axios';
 import { exportToCSV, loadData } from '@/utils/exportCvs';
 
 export default function CustomersPage() {
-  const { username } = useUser();
+  const { username, role } = useUser();
   const [dataStates, setDataStates] = useState<TrademarkItem[][]>(new Array(10).fill([]));
   const [dateList, setDateList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [content, setContent] = useState<string>('');
-  
+    console.log('-------------',role)
   const getDateList = async () => {
     setLoading(true);
     try {
@@ -105,99 +105,108 @@ export default function CustomersPage() {
         <CardDescription style={{marginTop: '20px'}}>获取最新国家知识产权局数据库的快照，撤三数据每周一周三更新，驳回数据每周一，周五更新</CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Date Selection Controls */}
-        <div className="flex flex-row gap-4 items-center mb-6">
-          <span>2025-4-11 前数据</span>
-          <input
-            type="date"
-            value={startDate}
-            max="2025-04-11"
-            disabled={loading}
-            onChange={(e) => {
-              setStartDate(e.target.value);
-              setEndDate(e.target.value);
-            }}
-            style={{ 
-              padding: '8px 10px', 
-              border: '#ccc 1px solid', 
-              borderRadius: '8px',
-              opacity: loading ? 0.6 : 1
-            }}
-          />
-          <span>2025-4-11 后数据</span>
-          <select
-            disabled={loading}
-            onChange={(e) => {
-              const selectedIndex = parseInt(e.target.value);
-              const selectedItem = dateList[selectedIndex];
-              setStartDate(selectedItem.item);
-              setEndDate(selectedItem.item);
-              setContent(selectedItem.content);
-            }}
-            style={{ 
-              border: '#ccc 1px solid', 
-              padding: '10px 5px', 
-              borderRadius: '8px',
-              opacity: loading ? 0.6 : 1
-            }}>
-            {dateList.map((item, index) => (
-              <option key={index} value={index}>{item.item} {index === 0 ? '最近更新' : ''}</option>
-            ))}
-          </select>
-          {loading && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <div className="w-4 h-4">
-                <LoadingSvg />
-              </div>
-              <span>加载中...</span>
-            </div>
-          )}
-          
-        </div>
-        {content && (
-            <div className="w-full flex items-center gap-2 text-gray-600 mb-4">
-              <span>{content}</span>
-            </div>
-          )}
-        {/* Loading Buttons Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-          {buttonConfigs.map((config, index) => (
-            <div key={config.id} className="flex flex-col gap-2">
-              <Button
-                onClick={() => exportToCSV(String(username), config, dataStates[index] as any)}
+        {role === 1 && (
+          <>
+            {/* Date Selection Controls */}
+            <div className="flex flex-row gap-4 items-center mb-6">
+              <span>2025-4-11 前数据</span>
+              <input
+                type="date"
+                value={startDate}
+                max="2025-04-11"
                 disabled={loading}
-                variant="outline"
-                className="h-16 flex flex-col items-center justify-center"
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setEndDate(e.target.value);
+                }}
                 style={{ 
-                  borderColor: config.color, 
-                  color: config.color,
+                  padding: '8px 10px', 
+                  border: '#ccc 1px solid', 
+                  borderRadius: '8px',
                   opacity: loading ? 0.6 : 1
                 }}
-              >
-                {loading ? (
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="w-4 h-4">
-                      <LoadingSvg />
-                    </div>
-                    <span className="text-xs">
-                      {loading ? '数据加载中...' : '导出中...'}
-                    </span>
+              />
+              <span>2025-4-11 后数据</span>
+              <select
+                disabled={loading}
+                onChange={(e) => {
+                  const selectedIndex = parseInt(e.target.value);
+                  const selectedItem = dateList[selectedIndex];
+                  setStartDate(selectedItem.item);
+                  setEndDate(selectedItem.item);
+                  setContent(selectedItem.content);
+                }}
+                style={{ 
+                  border: '#ccc 1px solid', 
+                  padding: '10px 5px', 
+                  borderRadius: '8px',
+                  opacity: loading ? 0.6 : 1
+                }}>
+                {dateList.map((item, index) => (
+                  <option key={index} value={index}>{item.item} {index === 0 ? '最近更新' : ''}</option>
+                ))}
+              </select>
+              {loading && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="w-4 h-4">
+                    <LoadingSvg />
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="font-bold">{config.name}</span>
-                    {config.id < 10 ? (
-                      <span className="text-xs">{dataStates[index]?.length || 0} 条数据</span>
-                      ) : (
-                        <span className="text-xs">开发中</span>
-                      )}
-                  </div>
-                )}
-              </Button>
+                  <span>加载中...</span>
+                </div>
+              )}
               
             </div>
-          ))}
-        </div>
+            {content && (
+                <div className="w-full flex items-center gap-2 text-gray-600 mb-4">
+                  <span>{content}</span>
+                </div>
+              )}
+            {/* Loading Buttons Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+              {buttonConfigs.map((config, index) => (
+                <div key={config.id} className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => exportToCSV(String(username), config, dataStates[index] as any)}
+                    disabled={loading}
+                    variant="outline"
+                    className="h-16 flex flex-col items-center justify-center"
+                    style={{ 
+                      borderColor: config.color, 
+                      color: config.color,
+                      opacity: loading ? 0.6 : 1
+                    }}
+                  >
+                    {loading ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-4 h-4">
+                          <LoadingSvg />
+                        </div>
+                        <span className="text-xs">
+                          {loading ? '数据加载中...' : '导出中...'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="font-bold">{config.name}</span>
+                        {config.id < 10 ? (
+                          <span className="text-xs">{dataStates[index]?.length || 0} 条数据</span>
+                          ) : (
+                            <span className="text-xs">开发中</span>
+                          )}
+                      </div>
+                    )}
+                  </Button>
+                  
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {role !== 1 && (
+          <div className="text-center py-8 text-gray-500">
+            <p>抱歉，您没有权限访问此功能</p>
+          </div>
+        )}
 
         {/* Data Display */}
         {/* {dataStates.map((data, buttonIndex) => 
