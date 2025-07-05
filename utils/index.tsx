@@ -1,3 +1,4 @@
+import axios from 'axios';
 
 export function convertToChineseCurrency(amount: number | string): string {
   // 确保 amount 是数字类型
@@ -74,3 +75,12 @@ export function base64Parser(tagValue: any) {
     }
     return bytes.buffer;
 }
+
+export const getPhoneData = async(key: string) => {
+    const res = await axios.post('http://localhost:8080/handleGetqixinPhoneTest', {
+      key,
+      page: 1
+    });
+    console.log('res--------------',res)
+    return res?.data?.phone;
+  }
