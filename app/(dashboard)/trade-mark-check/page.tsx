@@ -20,7 +20,7 @@ export default function CustomersPage() {
     <Card>
       <CardHeader>
         <CardTitle>商标近似查询</CardTitle>
-        <CardDescription style={{marginTop: '20px'}}>查询的匹配样本，采用中国，国际，欧盟的最新实时数据库进行数据检索，并通过Logo图形区域匹配算法，关键字相似度匹配进行AIGC数据校验，可能耗时较长.</CardDescription>
+        <CardDescription style={{marginTop: '20px', color: '#fe4c24'}}>查询的匹配样本，采用中国，国际，欧盟的最新实时数据库进行数据检索，并通过Logo图形区域匹配算法，关键字相似度匹配进行AIGC数据校验，可能耗时较长.</CardDescription>
       </CardHeader>
       <CardContent>
       <Tabs defaultValue="china">
@@ -30,8 +30,8 @@ export default function CustomersPage() {
           {/* <TabsTrigger value="foreign">图形商标查询</TabsTrigger> */}
           <TabsTrigger value="3">图形商标精准查询(通常)</TabsTrigger>
           <TabsTrigger value="4">图形商标精准查询(文字)</TabsTrigger>
-          <TabsTrigger value="5">图形商标精准查询(卡通)</TabsTrigger>
-          <TabsTrigger value="6">图形商标精准查询(国际)</TabsTrigger>
+          {/* <TabsTrigger value="5">图形商标精准查询(卡通)</TabsTrigger>
+          <TabsTrigger value="6">图形商标精准查询(国际)</TabsTrigger> */}
         </TabsList>
         <div className="lg:hidden ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">

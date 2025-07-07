@@ -5,7 +5,6 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { File } from 'lucide-react';
 import { textMark } from '@/utils/origin';
-import { getPhoneData } from '@/utils/index';
 
 export default function ItemsTable() {
   const productsPerPage = 100;
@@ -40,6 +39,10 @@ export default function ItemsTable() {
     }
   };
 
+  useEffect(() => {
+    // getData(pageStart);
+  }, []);
+
   const writeToDBSingle = async () => {
     const data = textMark;
     try {
@@ -68,7 +71,7 @@ export default function ItemsTable() {
 
   const writeToDB = async (dataList: any) => {
     try {
-      const data= {dataList: dataList, add_time: '2025-07-05'}
+      const data= {dataList: dataList, add_time: '2025-07-08'}
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData8', data, {
         headers: {
           'Content-Type': 'application/json',
@@ -95,37 +98,18 @@ export default function ItemsTable() {
   const startWrite = async() => {
     let pageStart = 1;
     // return console.log('------------',pages,pageStart + 1)
-    
-    // 添加延迟函数
-    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    
-    while (pageStart <= 1) {
-      try {
-        const res = await getData(pageStart);
-        console.log('res', res);
-        
-        // 使用 for...of 循环来确保每个请求之间有延迟
-        for (const item of res) {
-          await sleep(5000); // 等待5秒
-          const phone = await getPhoneData(item.applicantCn);
-          console.log('phone', phone);
-          item.contactPhone = phone || item.contactPhone;
-        }
-        
-        // writeToDB(res); // 在获取数据后继续写入下一页
-        pageStart = pageStart + 1;
-        
-        // 外层延迟6秒
-        if (pageStart <= 1) {
-          await sleep(6000);
-        }
-      } catch (error) {
-        console.error('处理数据时出错:', error);
-        break;
-      }
+    aaa = setInterval(async() => {
+      if (pageStart <= 7) {
+      getData(pageStart).then((res) => {
+        console.log('res',res)
+        writeToDB(res); // 在获取数据后继续写入下一页
+      });
+      pageStart = pageStart + 1;
+    }else{
+      clearInterval(aaa);
+      console.log('所有数据已写入完毕');
     }
-    
-    console.log('所有数据已写入完毕');
+    }, 15000);
   }
   return (
     <Card>
