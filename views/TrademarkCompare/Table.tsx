@@ -68,10 +68,10 @@ export function ItemsTable() {
     axios.post(url + '/handleGetQDSTrademarkMutilList', data, {
       headers: headers
     }).then((res) => {
-      if (res?.data?.data?.data?.data) {
-        console.log('aaaaaaa', transformData(res?.data?.data?.data?.data))
+      if (res?.data?.data) {
+        console.log('aaaaaaa', transformData(res?.data?.data))
         setLoading(false);
-        setItems(transformData(res?.data?.data?.data?.data));
+        setItems(transformData(res?.data?.data));
         return true;
       } else {
         setLoading(false);
@@ -135,28 +135,34 @@ export function ItemsTable() {
 
   const transformData = (sourceData: any) => {
     const result = [];
+    const filteredData = [];
 
-    for (const key in sourceData) {
-      const group = sourceData[key];
-      const groupData = [];
-
-      for (const subKey in group) {
-        const item = group[subKey];
+    // 遍历每个分类
+    for (const clsKey in sourceData) {
+      const clsNumber = parseInt(clsKey);
+      
+      // 只包含选中的分类
+      if (cls.includes(clsNumber.toString())) {
+        const clsData = sourceData[clsKey];
+        
         const transformedItem = {
-          value: parseInt(subKey),
+          value: clsNumber,
           data: {
-            approximateList: item.approximateList,
-            approximateTotal: item.approximateTotal,
-            groupRisk: convertObjectToArray(item.groupRisk),
-            riskLevel: item.riskLevel,
+            approximateList: convertObjectToArray(clsData['近似数据'] || {}),
+            approximateTotal: clsData['近似总数'] || 0,
+            groupRisk: convertObjectToArray(clsData['群组风险'] || {}),
+            riskLevel: clsData['风险等级'] || '',
           },
         };
-        groupData.push(transformedItem);
+        filteredData.push(transformedItem);
       }
+    }
 
+    // 如果有匹配的分类，创建一个默认的关键词条目
+    if (filteredData.length > 0) {
       result.push({
-        name: key,
-        data: groupData,
+        name: keyword || '查询关键词', // 使用输入的关键词或默认值
+        data: filteredData,
       });
     }
 
@@ -250,7 +256,7 @@ export function ItemsTable() {
                     <tr>
                       <td style={{ padding: '20px', width: '180px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>分类</td>
                       <td style={{ padding: '20px', width: '150px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>风险评估</td>
-                      {/* <td style={{ padding: '20px', width: '150px', textAlign: 'center' }}>相同或近似</td> */}
+                      <td style={{ padding: '20px', width: '150px', textAlign: 'center' }}>相同或近似</td>
                       <td style={{ padding: '20px', width: '150px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>群组风险</td>
                       <td style={{ padding: '20px', textAlign: 'center', fontSize: '16px', color: '#666', fontWeight: '800' }}>对比结果</td>
                     </tr>
@@ -277,6 +283,11 @@ export function ItemsTable() {
                               <span style={{ fontSize: '14px', color: '#999' }}>{getTagLevel(b.data.riskLevel)}</span>
                             </div>
                           </td>
+                          <td style={{ padding: '20px', width: '150px' }}>
+                            <div className="flex flex-col items-center gap-4">
+                              <span style={{ fontSize: '14px', color: getColorLevel(b.data.riskLevel) }}>{b.data.approximateTotal}</span>
+                            </div>
+                          </td>
                           <td style={{ padding: '20px' }}>
                             <div style={{ width: '200px' }} className="flex flex-row items-center gap-2 flex-wrap w-[200px]">
                               {b.data.groupRisk.map((c: any, index3: number) => (
@@ -288,7 +299,7 @@ export function ItemsTable() {
                             <div className="flex flex-row items-center gap-2 flex-wrap">
                               {b.data.approximateList.map((d: any, index4: number) => (
                                 <span key={index4} style={{ fontSize: '12px', color: '#999', cursor: 'pointer' }}>
-                                  {d.name}
+                                  {d.value['商标名称']}
                                 </span>
                               ))}
                             </div>
