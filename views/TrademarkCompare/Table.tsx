@@ -70,8 +70,8 @@ export function ItemsTable() {
 
     }
     setLoading(true);
-    // const url = 'https://gptserver.aliensoft.com.cn';
-    const url = 'http://localhost:8080';
+    const url = 'https://gptserver.aliensoft.com.cn';
+    // const url = 'http://localhost:8080';
     axios.post(url + '/handleGetQDSTrademarkMutilList', data, {
       headers: headers
     }).then((res) => {
@@ -142,35 +142,45 @@ export function ItemsTable() {
 
   const transformData = (sourceData: any) => {
     const result = [];
-    const filteredData = [];
 
-    // 遍历每个分类
-    for (const clsKey in sourceData) {
-      const clsNumber = parseInt(clsKey);
-      
-      // 只包含选中的分类
-      if (cls.includes(clsNumber.toString())) {
-        const clsData = sourceData[clsKey];
+    // 遍历每个关键词
+    for (const keywordName in sourceData) {
+      const keywordData = sourceData[keywordName];
+      const filteredData = [];
+
+      // 遍历每个分类
+      for (const clsKey in keywordData) {
+        const clsNumber = parseInt(clsKey);
         
-        const transformedItem = {
-          value: clsNumber,
-          data: {
-            approximateList: convertObjectToArray(clsData['近似数据'] || {}),
-            approximateTotal: clsData['近似总数'] || 0,
-            groupRisk: convertObjectToArray(clsData['群组风险'] || {}),
-            riskLevel: clsData['风险等级'] || '',
-          },
-        };
-        filteredData.push(transformedItem);
+        // 只包含选中的分类
+        if (cls.includes(clsNumber.toString())) {
+          const clsData = keywordData[clsKey];
+          
+          // 如果clsData为空对象，跳过
+          if (!clsData || Object.keys(clsData).length === 0) {
+            continue;
+          }
+          
+          const transformedItem = {
+            value: clsNumber,
+            data: {
+              approximateList: Array.isArray(clsData['近似数据']) ? clsData['近似数据'] : [],
+              approximateTotal: Array.isArray(clsData['近似数据']) ? clsData['近似数据'].length : 0,
+              groupRisk: convertObjectToArray(clsData['群组风险'] || {}),
+              riskLevel: clsData['风险等级'] || '',
+            },
+          };
+          filteredData.push(transformedItem);
+        }
       }
-    }
 
-    // 如果有匹配的分类，创建一个默认的关键词条目
-    if (filteredData.length > 0) {
-      result.push({
-        name: keyword || '查询关键词', // 使用输入的关键词或默认值
-        data: filteredData,
-      });
+      // 如果有匹配的分类，添加到结果中
+      if (filteredData.length > 0) {
+        result.push({
+          name: keywordName,
+          data: filteredData,
+        });
+      }
     }
 
     return result;
@@ -306,7 +316,7 @@ export function ItemsTable() {
                             <div className="flex flex-row items-center gap-2 flex-wrap">
                               {b.data.approximateList.map((d: any, index4: number) => (
                                 <span key={index4} style={{ fontSize: '12px', color: '#999', cursor: 'pointer' }}>
-                                  {d.value['商标名称']}
+                                  {d['商标名称']}
                                 </span>
                               ))}
                             </div>
