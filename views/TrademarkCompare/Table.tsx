@@ -53,8 +53,15 @@ export function ItemsTable() {
       return result.length;
     }
     console.log('-----', cls)
+    const keywords = keyword.replace('，', ",");
+    const keyArray = keywords.split(',');
+    //把cls组装到keyArray中，成为["网易_28,19,10","腾讯_28,19,10"]这种格式
+    const keywordsArray = keyArray.map((item: any) => {
+      return `${item}_${cls.join(',')}`;
+    });
+
     const data = {
-      keywords: keyword.replace('，', ","),
+      keywords: keywordsArray,
       total: getTotal(keyword),
       cls: cls.length > 1 ? cls.join(',') : cls[0]
     }
@@ -63,13 +70,13 @@ export function ItemsTable() {
 
     }
     setLoading(true);
-    const url = 'https://gptserver.aliensoft.com.cn';
-    // const url = 'http://localhost:8080';
+    // const url = 'https://gptserver.aliensoft.com.cn';
+    const url = 'http://localhost:8080';
     axios.post(url + '/handleGetQDSTrademarkMutilList', data, {
       headers: headers
     }).then((res) => {
       if (res?.data?.data) {
-        console.log('aaaaaaa', transformData(res?.data?.data))
+        console.log('aaaaaaa', res?.data?.data)
         setLoading(false);
         setItems(transformData(res?.data?.data));
         return true;

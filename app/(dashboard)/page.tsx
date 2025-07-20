@@ -10,22 +10,22 @@ import { Suspense, useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button';
 import { LoadingSvg } from '@/images/loading';
 import { useUser } from '@/store/nav';
-import { 
-  TrademarkItem, 
-  buttonConfigs 
+import {
+  TrademarkItem,
+  buttonConfigs
 } from '@/utils/trademarkUtils';
 import axios from 'axios';
 import { exportToCSV, loadData } from '@/utils/exportCvs';
 
 export default function CustomersPage() {
-  const { username, role } = useUser();
+  const { username } = useUser();
   const [dataStates, setDataStates] = useState<TrademarkItem[][]>(new Array(10).fill([]));
   const [dateList, setDateList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [content, setContent] = useState<string>('');
-    console.log('-------------',role)
+
   const getDateList = async () => {
     setLoading(true);
     try {
@@ -85,94 +85,94 @@ export default function CustomersPage() {
   }, []);
 
   useEffect(() => {
-    if(dateList.length > 0) {
+    if (dateList.length > 0) {
       setStartDate(dateList[0].item);
       setEndDate(dateList[0].item);
     }
   }, [dateList]);
 
   useEffect(() => {
-    if(startDate && endDate) {
+    if (startDate && endDate) {
       loadAllData(startDate, endDate);
     }
   }, [startDate, endDate]);
 
   return (
     <Suspense fallback={<p>Loading feed...</p>}>
-    <Card>
-      <CardHeader>
-        <CardTitle>潜在客户探测</CardTitle>
-        <CardDescription style={{marginTop: '20px'}}>获取最新国家知识产权局数据库的快照，撤三数据每周一周三更新，驳回数据每周一，周五更新</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {role === 1 && (
-          <>
-            {/* Date Selection Controls */}
-            <div className="flex flex-row gap-4 items-center mb-6">
-              <span>2025-4-11 前数据</span>
-              <input
-                type="date"
-                value={startDate}
-                max="2025-04-11"
-                disabled={loading}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                  setEndDate(e.target.value);
-                }}
-                style={{ 
-                  padding: '8px 10px', 
-                  border: '#ccc 1px solid', 
-                  borderRadius: '8px',
-                  opacity: loading ? 0.6 : 1
-                }}
-              />
-              <span>2025-4-11 后数据</span>
-              <select
-                disabled={loading}
-                onChange={(e) => {
-                  const selectedIndex = parseInt(e.target.value);
-                  const selectedItem = dateList[selectedIndex];
-                  setStartDate(selectedItem.item);
-                  setEndDate(selectedItem.item);
-                  setContent(selectedItem.content);
-                }}
-                style={{ 
-                  border: '#ccc 1px solid', 
-                  padding: '10px 5px', 
-                  borderRadius: '8px',
-                  opacity: loading ? 0.6 : 1
-                }}>
-                {dateList.map((item, index) => (
-                  <option key={index} value={index}>{item.item} {index === 0 ? '最近更新' : ''}</option>
-                ))}
-              </select>
-              {loading && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="w-4 h-4">
-                    <LoadingSvg />
-                  </div>
-                  <span>加载中...</span>
+      <Card>
+        <CardHeader>
+          <CardTitle>潜在客户探测</CardTitle>
+          <CardDescription style={{ marginTop: '20px', color: '#fe4c24' }}>获取最新国家知识产权局数据库的快照，撤三数据每周一周三更新，驳回数据每周一，周五更新</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Date Selection Controls */}
+          <div className="flex flex-row gap-4 items-center mb-6">
+            <span style={{ color: '#26d', fontSize: '14px' }}>2025-4-11 前数据</span>
+            <input
+              type="date"
+              value={startDate}
+              max="2025-04-11"
+              disabled={loading}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setEndDate(e.target.value);
+              }}
+              style={{
+                padding: '3px 10px',
+                border: '#ccc 1px solid',
+                borderRadius: '8px',
+                opacity: loading ? 0.6 : 1,
+                fontSize: '14px'
+              }}
+            />
+            <span style={{ color: '#26d', fontSize: '14px' }}>2025-4-11 后数据</span>
+            <select
+              disabled={loading}
+              onChange={(e) => {
+                const selectedIndex = parseInt(e.target.value);
+                const selectedItem = dateList[selectedIndex];
+                setStartDate(selectedItem.item);
+                setEndDate(selectedItem.item);
+                setContent(selectedItem.content);
+              }}
+              style={{
+                border: '#ccc 1px solid',
+                padding: '3px 10px',
+                borderRadius: '8px',
+                opacity: loading ? 0.6 : 1,
+                fontSize: '14px'
+              }}>
+              {dateList.map((item, index) => (
+                <option style={{ fontSize: '14px' }} key={index} value={index}>{item.item} {index === 0 ? '最近更新' : ''}</option>
+              ))}
+            </select>
+            {loading && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="w-4 h-4">
+                  <LoadingSvg />
                 </div>
-              )}
-              
+                <span>加载中...</span>
+              </div>
+            )}
+
+          </div>
+          {content && (
+            <div className="w-full flex items-center gap-2 text-gray-600 mb-4">
+              <span>{content}</span>
             </div>
-            {content && (
-                <div className="w-full flex items-center gap-2 text-gray-600 mb-4">
-                  <span>{content}</span>
-                </div>
-              )}
-            {/* Loading Buttons Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-              {buttonConfigs.map((config, index) => (
-                <div key={config.id} className="flex flex-col gap-2">
+          )}
+          {/* Loading Buttons Grid */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            {buttonConfigs.map((config, index) => (
+              <Card key={config.id} className="w-[220px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white">
+                <CardContent className="p-4">
                   <Button
                     onClick={() => exportToCSV(String(username), config, dataStates[index] as any)}
                     disabled={loading}
-                    variant="outline"
-                    className="h-16 flex flex-col items-center justify-center"
-                    style={{ 
-                      borderColor: config.color, 
-                      color: config.color,
+                    variant="ghost"
+                    className="w-full h-16 flex flex-col items-center justify-center p-0 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                    style={{
+
                       opacity: loading ? 0.6 : 1
                     }}
                   >
@@ -186,30 +186,36 @@ export default function CustomersPage() {
                         </span>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="font-bold">{config.name}</span>
-                        {config.id < 10 ? (
-                          <span className="text-xs">{dataStates[index]?.length || 0} 条数据</span>
-                          ) : (
-                            <span className="text-xs">开发中</span>
-                          )}
+                      <div className='w-full flex items-center justify-around'>
+                        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7974" width="36" height="36"><path d="M663.04 112.64h-430.08c-29.184 0-52.736 22.528-53.248 49.664v698.368c0 27.648 23.552 49.664 53.248 49.664h557.568c29.184 0 52.736-22.528 52.736-49.664V302.08l-180.224-189.44z" fill="#5393FB" p-id="7975"></path><path d="M663.03488 112.64v189.44h180.736l-180.736-189.44z" fill="#0850C6" p-id="7976"></path><path d="M338.18112 376.53504c0-12.8 9.728-23.04 22.016-23.04h301.568c12.288 0 22.016 10.24 22.016 23.04s-9.728 23.04-22.016 23.04h-301.568c-11.776 0.512-22.016-10.24-22.016-23.04zM394.50112 603.35104c-2.56 0-4.608 1.536-5.632 4.096-1.024 2.56-0.512 5.632 1.536 7.168l112.128 112.64c2.048 2.56 5.632 4.096 8.704 4.096 3.072 0 6.656-1.536 8.704-4.096l112.128-112.64c1.536-2.048 2.048-4.608 1.536-7.168-1.024-2.56-3.072-4.096-5.632-4.096h-66.048v-112.64c0-7.168-5.632-13.312-12.8-13.312h-75.776c-6.656 0-12.288 6.144-12.8 13.312v112.64h-66.048z" fill="#FFFFFF" ></path></svg>
+                        <div className="flex flex-col items-left">
+                          <div className="flex items-center gap-1 justify-between mb-2">
+                            <span style={{ color: '#1c252e' }} className="font-bold text-[16px]  opacity-90">{config.name}</span>
+
+                          </div>
+                          <div className="flex items-center gap-1 justify-between">
+
+                            {config.id < 10 ? (
+                              <div className="flex items-center gap-1">
+                                <span style={{ color: '#26d' }} className="text-[12px]  opacity-90">点击下载</span>
+                                <span style={{ color: '#26d' }} className="text-xs opacity-75">({dataStates[index]?.length || 0} 条数据)</span>
+                              </div>
+                            ) : (
+                              <span style={{ color: '#26d' }} className="text-xs opacity-75">开发中</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
+
                     )}
                   </Button>
-                  
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-        {role !== 1 && (
-          <div className="text-center py-8 text-gray-500">
-            <p>抱歉，您没有权限访问此功能</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        )}
 
-        {/* Data Display */}
-        {/* {dataStates.map((data, buttonIndex) => 
+          {/* Data Display */}
+          {/* {dataStates.map((data, buttonIndex) => 
           data.length > 0 && (
             <Card key={buttonIndex} className="mb-6">
               <CardHeader>
@@ -281,8 +287,8 @@ export default function CustomersPage() {
           )
         )} */}
 
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
     </Suspense>
   );
 }
