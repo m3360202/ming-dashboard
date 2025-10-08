@@ -149,11 +149,11 @@ export default function CustomersPage() {
         <CardContent>
           {/* Date Selection Controls */}
           <div className="flex flex-row gap-4 items-center mb-6">
-            <span style={{ color: '#26d', fontSize: '14px' }}>2025-4-11 前数据</span>
+            <span style={{ color: '#26d', fontSize: '14px' }}>选择日期（全日期可选支持）</span>
             <input
               type="date"
               value={startDate}
-              max="2025-04-11"
+              // max="2025-04-11"
               disabled={loading}
               onChange={(e) => {
                 setStartDate(e.target.value);
@@ -169,8 +169,8 @@ export default function CustomersPage() {
                 fontSize: '14px'
               }}
             />
-            <span style={{ color: '#26d', fontSize: '14px' }}>2025-4-11 后数据</span>
-            <select
+            <span style={{ color: '#26d', fontSize: '14px' }}></span>
+            {/* <select
               disabled={loading}
               onChange={(e) => {
                 const selectedIndex = parseInt(e.target.value);
@@ -191,7 +191,7 @@ export default function CustomersPage() {
               {dateList.map((item, index) => (
                 <option style={{ fontSize: '14px' }} key={index} value={index}>{item.item} {index === 0 ? '最近更新' : ''}</option>
               ))}
-            </select>
+            </select> */}
             {loading && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="w-4 h-4">
