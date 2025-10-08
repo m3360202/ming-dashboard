@@ -42,6 +42,7 @@ import Dspng from '@/images/deepseek.png';
 import Mingpng from '@/images/ming.jpeg';
 import Hyperpng from '@/images/hyper.jpeg';
 import axios from 'axios';
+import Qrcodepng from '@/images/qrcode.png';
 
 export default function DashboardLayout({
   children
@@ -258,6 +259,16 @@ function DesktopNav({ role, username }: { role: number; username: String; }) {
             <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史合同记录</span>
           </div>
         </NavItem>
+        {/* 二维码图片 */}
+          <div className="flex flex-col items-center gap-2 mt-4">
+            <img 
+              src={Qrcodepng.src}
+              width="120"
+              height="120"
+              alt="智慧树二维码" 
+              className="w-24 h-24 rounded-lg shadow-md"
+            />
+          </div>
         {/* <NavItem href="#" label="Dashboard">
           <div className="flex flex-col items-start">
             <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
@@ -418,9 +429,12 @@ function MobileNav({ role }: { role: number }) {
               <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史合同记录</span>
             </div>
           </NavItem>
+          
         </nav>
 
         <nav className="mt-auto flex flex-col items-start justify-start gap-4 px-2 sm:py-5">
+          
+          
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
