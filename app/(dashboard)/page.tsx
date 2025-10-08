@@ -16,22 +16,23 @@ import {
 } from '@/utils/trademarkUtils';
 import axios from 'axios';
 import { exportToCSV, loadData } from '@/utils/exportCvs';
+import '@/views/TrademarkDetective/style.css';
 
 export default function CustomersPage() {
   const { username } = useUser();
   const [dataStates, setDataStates] = useState<TrademarkItem[][]>(new Array(10).fill([]));
+  const [dataCounts, setDataCounts] = useState<number[]>([0, 0, 0]); // 数据数量
   const [dateList, setDateList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingCardId, setLoadingCardId] = useState<number | null>(null); // 当前加载的卡片ID
   const [content, setContent] = useState<string>('');
 
   const getDateList = async () => {
     setLoading(true);
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/dataList', {
-
-      });
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/dataList', {});
 
       if (res?.data?.success) {
         setDateList(res?.data?.data);
@@ -50,23 +51,63 @@ export default function CustomersPage() {
     }
   };
 
-  // 加载数据的函数
-  const loadAllData = async (start: string, end: string) => {
-    setLoading(true);
+  // 获取数据数量
+  const getDataCounts = async (start: string, end: string) => {
     try {
-      const result = await loadData(start, end);
-      if (result.success) {
-        const newDataStates = new Array(10).fill([]);
-        newDataStates[0] = result.data7 || [];
-        newDataStates[1] = result.data8 || [];
-        newDataStates[2] = result.data9 || [];
-        setDataStates(newDataStates);
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/dataListCount', {
+        startDate: start,
+        endDate: end
+      });
+
+      console.log('数据数量请求结果:', res?.data);
+      if (res?.data?.success) {
+        const counts = res.data.total || [0, 0, 0];
+        console.log('设置数据数量:', counts);
+        setDataCounts(counts);
       }
+    } catch (error) {
+      console.log('获取数量失败:', error);
+    }
+  };
+
+  // 加载单个卡片的数据
+  const loadCardData = async (cardIndex: number, start: string, end: string) => {
+    setLoadingCardId(cardIndex);
+    try {
+      // 根据卡片索引确定API端点
+      let apiEndpoint = '';
+      if (cardIndex === 0) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData7';
+      else if (cardIndex === 1) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData8';
+      else if (cardIndex === 2) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData9';
+      
+      if (!apiEndpoint) {
+        throw new Error('无效的卡片索引');
+      }
+
+      // 只请求对应卡片的数据
+      const response = await axios.post(apiEndpoint, {
+        startDate: start,
+        endDate: end
+      });
+
+      if (response?.data?.success) {
+        const cardData = response.data.data || [];
+        
+        // 更新状态
+        const newDataStates = [...dataStates];
+        newDataStates[cardIndex] = cardData;
+        setDataStates(newDataStates);
+        
+        // 返回加载的数据
+        return cardData;
+      }
+      return [];
     } catch (error) {
       console.error('加载数据失败:', error);
       alert('加载数据失败');
+      return [];
     } finally {
-      setLoading(false);
+      setLoadingCardId(null);
     }
   };
 
@@ -93,7 +134,8 @@ export default function CustomersPage() {
 
   useEffect(() => {
     if (startDate && endDate) {
-      loadAllData(startDate, endDate);
+      // 只获取数量，不加载具体数据
+      getDataCounts(startDate, endDate);
     }
   }, [startDate, endDate]);
 
@@ -116,6 +158,8 @@ export default function CustomersPage() {
               onChange={(e) => {
                 setStartDate(e.target.value);
                 setEndDate(e.target.value);
+                // 清空已加载的数据，重新获取数量
+                setDataStates(new Array(10).fill([]));
               }}
               style={{
                 padding: '3px 10px',
@@ -134,6 +178,8 @@ export default function CustomersPage() {
                 setStartDate(selectedItem.item);
                 setEndDate(selectedItem.item);
                 setContent(selectedItem.content);
+                // 清空已加载的数据，重新获取数量
+                setDataStates(new Array(10).fill([]));
               }}
               style={{
                 border: '#ccc 1px solid',
@@ -167,23 +213,44 @@ export default function CustomersPage() {
               <Card key={config.id} className="w-[220px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white">
                 <CardContent className="p-4">
                   <Button
-                    onClick={() => exportToCSV(String(username), config, dataStates[index] as any)}
-                    disabled={loading}
+                    onClick={async () => {
+                      try {
+                        // 检查是否已有数据
+                        if (index < 3 && dataStates[index].length === 0) {
+                          // 没有数据，先加载数据
+                          const loadedData = await loadCardData(index, startDate, endDate);
+                          if (loadedData && loadedData.length > 0) {
+                            exportToCSV(String(username), config, loadedData as any);
+                          } else {
+                            alert('暂无数据可导出');
+                          }
+                        } else {
+                          // 已有数据，直接导出
+                          const currentData = dataStates[index];
+                          if (currentData && currentData.length > 0) {
+                            exportToCSV(String(username), config, currentData as any);
+                          } else {
+                            alert('暂无数据可导出');
+                          }
+                        }
+                      } catch (error) {
+                        console.error('操作失败:', error);
+                        alert('操作失败，请重试');
+                      }
+                    }}
+                    disabled={loading || loadingCardId === index}
                     variant="ghost"
                     className="w-full h-16 flex flex-col items-center justify-center p-0 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                     style={{
-
-                      opacity: loading ? 0.6 : 1
+                      opacity: (loading || loadingCardId === index) ? 0.6 : 1
                     }}
                   >
-                    {loading ? (
+                    {loadingCardId === index ? (
                       <div className="flex flex-col items-center gap-1">
                         <div className="w-4 h-4">
                           <LoadingSvg />
                         </div>
-                        <span className="text-xs">
-                          {loading ? '数据加载中...' : '导出中...'}
-                        </span>
+                        <span className="text-xs">数据加载中...</span>
                       </div>
                     ) : (
                       <div className='w-full flex items-center justify-around'>
@@ -197,8 +264,10 @@ export default function CustomersPage() {
 
                             {config.id < 10 ? (
                               <div className="flex items-center gap-1">
-                                <span style={{ color: '#26d' }} className="text-[12px]  opacity-90">点击下载</span>
-                                <span style={{ color: '#26d' }} className="text-xs opacity-75">({dataStates[index]?.length || 0} 条数据)</span>
+                                <span style={{ color: '#26d' }} className="text-[12px] opacity-90">点击下载</span>
+                                <span style={{ color: '#26d' }} className="text-xs opacity-75">
+                                  ({index < 3 ? dataCounts[index] || 0 : dataStates[index]?.length || 0} 条数据)
+                                </span>
                               </div>
                             ) : (
                               <span style={{ color: '#26d' }} className="text-xs opacity-75">开发中</span>

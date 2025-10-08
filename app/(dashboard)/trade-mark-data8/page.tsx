@@ -7,7 +7,7 @@ import { File } from 'lucide-react';
 import { textMark } from '@/utils/origin';
 
 export default function ItemsTable() {
-  const productsPerPage = 100;
+  const productsPerPage = 20;
   const [pageStart, setPageStart] = useState(0);
   const [pageTotal, setPageTotal] = useState(0);
   const [pages, setPages] = useState(0);
@@ -18,9 +18,9 @@ export default function ItemsTable() {
     if (isWriting) return; // 如果正在写入，则不获取新数据
 
     try {
-      const res = await axios.post('http://localhost:8080/handleGetWUXIAOTargetList', {
+      const res = await axios.post('http://localhost:8080/handleGetqjWUXIAOTargetList', {
         pageNo: pageNo,
-        pageSize: productsPerPage
+        pageSize: 20
       });
 
       if (res?.data?.data) {
@@ -71,7 +71,7 @@ export default function ItemsTable() {
 
   const writeToDB = async (dataList: any) => {
     try {
-      const data= {dataList: dataList, add_time: '2025-07-21'}
+      const data= {dataList: dataList, add_time: '2025-10-09'}
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData8', data, {
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ export default function ItemsTable() {
     let pageStart = 1;
     // return console.log('------------',pages,pageStart + 1)
     aaa = setInterval(async() => {
-      if (pageStart <= 6) {
+      if (pageStart <= 2) {
       getData(pageStart).then((res) => {
         console.log('res',res)
         writeToDB(res); // 在获取数据后继续写入下一页

@@ -18,7 +18,7 @@ export default function ItemsTable() {
     if (isWriting) return; // 如果正在写入，则不获取新数据
 
     try {
-      const res = await axios.post('http://localhost:8080/handleGetBHList', {
+      const res = await axios.post('http://localhost:8080/handleGetqjBHList', {
         pageNo: pageNo,
         pageSize: productsPerPage
       });
@@ -71,7 +71,7 @@ export default function ItemsTable() {
 
   const writeToDB = async (dataList: any) => {
     try {
-      const data= {dataList: dataList, add_time: '2025-07-21'}
+      const data= {dataList: dataList, add_time: '2025-10-09'}
       const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData7', data, {
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ export default function ItemsTable() {
     let pageStart = 1;
     // return console.log('------------',pages,pageStart + 1)
     aaa = setInterval(async() => {
-      if (pageStart <= 20) {
+      if (pageStart <= 100) {
       getData(pageStart).then((res) => {
         console.log('res',res)
         writeToDB(res); // 在获取数据后继续写入下一页
@@ -110,7 +110,7 @@ export default function ItemsTable() {
       clearInterval(aaa);
       console.log('所有数据已写入完毕');
     }
-    }, 35000);
+    }, 15000);
   }
   return (
     <Card>
