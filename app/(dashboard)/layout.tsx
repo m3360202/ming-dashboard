@@ -222,7 +222,7 @@ function DesktopNav({ role, username }: { role: number; username: String; }) {
               window.open('https://docs.qq.com/mind/DTUpjeUJDeFFvWkxw?subId=BB08J2&mode=mind', '_blank')
             }} className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
               <svg fill="rgb(100, 116, 139)" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-              <path d="M826.4 615.9h-40.7v-60.7c0-33.7-27.5-61.2-61.2-61.2H543.7v-85.9h40.6c39.6 0 71.9-32.3 71.9-71.9V190.9c0-39.6-32.2-71.8-71.8-71.8H439c-39.6 0-71.8 32.2-71.8 71.8v145.4c0 39.6 32.2 71.8 71.8 71.8h40.7V494h-181c-33.7 0-61.2 27.5-61.2 61.2v60.7h-40.6c-39.6 0-71.8 32.2-71.8 71.8v145.4c0 39.6 32.2 71.8 71.8 71.8h145.3c19.3 0 37.4-7.5 51-21.2 13.5-13.6 20.9-31.6 20.8-50.7V687.7c0-39.6-32.2-71.8-71.8-71.8h-40.7V558h420.2v57.9h-40.6c-39.6 0-71.8 32.2-71.8 71.8v145.4c0 39.6 32.2 71.8 71.8 71.8h145.4c19.2 0 37.3-7.5 50.9-21.1 13.5-13.6 20.9-31.6 20.8-50.7V687.7c0-39.6-32.2-71.8-71.8-71.8zM431.2 336.3V190.9c0-4.3 3.5-7.8 7.8-7.8h145.4c4.3 0 7.8 3.5 7.8 7.8v145.3c0 4.4-3.5 7.9-7.9 7.9H439c-4.3 0-7.8-3.5-7.8-7.8zM350 687.7v145.5c0 2.6-1.2 4.3-2.2 5.3-1.1 1.1-2.9 2.3-5.6 2.3H196.9c-4.3 0-7.8-3.5-7.8-7.8V687.7c0-4.3 3.5-7.8 7.8-7.8h145.3c4.3 0 7.8 3.5 7.8 7.8z m484.2 145.5c0 2.6-1.2 4.4-2.2 5.4-1 1-2.8 2.3-5.5 2.3H681.1c-4.3 0-7.8-3.5-7.8-7.8V687.7c0-4.3 3.5-7.8 7.8-7.8h145.3c4.3 0 7.8 3.5 7.8 7.8v145.5z"></path></svg>
+                <path d="M826.4 615.9h-40.7v-60.7c0-33.7-27.5-61.2-61.2-61.2H543.7v-85.9h40.6c39.6 0 71.9-32.3 71.9-71.9V190.9c0-39.6-32.2-71.8-71.8-71.8H439c-39.6 0-71.8 32.2-71.8 71.8v145.4c0 39.6 32.2 71.8 71.8 71.8h40.7V494h-181c-33.7 0-61.2 27.5-61.2 61.2v60.7h-40.6c-39.6 0-71.8 32.2-71.8 71.8v145.4c0 39.6 32.2 71.8 71.8 71.8h145.3c19.3 0 37.4-7.5 51-21.2 13.5-13.6 20.9-31.6 20.8-50.7V687.7c0-39.6-32.2-71.8-71.8-71.8h-40.7V558h420.2v57.9h-40.6c-39.6 0-71.8 32.2-71.8 71.8v145.4c0 39.6 32.2 71.8 71.8 71.8h145.4c19.2 0 37.3-7.5 50.9-21.1 13.5-13.6 20.9-31.6 20.8-50.7V687.7c0-39.6-32.2-71.8-71.8-71.8zM431.2 336.3V190.9c0-4.3 3.5-7.8 7.8-7.8h145.4c4.3 0 7.8 3.5 7.8 7.8v145.3c0 4.4-3.5 7.9-7.9 7.9H439c-4.3 0-7.8-3.5-7.8-7.8zM350 687.7v145.5c0 2.6-1.2 4.3-2.2 5.3-1.1 1.1-2.9 2.3-5.6 2.3H196.9c-4.3 0-7.8-3.5-7.8-7.8V687.7c0-4.3 3.5-7.8 7.8-7.8h145.3c4.3 0 7.8 3.5 7.8 7.8z m484.2 145.5c0 2.6-1.2 4.4-2.2 5.4-1 1-2.8 2.3-5.5 2.3H681.1c-4.3 0-7.8-3.5-7.8-7.8V687.7c0-4.3 3.5-7.8 7.8-7.8h145.3c4.3 0 7.8 3.5 7.8 7.8v145.5z"></path></svg>
               <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">业务设计框架</span>
             </div></NavItem>)}
         <NavItem href="order" label="Order">
@@ -259,16 +259,44 @@ function DesktopNav({ role, username }: { role: number; username: String; }) {
             <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史合同记录</span>
           </div>
         </NavItem>
+        <NavItem href="email-broadcast" label="EmailBroadcast" nav1={'邮件群发'} nav2={'邮件发送'}>
+              <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start">
+                <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">邮件群发系统</span>
+              </div>
+            </NavItem>
+            <NavItem href="email-status" label="EmailStatus" nav1={'邮件群发'} nav2={'发送结果查询'}>
+              <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+                <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  <path d="M13 7H7"></path>
+                  <path d="M17 11H7"></path>
+                </svg>
+                <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">发送结果查询</span>
+              </div>
+            </NavItem>
+
+            <NavItem href="sms-broadcast" label="SmsBroadcast" nav1={'短信群发'} nav2={'短信发送'}>
+              <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start">
+                <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">短信群发系统</span>
+              </div>
+            </NavItem>
         {/* 二维码图片 */}
-          <div className="flex flex-col items-center gap-2 mt-4">
-            <img 
-              src={Qrcodepng.src}
-              width="120"
-              height="120"
-              alt="智慧树二维码" 
-              className="w-24 h-24 rounded-lg shadow-md"
-            />
-          </div>
+        <div className="flex flex-col items-center gap-2 mt-4">
+          <img
+            src={Qrcodepng.src}
+            width="120"
+            height="120"
+            alt="智慧树二维码"
+            className="w-24 h-24 rounded-lg shadow-md"
+          />
+        </div>
         {/* <NavItem href="#" label="Dashboard">
           <div className="flex flex-col items-start">
             <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] mt-2 justify-start">
@@ -429,12 +457,31 @@ function MobileNav({ role }: { role: number }) {
               <span className="text-[rgb(100, 116, 139)] text-[14px] hover:text-[#1c252e]">历史合同记录</span>
             </div>
           </NavItem>
-          
+          <NavItem href="email-broadcast" label="EmailBroadcast" nav1={'邮件群发'} nav2={'邮件发送'}>
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start">
+              <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">邮件群发系统</span>
+            </div>
+          </NavItem>
+          <NavItem href="email-status" label="EmailStatus" nav1={'邮件群发'} nav2={'发送结果查询'}>
+            <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-[#1c252e] justify-start ml-4">
+              <svg className="text-[rgb(100, 116, 139)] hover:text-[#1c252e]" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                <path d="M13 7H7"></path>
+                <path d="M17 11H7"></path>
+              </svg>
+              <span className="text-[rgb(100, 116, 139)] font-[14px] hover:text-[#1c252e]">发送结果查询</span>
+            </div>
+          </NavItem>
+
         </nav>
 
         <nav className="mt-auto flex flex-col items-start justify-start gap-4 px-2 sm:py-5">
-          
-          
+
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Link

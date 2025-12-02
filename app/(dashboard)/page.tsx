@@ -21,7 +21,7 @@ import '@/views/TrademarkDetective/style.css';
 export default function CustomersPage() {
   const { username } = useUser();
   const [dataStates, setDataStates] = useState<TrademarkItem[][]>(new Array(10).fill([]));
-  const [dataCounts, setDataCounts] = useState<number[]>([0, 0, 0]); // 数据数量
+  const [dataCounts, setDataCounts] = useState<number[]>([0, 0, 0, 0]); // 数据数量
   const [dateList, setDateList] = useState<any[]>([]);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -61,9 +61,14 @@ export default function CustomersPage() {
 
       console.log('数据数量请求结果:', res?.data);
       if (res?.data?.success) {
-        const counts = res.data.total || [0, 0, 0];
-        console.log('设置数据数量:', counts);
-        setDataCounts(counts);
+        const counts = res.data.total || [0, 0, 0, 0];
+        // 确保数组有4个元素
+        const paddedCounts = [...counts];
+        while (paddedCounts.length < 4) {
+          paddedCounts.push(0);
+        }
+        console.log('设置数据数量:', paddedCounts);
+        setDataCounts(paddedCounts.slice(0, 4));
       }
     } catch (error) {
       console.log('获取数量失败:', error);
@@ -79,6 +84,7 @@ export default function CustomersPage() {
       if (cardIndex === 0) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData7';
       else if (cardIndex === 1) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData8';
       else if (cardIndex === 2) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData9';
+      else if (cardIndex === 3) apiEndpoint = 'https://ai.aliensoft.com.cn/api/loadData11';
       
       if (!apiEndpoint) {
         throw new Error('无效的卡片索引');
@@ -144,7 +150,7 @@ export default function CustomersPage() {
       <Card>
         <CardHeader>
           <CardTitle>潜在客户探测</CardTitle>
-          <CardDescription style={{ marginTop: '20px', color: '#fe4c24' }}>获取最新国家知识产权局数据库的快照，撤三数据每周一周三更新，驳回数据每周一，周五更新</CardDescription>
+          <CardDescription style={{ marginTop: '20px', color: '#fe4c24' }}>获取最新国家知识产权局数据库的快照，所有数据每周一周三更新，客户情报分析每周一更新，周三可能更新</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Date Selection Controls */}
@@ -170,7 +176,7 @@ export default function CustomersPage() {
               }}
             />
             <span style={{ color: '#26d', fontSize: '14px' }}></span>
-            {/* <select
+            <select
               disabled={loading}
               onChange={(e) => {
                 const selectedIndex = parseInt(e.target.value);
@@ -191,7 +197,7 @@ export default function CustomersPage() {
               {dateList.map((item, index) => (
                 <option style={{ fontSize: '14px' }} key={index} value={index}>{item.item} {index === 0 ? '最近更新' : ''}</option>
               ))}
-            </select> */}
+            </select>
             {loading && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="w-4 h-4">
@@ -209,78 +215,124 @@ export default function CustomersPage() {
           )}
           {/* Loading Buttons Grid */}
           <div className="flex flex-wrap gap-4 mb-6">
-            {buttonConfigs.map((config, index) => (
-              <Card key={config.id} className="w-[220px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white">
-                <CardContent className="p-4">
-                  <Button
-                    onClick={async () => {
-                      try {
-                        // 检查是否已有数据
-                        if (index < 3 && dataStates[index].length === 0) {
-                          // 没有数据，先加载数据
-                          const loadedData = await loadCardData(index, startDate, endDate);
-                          if (loadedData && loadedData.length > 0) {
-                            exportToCSV(String(username), config, loadedData as any);
-                          } else {
-                            alert('暂无数据可导出');
+            {buttonConfigs
+              .filter(config => config.id !== 12 && config.id !== 17) // 过滤掉专利申请需求和企业信用证书需求
+              .map((config, index) => {
+                // 重新计算索引，用于dataCounts和dataStates的访问
+                const originalIndex = buttonConfigs.findIndex(c => c.id === config.id);
+                // 判断是否在前4个卡片中（0, 1, 2, 3），这些卡片会显示数量
+                const isCountCard = originalIndex < 4;
+                // 判断是否是可用的卡片（7, 8, 9, 11）
+                const isAvailableCard = config.id === 7 || config.id === 8 || config.id === 9 || config.id === 11;
+                // 调试信息
+                if (config.id === 11) {
+                  console.log('等待续展卡片:', { configId: config.id, originalIndex, isCountCard, isAvailableCard, dataCount: dataCounts[originalIndex] });
+                }
+                return (
+                  <Card key={config.id} className="w-[220px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white">
+                    <CardContent className="p-4">
+                      <Button
+                        onClick={async () => {
+                          try {
+                            // 检查是否已有数据
+                            if (isCountCard && dataStates[originalIndex].length === 0) {
+                              // 没有数据，先加载数据
+                              const loadedData = await loadCardData(originalIndex, startDate, endDate);
+                              if (loadedData && loadedData.length > 0) {
+                                exportToCSV(String(username), config, loadedData as any);
+                              } else {
+                                alert('暂无数据可导出');
+                              }
+                            } else {
+                              // 已有数据，直接导出
+                              const currentData = dataStates[originalIndex];
+                              if (currentData && currentData.length > 0) {
+                                exportToCSV(String(username), config, currentData as any);
+                              } else {
+                                alert('暂无数据可导出');
+                              }
+                            }
+                          } catch (error) {
+                            console.error('操作失败:', error);
+                            alert('操作失败，请重试');
                           }
-                        } else {
-                          // 已有数据，直接导出
-                          const currentData = dataStates[index];
-                          if (currentData && currentData.length > 0) {
-                            exportToCSV(String(username), config, currentData as any);
-                          } else {
-                            alert('暂无数据可导出');
-                          }
-                        }
-                      } catch (error) {
-                        console.error('操作失败:', error);
-                        alert('操作失败，请重试');
-                      }
-                    }}
-                    disabled={loading || loadingCardId === index}
-                    variant="ghost"
-                    className="w-full h-16 flex flex-col items-center justify-center p-0 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-                    style={{
-                      opacity: (loading || loadingCardId === index) ? 0.6 : 1
-                    }}
-                  >
-                    {loadingCardId === index ? (
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="w-4 h-4">
-                          <LoadingSvg />
-                        </div>
-                        <span className="text-xs">数据加载中...</span>
-                      </div>
-                    ) : (
-                      <div className='w-full flex items-center justify-around'>
-                        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7974" width="36" height="36"><path d="M663.04 112.64h-430.08c-29.184 0-52.736 22.528-53.248 49.664v698.368c0 27.648 23.552 49.664 53.248 49.664h557.568c29.184 0 52.736-22.528 52.736-49.664V302.08l-180.224-189.44z" fill="#5393FB" p-id="7975"></path><path d="M663.03488 112.64v189.44h180.736l-180.736-189.44z" fill="#0850C6" p-id="7976"></path><path d="M338.18112 376.53504c0-12.8 9.728-23.04 22.016-23.04h301.568c12.288 0 22.016 10.24 22.016 23.04s-9.728 23.04-22.016 23.04h-301.568c-11.776 0.512-22.016-10.24-22.016-23.04zM394.50112 603.35104c-2.56 0-4.608 1.536-5.632 4.096-1.024 2.56-0.512 5.632 1.536 7.168l112.128 112.64c2.048 2.56 5.632 4.096 8.704 4.096 3.072 0 6.656-1.536 8.704-4.096l112.128-112.64c1.536-2.048 2.048-4.608 1.536-7.168-1.024-2.56-3.072-4.096-5.632-4.096h-66.048v-112.64c0-7.168-5.632-13.312-12.8-13.312h-75.776c-6.656 0-12.288 6.144-12.8 13.312v112.64h-66.048z" fill="#FFFFFF" ></path></svg>
-                        <div className="flex flex-col items-left">
-                          <div className="flex items-center gap-1 justify-between mb-2">
-                            <span style={{ color: '#1c252e' }} className="font-bold text-[16px]  opacity-90">{config.name}</span>
-
+                        }}
+                        disabled={loading || loadingCardId === originalIndex}
+                        variant="ghost"
+                        className="w-full h-16 flex flex-col items-center justify-center p-0 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                        style={{
+                          opacity: (loading || loadingCardId === originalIndex) ? 0.6 : 1
+                        }}
+                      >
+                        {loadingCardId === originalIndex ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-4 h-4">
+                              <LoadingSvg />
+                            </div>
+                            <span className="text-xs">数据加载中...</span>
                           </div>
-                          <div className="flex items-center gap-1 justify-between">
+                        ) : (
+                          <div className='w-full flex items-center justify-around'>
+                            <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7974" width="36" height="36"><path d="M663.04 112.64h-430.08c-29.184 0-52.736 22.528-53.248 49.664v698.368c0 27.648 23.552 49.664 53.248 49.664h557.568c29.184 0 52.736-22.528 52.736-49.664V302.08l-180.224-189.44z" fill="#5393FB" p-id="7975"></path><path d="M663.03488 112.64v189.44h180.736l-180.736-189.44z" fill="#0850C6" p-id="7976"></path><path d="M338.18112 376.53504c0-12.8 9.728-23.04 22.016-23.04h301.568c12.288 0 22.016 10.24 22.016 23.04s-9.728 23.04-22.016 23.04h-301.568c-11.776 0.512-22.016-10.24-22.016-23.04zM394.50112 603.35104c-2.56 0-4.608 1.536-5.632 4.096-1.024 2.56-0.512 5.632 1.536 7.168l112.128 112.64c2.048 2.56 5.632 4.096 8.704 4.096 3.072 0 6.656-1.536 8.704-4.096l112.128-112.64c1.536-2.048 2.048-4.608 1.536-7.168-1.024-2.56-3.072-4.096-5.632-4.096h-66.048v-112.64c0-7.168-5.632-13.312-12.8-13.312h-75.776c-6.656 0-12.288 6.144-12.8 13.312v112.64h-66.048z" fill="#FFFFFF" ></path></svg>
+                            <div className="flex flex-col items-left">
+                              <div className="flex items-center gap-1 justify-between mb-2">
+                                <span style={{ color: '#1c252e' }} className="font-bold text-[16px]  opacity-90">{config.name}</span>
 
-                            {config.id < 10 ? (
-                              <div className="flex items-center gap-1">
-                                <span style={{ color: '#26d' }} className="text-[12px] opacity-90">点击下载</span>
-                                <span style={{ color: '#26d' }} className="text-xs opacity-75">
-                                  ({index < 3 ? dataCounts[index] || 0 : dataStates[index]?.length || 0} 条数据)
-                                </span>
                               </div>
-                            ) : (
-                              <span style={{ color: '#26d' }} className="text-xs opacity-75">开发中</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                              <div className="flex items-center gap-1 justify-between">
 
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                                {isAvailableCard ? (
+                                  <div className="flex items-center gap-1">
+                                    <span style={{ color: '#26d' }} className="text-[12px] opacity-90">点击下载</span>
+                                    <span style={{ color: '#26d' }} className="text-xs opacity-75">
+                                      ({isCountCard ? dataCounts[originalIndex] || 0 : dataStates[originalIndex]?.length || 0} 条数据)
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span style={{ color: '#26d' }} className="text-xs opacity-75">开发中</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+          </div>
+          {/* 成交价值分析报告下载卡片 - 单独一行 */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            <Card className="w-[220px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white">
+              <CardContent className="p-4">
+                <Button
+                  onClick={() => {
+                    // 直接使用静态文件路径，Next.js 会自动处理 public 文件夹
+                    const link = document.createElement('a');
+                    link.href = '/anz/数据分析.zip';
+                    link.download = '数据分析.zip';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  variant="ghost"
+                  className="w-full h-16 flex flex-col items-center justify-center p-0 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                >
+                  <div className='w-full flex items-center justify-around'>
+                    <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7974" width="36" height="36"><path d="M663.04 112.64h-430.08c-29.184 0-52.736 22.528-53.248 49.664v698.368c0 27.648 23.552 49.664 53.248 49.664h557.568c29.184 0 52.736-22.528 52.736-49.664V302.08l-180.224-189.44z" fill="#5393FB" p-id="7975"></path><path d="M663.03488 112.64v189.44h180.736l-180.736-189.44z" fill="#0850C6" p-id="7976"></path><path d="M338.18112 376.53504c0-12.8 9.728-23.04 22.016-23.04h301.568c12.288 0 22.016 10.24 22.016 23.04s-9.728 23.04-22.016 23.04h-301.568c-11.776 0.512-22.016-10.24-22.016-23.04zM394.50112 603.35104c-2.56 0-4.608 1.536-5.632 4.096-1.024 2.56-0.512 5.632 1.536 7.168l112.128 112.64c2.048 2.56 5.632 4.096 8.704 4.096 3.072 0 6.656-1.536 8.704-4.096l112.128-112.64c1.536-2.048 2.048-4.608 1.536-7.168-1.024-2.56-3.072-4.096-5.632-4.096h-66.048v-112.64c0-7.168-5.632-13.312-12.8-13.312h-75.776c-6.656 0-12.288 6.144-12.8 13.312v112.64h-66.048z" fill="#FFFFFF" ></path></svg>
+                    <div className="flex flex-col items-left">
+                      <div className="flex items-center gap-1 justify-between mb-2">
+                        <span style={{ color: '#1c252e' }} className="font-bold text-[16px] opacity-90">成交价值分析报告</span>
+                      </div>
+                      <div className="flex items-center gap-1 justify-between">
+                        <span style={{ color: '#26d' }} className="text-[12px] opacity-90">点击下载</span>
+                      </div>
+                    </div>
+                  </div>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Data Display */}

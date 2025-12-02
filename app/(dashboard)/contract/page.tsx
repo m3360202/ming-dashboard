@@ -23,7 +23,7 @@ import { clsData } from '@/utils/trademarkCls';
 
 import { convertToChineseCurrency, base64Parser } from '@/utils/index';
 
-import { addImageToPDF } from '@/utils/generalPdf';
+// import { addImageToPDF } from '@/utils/generalPdf';
 
 export default function ContractPage() {
   const { role, userId, username, realname } = useUser();
@@ -120,18 +120,18 @@ export default function ContractPage() {
     }
   }
 
-  async function delayAsyncOperation(pdfUrl: string, imageUrl: string, position: { x: number; y: number }): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          const pdfResult = await addImageToPDF({ pdfUrl, imageUrl, position });
-          resolve(pdfResult);
-        } catch (error) {
-          reject(error);
-        }
-      }, 20000);
-    });
-  }
+  // async function delayAsyncOperation(pdfUrl: string, imageUrl: string, position: { x: number; y: number }): Promise<Blob> {
+  //   return new Promise((resolve, reject) => {
+  //     setTimeout(async () => {
+  //       try {
+  //         const pdfResult = await addImageToPDF({ pdfUrl, imageUrl, position });
+  //         resolve(pdfResult);
+  //       } catch (error) {
+  //         reject(error);
+  //       }
+  //     }, 20000);
+  //   });
+  // }
 
   const handleSaveContract = async () => {
     try {
@@ -236,8 +236,8 @@ export default function ContractPage() {
       }
       
       if(contractType === '著作权服务') {
-        let pdfResult = await delayAsyncOperation('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+result,'https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+file,{x:100,y:400})
-
+        // let pdfResult = await delayAsyncOperation('https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+result,'https://hypergpt.oss-ap-southeast-1.aliyuncs.com/'+file,{x:100,y:400})
+        let pdfResult = null;
         saveData = {
           userId: userId,
           customer,

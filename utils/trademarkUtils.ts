@@ -273,6 +273,15 @@ export const buttonConfigs = [
     dateType: 'rescind'
   },
   { 
+    id: 11, 
+    name: '等待续展', 
+    api: 'loadData11', 
+    color: '#07c160', 
+    description: '等待续展的商标数据',
+    type: 'table11' as const,
+    dateType: 'accept'
+  },
+  { 
     id: 12, 
     name: '专利申请需求', 
     api: 'loadData11', 

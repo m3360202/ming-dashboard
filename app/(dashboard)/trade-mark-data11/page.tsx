@@ -18,10 +18,20 @@ export default function ItemsTable() {
     if (isWriting) return; // 如果正在写入，则不获取新数据
 
     try {
-      const res = await axios.post('http://localhost:8080/handleGetqjWUXIAOTargetList', {
-        pageNo: pageNo,
-        pageSize: productsPerPage
+      const params = new URLSearchParams({
+        pageNo: pageNo.toString(),
+        pageSize: productsPerPage.toString(),
+        intCls: '',
+        province: '',
+        city: '',
+        regYear: '',
+        appDate: '',
+        state: '',
+        一级地区: '',
+        二级地区: '',
+        xzDateType: ''
       });
+      const res = await axios.get(`http://localhost:8080/handleGetExtensionClueList?${params.toString()}`);
 
       if (res?.data?.data) {
         console.log('------', res?.data?.data?.list);
@@ -46,7 +56,7 @@ export default function ItemsTable() {
   const writeToDBSingle = async () => {
     const data = textMark;
     try {
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData8', data, {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData11', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -72,7 +82,7 @@ export default function ItemsTable() {
   const writeToDB = async (dataList: any) => {
     try {
       const data= {dataList: dataList, add_time: '2025-12-01'}
-      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData8', data, {
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/saveData11', data, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -99,7 +109,7 @@ export default function ItemsTable() {
     let pageStart = 0;
     // return console.log('------------',pages,pageStart + 1)
     aaa = setInterval(async() => {
-      if (pageStart <= 3) {
+      if (pageStart <= 54) {
       getData(pageStart).then((res) => {
         console.log('res',res)
         writeToDB(res); // 在获取数据后继续写入下一页

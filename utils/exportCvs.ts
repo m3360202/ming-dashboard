@@ -121,6 +121,44 @@ export const exportToCSV = async (username: string, config: any, data: any) => {
     ].join('\r\n');
   }
 
+  if(index === 11) {
+    name = '等待续展潜在客户数据';
+    headers = [
+      '申请人',
+      '联系人',
+      '联系电话',
+      '联系邮箱',
+      '申请地址',
+      '商标名称',
+      '类目',
+      '注册号',
+      '状态',
+      '申请日期',
+      '注册日期',
+      '到期日期',
+      '代理机构'
+    ];
+
+    csvData = [
+      headers.join(','),
+      ...data.map((product: any) => [
+        product.applicant_cn || product.applicantCn || '',
+        product.oper_name || product.operName || '',
+        escapeCommas(product.contact_phone || product.contactPhone || ''),
+        escapeCommas(product.contact_email || product.contactEmail || ''),
+        product.address_cn || product.addressCn || product.address || '',
+        product.tm_name || product.tmName || '',
+        product.int_cls || product.intCls || '',
+        product.reg_no || product.regNo || '',
+        product.status_name || product.statusName || '',
+        product.app_date || product.appDate || '',
+        product.reg_date || product.regDate || '',
+        product.expire_date || product.expireDate || '',
+        product.agent || ''
+      ].join(','))
+    ].join('\r\n');
+  }
+
   await axios.post('https://ai.aliensoft.com.cn/api/saveRecord', {
     username,
     item: index

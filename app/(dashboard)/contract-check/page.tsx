@@ -11,7 +11,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import * as Dialog from '@radix-ui/react-dialog';
-import ContractPreview  from '@/components/PdfViewer';
+// import ContractPreview  from '@/components/PdfViewer';
 
 export default function ContractCheckPage() {
   const [data, setData] = useState<any[]>([]);
@@ -289,7 +289,7 @@ export default function ContractCheckPage() {
               <div className="flex justify-center items-start mt-8 gap-8">
                 <div className="flex flex-col items-center gap-4">
                   <label className="block text-md font-[600] text-gray-700">合同内容</label>
-                  {pdfUrl && <ContractPreview pdfUrl={pdfUrl} pdf={pdf} setPdf={setPdf} />}
+                  {/* {pdfUrl && <ContractPreview pdfUrl={pdfUrl} pdf={pdf} setPdf={setPdf} />} */}
                   {/* <textarea onChange={()=>{}} value={'aaaaa'} style={{ width: '760px', padding: '10px', height: '400px', overflowY: 'scroll', border: '#ccc 1px solid', color: '#999', fontSize: '14px', lineHeight: '24px'  }} /> */}
                 </div>
               </div>
