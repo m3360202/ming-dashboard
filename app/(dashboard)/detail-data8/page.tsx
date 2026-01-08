@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader } from '@/components/ui/card';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { File, Download, AlertCircle, Brain } from 'lucide-react';
 
 export default function ItemsTable() {
@@ -13,22 +14,24 @@ export default function ItemsTable() {
   const [errorCount, setErrorCount] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState('');
+  const [dateValue, setDateValue] = useState('');
 
   // 延迟函数
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // 获取列表数据
-  const getListData = async (pageNo: number) => {
+  const getListData = async (date: string) => {
     try {
-      setCurrentStatus(`正在获取第 ${pageNo} 页列表数据...`);
-      const res = await axios.post('http://localhost:8080/handleGetqjWUXIAOTargetList', {
-        pageNo: pageNo,
-        pageSize: productsPerPage
+      setCurrentStatus(`正在获取日期 ${date} 的列表数据...`);
+      const res = await axios.post('https://ai.aliensoft.com.cn/api/loadData8', {
+        startDate: date,
+        endDate: date
       });
 
-      if (res?.data?.data?.list) {
-        console.log(`第 ${pageNo} 页数据获取成功，共 ${res.data.data.list.length} 条记录`);
-        return res.data.data.list;
+      if (res?.data?.success && res?.data?.data) {
+        const list = Array.isArray(res.data.data) ? res.data.data : [];
+        console.log(`日期 ${date} 数据获取成功，共 ${list.length} 条记录`);
+        return list;
       } else {
         console.error('获取列表数据失败:', res?.data);
         return [];
@@ -228,7 +231,7 @@ export default function ItemsTable() {
             ${flowText}`;
   };
 
-  // 开始分析所有商标（逐个分析，实时显示进度）
+  // 开始分析所有商标（10个并发执行）
   const startAnalyzing = async () => {
     setIsAnalyzing(true);
     setAnalysisStatus('开始分析商标数据...');
@@ -248,39 +251,50 @@ export default function ItemsTable() {
 
       const trademarks = listRes.data.trademarks;
       const total = trademarks.length;
+      const concurrency = 20; // 并发数量
       
-      setAnalysisStatus(`找到 ${total} 个商标，开始逐个分析...`);
+      setAnalysisStatus(`找到 ${total} 个商标，开始并发分析（每次 ${concurrency} 个）...`);
 
-      // 逐个分析每个商标
-      for (let i = 0; i < trademarks.length; i++) {
-        const tmName = trademarks[i];
+      // 分批并发处理
+      for (let i = 0; i < trademarks.length; i += concurrency) {
+        const batch = trademarks.slice(i, i + concurrency);
+        const batchNum = Math.floor(i / concurrency) + 1;
+        const totalBatches = Math.ceil(trademarks.length / concurrency);
         
-        setAnalysisStatus(`正在分析 [${i + 1}/${total}] ${tmName}...`);
-        
-        try {
-          const res = await axios.post('/api/analyze-trademark', {
-            tmName: tmName
-          });
+        setAnalysisStatus(`正在分析第 ${batchNum}/${totalBatches} 批（${batch.length} 个商标）...`);
 
-          if (res?.data?.success) {
-            setProcessedCount(prev => prev + 1);
-            console.log(`✅ ${tmName} 分析完成`);
-          } else {
+        // 并发执行当前批次
+        const promises = batch.map(async (tmName: string) => {
+          try {
+            const res = await axios.post('/api/analyze-trademark', {
+              tmName: tmName
+            });
+
+            if (res?.data?.success) {
+              setProcessedCount(prev => prev + 1);
+              console.log(`✅ ${tmName} 分析完成`);
+              return { success: true, tmName };
+            } else {
+              setErrorCount(prev => prev + 1);
+              console.error(`❌ ${tmName} 分析失败:`, res?.data?.error);
+              return { success: false, tmName, error: res?.data?.error };
+            }
+          } catch (error) {
             setErrorCount(prev => prev + 1);
-            console.error(`❌ ${tmName} 分析失败:`, res?.data?.error);
+            console.error(`❌ ${tmName} 分析错误:`, error);
+            return { success: false, tmName, error };
           }
-        } catch (error) {
-          setErrorCount(prev => prev + 1);
-          console.error(`❌ ${tmName} 分析错误:`, error);
-        }
+        });
 
-        // 每个商标分析完后等待2秒，避免API限流
-        if (i < trademarks.length - 1) {
-          await delay(2000);
+        await Promise.all(promises);
+
+        // 每批完成后短暂延迟，避免API限流
+        if (i + concurrency < trademarks.length) {
+          await delay(1000);
         }
       }
 
-      setAnalysisStatus(`分析完成！总计 ${total} 个商标，成功 ${total - errorCount} 个，失败 ${errorCount} 个`);
+      setAnalysisStatus(`分析完成！总计 ${total} 个商标，成功 ${processedCount} 个，失败 ${errorCount} 个`);
     } catch (error) {
       console.error('分析过程中发生错误:', error);
       setAnalysisStatus('分析过程中发生错误');
@@ -305,56 +319,48 @@ export default function ItemsTable() {
 
   // 开始处理
   const startProcessing = async () => {
+    if (!dateValue) {
+      setCurrentStatus('请先输入日期');
+      return;
+    }
+
     setIsProcessing(true);
     setProcessedCount(0);
     setErrorCount(0);
     setCurrentStatus('开始处理数据...');
 
-    let pageNo = 0;
-    let hasMorePages = true;
-
     try {
-      while (hasMorePages && pageNo <= 3) { // 限制最多处理10页，避免无限循环
-        setCurrentStatus(`正在获取第 ${pageNo} 页列表数据...`);
-
-        // 获取当前页数据
-        const listData = await getListData(pageNo);
-        if (listData.length === 0) {
-          hasMorePages = false;
-          setCurrentStatus(`第 ${pageNo} 页无数据，处理完成！成功: ${processedCount}, 失败: ${errorCount}`);
-          break;
-        }
-
-        setCurrentStatus(`第 ${pageNo} 页获取成功，共 ${listData.length} 条记录，开始处理详情数据...`);
-
-        // 处理当前页的每个商户
-        for (let i = 0; i < listData.length; i++) {
-          const merchant = listData[i];
-          if (!merchant.detailId) continue;
-
-          setCurrentStatus(`正在处理第 ${pageNo} 页第 ${i + 1}/${listData.length} 条: ${merchant.tmName}`);
-
-          // 获取商标详情（每个detail请求间隔20秒）
-          const detailData = await getMarkDetail(merchant.detailId, merchant.tmName);
-
-          // 处理商户数据
-          await processSingleMerchant(merchant, detailData);
-
-          // 每个商户处理完后等待20秒，确保每个detail请求间隔20秒
-          if (i < listData.length - 1) {
-            setCurrentStatus(`等待20秒后处理下一条...`);
-            await delay(20000);
-          }
-        }
-
-        setCurrentStatus(`第 ${pageNo} 页处理完成，成功: ${processedCount}, 失败: ${errorCount}`);
-
-        // 当前页处理完成后，等待5秒再获取下一页
-        await delay(5000);
-        pageNo++;
+      // 获取指定日期的数据
+      const listData = await getListData(dateValue);
+      if (listData.length === 0) {
+        setCurrentStatus(`日期 ${dateValue} 无数据，处理完成！`);
+        setIsProcessing(false);
+        return;
       }
 
-      setCurrentStatus(`所有页面处理完成！成功: ${processedCount}, 失败: ${errorCount}`);
+      setCurrentStatus(`数据获取成功，共 ${listData.length} 条记录，开始处理详情数据...`);
+
+      // 处理每个商户
+      for (let i = 0; i < listData.length; i++) {
+        const merchant = listData[i];
+        if (!merchant.detailId) continue;
+
+        setCurrentStatus(`正在处理第 ${i + 1}/${listData.length} 条: ${merchant.tmName}`);
+
+        // 获取商标详情（每个detail请求间隔20秒）
+        const detailData = await getMarkDetail(merchant.detailId, merchant.tmName);
+
+        // 处理商户数据
+        await processSingleMerchant(merchant, detailData);
+
+        // 每个商户处理完后等待20秒，确保每个detail请求间隔20秒
+        if (i < listData.length - 1) {
+          setCurrentStatus(`等待20秒后处理下一条...`);
+          await delay(20000);
+        }
+      }
+
+      setCurrentStatus(`所有数据处理完成！成功: ${processedCount}, 失败: ${errorCount}`);
     } catch (error) {
       console.error('处理过程中发生错误:', error);
       setCurrentStatus('处理过程中发生错误');
@@ -367,13 +373,21 @@ export default function ItemsTable() {
     <Card>
       <CardHeader>
         <div className='flex flex-col gap-4'>
-          <div className='flex flex-row justify-between items-center gap-2'>
+          <div className='flex flex-row items-center gap-2'>
+            <Input
+              type="date"
+              value={dateValue}
+              onChange={(e) => setDateValue(e.target.value)}
+              placeholder="选择日期"
+              className="h-8 w-40"
+              disabled={isProcessing || isAnalyzing}
+            />
             <Button
               size="sm"
               variant="outline"
               className="h-8 gap-1"
               onClick={startProcessing}
-              disabled={isProcessing || isAnalyzing}
+              disabled={isProcessing || isAnalyzing || !dateValue}
             >
               <Download className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">

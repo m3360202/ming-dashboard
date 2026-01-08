@@ -37,6 +37,7 @@ export default function EmailStatusPage() {
   const [queryEndDate, setQueryEndDate] = useState('')
   const [queryDays, setQueryDays] = useState('1')
   const [statusFilter, setStatusFilter] = useState<string>('') // 状态过滤器：''=全部, '1'=送达, '4'=无效邮件, '5'=软退信, '18'=请求中
+  const [resultTypeFilter, setResultTypeFilter] = useState<string>('') // 结果类型过滤器：''=全部, 'success'=成功, 'failed'=失败
   const [currentPage, setCurrentPage] = useState(1)
   const [isQuerying, setIsQuerying] = useState(false)
   const [isLoadingStats, setIsLoadingStats] = useState(false)
@@ -134,10 +135,21 @@ export default function EmailStatusPage() {
   }
 
   // 查询邮件状态
-  const handleQueryStatus = async (page: number = 1) => {
+  const handleQueryStatus = async (page: number = 1, overrideStatusFilter?: string, overrideResultTypeFilter?: string) => {
     if (!queryStartDate && !queryEndDate && !queryDays) {
       setQueryError('请选择查询日期或输入查询天数')
       return
+    }
+
+    // 检查日期间隔是否超过3天
+    if (queryStartDate && queryEndDate) {
+      const start = new Date(queryStartDate)
+      const end = new Date(queryEndDate)
+      const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      if (diffDays > 2) {
+        alert('日期间隔不能超过3天，请调整日期范围')
+        return
+      }
     }
 
     setIsQuerying(true)
@@ -145,66 +157,161 @@ export default function EmailStatusPage() {
     setQueryResult([])
     setCurrentPage(page)
 
+    // 使用传入的覆盖值，如果没有则使用当前状态
+    const currentStatusFilter = overrideStatusFilter !== undefined ? overrideStatusFilter : statusFilter
+    const currentResultTypeFilter = overrideResultTypeFilter !== undefined ? overrideResultTypeFilter : resultTypeFilter
+
     try {
-      const params: any = {}
+      const baseParams: any = {}
       // 如果同时有开始和结束日期，优先使用日期范围，否则使用天数
       if (queryStartDate && queryEndDate) {
-        params.startDate = queryStartDate
-        params.endDate = queryEndDate
+        baseParams.startDate = queryStartDate
+        baseParams.endDate = queryEndDate
       } else if (queryDays) {
-        params.days = queryDays
+        baseParams.days = queryDays
       } else if (queryStartDate) {
         // 如果只有开始日期，使用开始日期作为结束日期
-        params.startDate = queryStartDate
-        params.endDate = queryStartDate
+        baseParams.startDate = queryStartDate
+        baseParams.endDate = queryStartDate
       }
 
-      // 添加状态过滤器
-      if (statusFilter) {
-        params.status = statusFilter
-      }
+      let allResults: EmailStatus[] = []
+      let totalCount = 0
 
-      // 计算分页参数
-      const start = (page - 1) * ITEMS_PER_PAGE
-      params.start = start.toString()
-      params.limit = ITEMS_PER_PAGE.toString()
+      // 处理结果类型过滤器
+      if (currentResultTypeFilter === 'success') {
+        // 成功：只查询送达状态
+        const params = { ...baseParams, status: '1' }
+        const start = (page - 1) * ITEMS_PER_PAGE
+        params.start = start.toString()
+        params.limit = ITEMS_PER_PAGE.toString()
 
-      const response = await fetch('/api/email-status?' + new URLSearchParams(params), {
-        method: 'GET'
-      })
-
-      const result = await response.json()
-
-      if (result.success && result.data) {
-        const data = result.data.voList || []
-        setQueryResult(data)
-        setQueryTotal(parseInt(result.data.total || '0'))
-        
-        // 获取所有数据用于统计（不应用状态过滤器和分页）
-        if (page === 1) {
-          const statsParams: any = {}
-          // 复制日期参数，但不包含状态过滤器和分页参数
-          if (queryStartDate && queryEndDate) {
-            statsParams.startDate = queryStartDate
-            statsParams.endDate = queryEndDate
-          } else if (queryDays) {
-            statsParams.days = queryDays
-          } else if (queryStartDate) {
-            statsParams.startDate = queryStartDate
-            statsParams.endDate = queryStartDate
-          }
-          await fetchAllDataForStatistics(statsParams)
-        }
-      } else {
-        setQueryError(result.message || '查询失败')
-        setStatistics({
-          total: 0,
-          delivered: 0,
-          invalid: 0,
-          softBounce: 0,
-          pending: 0,
-          successRate: 0
+        const response = await fetch('/api/email-status?' + new URLSearchParams(params), {
+          method: 'GET'
         })
+        const result = await response.json()
+
+        if (result.success && result.data) {
+          allResults = result.data.voList || []
+          totalCount = parseInt(result.data.total || '0')
+        }
+      } else if (resultTypeFilter === 'failed') {
+        // 失败：需要查询无效邮件(status=4)和软退信(status=5)
+        // 由于API限制，我们需要分别查询所有数据然后合并
+        const invalidParams = { ...baseParams, status: '4' }
+        const bounceParams = { ...baseParams, status: '5' }
+        
+        // 获取所有失败数据（用于分页）
+        let allInvalidData: EmailStatus[] = []
+        let allBounceData: EmailStatus[] = []
+        let invalidTotal = 0
+        let bounceTotal = 0
+
+        // 获取无效邮件数据（分页获取）
+        let invalidStart = 0
+        const invalidLimit = 100
+        let hasMoreInvalid = true
+        while (hasMoreInvalid) {
+          const params = { ...invalidParams, start: invalidStart.toString(), limit: invalidLimit.toString() }
+          const response = await fetch('/api/email-status?' + new URLSearchParams(params), { method: 'GET' })
+          const result = await response.json()
+          
+          if (result.success && result.data) {
+            const data = result.data.voList || []
+            allInvalidData.push(...data)
+            if (invalidTotal === 0) {
+              invalidTotal = parseInt(result.data.total || '0')
+            }
+            if (data.length < invalidLimit) {
+              hasMoreInvalid = false
+            } else {
+              invalidStart += invalidLimit
+            }
+          } else {
+            hasMoreInvalid = false
+          }
+        }
+
+        // 获取软退信数据（分页获取）
+        let bounceStart = 0
+        const bounceLimit = 100
+        let hasMoreBounce = true
+        while (hasMoreBounce) {
+          const params = { ...bounceParams, start: bounceStart.toString(), limit: bounceLimit.toString() }
+          const response = await fetch('/api/email-status?' + new URLSearchParams(params), { method: 'GET' })
+          const result = await response.json()
+          
+          if (result.success && result.data) {
+            const data = result.data.voList || []
+            allBounceData.push(...data)
+            if (bounceTotal === 0) {
+              bounceTotal = parseInt(result.data.total || '0')
+            }
+            if (data.length < bounceLimit) {
+              hasMoreBounce = false
+            } else {
+              bounceStart += bounceLimit
+            }
+          } else {
+            hasMoreBounce = false
+          }
+        }
+
+        // 合并结果并按时间排序（降序）
+        const allFailedData = [...allInvalidData, ...allBounceData].sort((a, b) => {
+          const timeA = new Date(a.requestTime || '').getTime()
+          const timeB = new Date(b.requestTime || '').getTime()
+          return timeB - timeA // 降序
+        })
+
+        totalCount = invalidTotal + bounceTotal
+        
+        // 应用分页
+        const pageStart = (page - 1) * ITEMS_PER_PAGE
+        allResults = allFailedData.slice(pageStart, pageStart + ITEMS_PER_PAGE)
+      } else {
+        // 全部或其他状态过滤器
+        const params = { ...baseParams }
+        
+        // 添加状态过滤器
+        if (currentStatusFilter) {
+          params.status = currentStatusFilter
+        }
+
+        // 计算分页参数
+        const start = (page - 1) * ITEMS_PER_PAGE
+        params.start = start.toString()
+        params.limit = ITEMS_PER_PAGE.toString()
+
+        const response = await fetch('/api/email-status?' + new URLSearchParams(params), {
+          method: 'GET'
+        })
+
+        const result = await response.json()
+
+        if (result.success && result.data) {
+          allResults = result.data.voList || []
+          totalCount = parseInt(result.data.total || '0')
+        }
+      }
+
+      setQueryResult(allResults)
+      setQueryTotal(totalCount)
+      
+      // 获取所有数据用于统计（不应用状态过滤器和分页）
+      if (page === 1) {
+        const statsParams: any = {}
+        // 复制日期参数，但不包含状态过滤器和分页参数
+        if (queryStartDate && queryEndDate) {
+          statsParams.startDate = queryStartDate
+          statsParams.endDate = queryEndDate
+        } else if (queryDays) {
+          statsParams.days = queryDays
+        } else if (queryStartDate) {
+          statsParams.startDate = queryStartDate
+          statsParams.endDate = queryStartDate
+        }
+        await fetchAllDataForStatistics(statsParams)
       }
     } catch (error) {
       setQueryError('查询失败，请检查网络连接')
@@ -224,11 +331,19 @@ export default function EmailStatusPage() {
   // 处理状态过滤器变化
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value)
+    setResultTypeFilter('') // 清除结果类型过滤器
     setCurrentPage(1)
-    // 延迟查询，避免频繁请求
-    setTimeout(() => {
-      handleQueryStatus(1)
-    }, 100)
+    // 直接使用新值进行查询，避免闭包问题
+    handleQueryStatus(1, value, '')
+  }
+
+  // 处理结果类型过滤器变化
+  const handleResultTypeFilterChange = (value: string) => {
+    setResultTypeFilter(value)
+    setStatusFilter('') // 清除状态过滤器
+    setCurrentPage(1)
+    // 直接使用新值进行查询，避免闭包问题
+    handleQueryStatus(1, '', value)
   }
 
   // 获取状态标签颜色
@@ -264,7 +379,7 @@ export default function EmailStatusPage() {
           <CardDescription>根据日期查询邮件发送状态</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="space-y-2">
               <Label htmlFor="queryDays">查询天数</Label>
               <Input
@@ -289,8 +404,18 @@ export default function EmailStatusPage() {
                 type="date"
                 value={queryStartDate}
                 onChange={(e) => {
-                  setQueryStartDate(e.target.value)
+                  const startDate = e.target.value
+                  setQueryStartDate(startDate)
                   setQueryDays('')
+                  // 如果结束日期为空，自动设置为开始日期+2天（3天间隔）
+                  if (startDate && !queryEndDate) {
+                    const date = new Date(startDate)
+                    date.setDate(date.getDate() + 2)
+                    const today = new Date()
+                    // 不能超过今天
+                    const endDate = date > today ? today.toISOString().split('T')[0] : date.toISOString().split('T')[0]
+                    setQueryEndDate(endDate)
+                  }
                 }}
               />
             </div>
@@ -301,17 +426,38 @@ export default function EmailStatusPage() {
                 type="date"
                 value={queryEndDate}
                 onChange={(e) => {
-                  setQueryEndDate(e.target.value)
+                  const endDate = e.target.value
+                  setQueryEndDate(endDate)
                   setQueryDays('')
+                  // 如果开始日期为空，自动设置为结束日期-2天（3天间隔）
+                  if (endDate && !queryStartDate) {
+                    const date = new Date(endDate)
+                    date.setDate(date.getDate() - 2)
+                    setQueryStartDate(date.toISOString().split('T')[0])
+                  }
                 }}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="statusFilter">状态筛选</Label>
+              <Label htmlFor="resultTypeFilter">结果类型</Label>
+              <select
+                id="resultTypeFilter"
+                value={resultTypeFilter}
+                onChange={(e) => handleResultTypeFilterChange(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">全部</option>
+                <option value="success">成功</option>
+                <option value="failed">失败</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="statusFilter">详细状态</Label>
               <select
                 id="statusFilter"
                 value={statusFilter}
                 onChange={(e) => handleStatusFilterChange(e.target.value)}
+                disabled={!!resultTypeFilter}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">全部状态</option>

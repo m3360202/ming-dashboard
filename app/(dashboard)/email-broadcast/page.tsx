@@ -178,7 +178,18 @@ export default function EmailBroadcastPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="content">邮件内容</Label>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-2 flex-wrap">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    setSubject('')
+                    setEmailContent('')
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white"
+                >
+                  自定义模板
+                </Button>
                 <Button
                   type="button"
                   size="sm"
@@ -210,6 +221,19 @@ export default function EmailBroadcastPage() {
                   onChange={(value: any) => setEmailContent(value || '')}
                   height={400}
                   preview="edit"
+                  textareaProps={{
+                    placeholder: `支持Markdown格式：
+# 一级标题
+## 二级标题
+**粗体文字**
+*斜体文字*
+- 无序列表项
+1. 有序列表项
+[链接文字](https://example.com)
+![图片描述](图片URL)
+
+点击工具栏图片按钮可上传图片`
+                  }}
                 />
               </div>
             </div>

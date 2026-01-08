@@ -19,7 +19,19 @@ import { exportToCSV, loadData } from '@/utils/exportCvs';
 import '@/views/TrademarkDetective/style.css';
 
 export default function CustomersPage() {
-  const { username } = useUser();
+  const { username, role } = useUser();
+
+  // 权限检查：只有role为1的用户才能访问
+  useEffect(() => {
+    if (role && role !== 1) {
+      window.location.href = '/trade-mark-check';
+    }
+  }, [role]);
+
+  // 如果不是role=1，不渲染内容
+  if (role && role !== 1) {
+    return null;
+  }
   const [dataStates, setDataStates] = useState<TrademarkItem[][]>(new Array(10).fill([]));
   const [dataCounts, setDataCounts] = useState<number[]>([0, 0, 0, 0]); // 数据数量
   const [dateList, setDateList] = useState<any[]>([]);
