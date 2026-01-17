@@ -41,17 +41,49 @@ export default function CustomersPage() {
   const [loadingCardId, setLoadingCardId] = useState<number | null>(null); // 当前加载的卡片ID
   const [content, setContent] = useState<string>('');
 
+  // 生成指定日期范围的日期数组
+  const generateDateRange = (startDateStr: string, endDateStr: string) => {
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+    const dates = [];
+    
+    // 重置时间为 00:00:00
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    
+    const currentDate = new Date(start);
+    while (currentDate <= end) {
+      const dateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD 格式
+      dates.push({
+        item: dateStr,
+        content: ''
+      });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return dates;
+  };
+
   const getDateList = async () => {
     setLoading(true);
     try {
       const res = await axios.post('https://ai.aliensoft.com.cn/api/dataList', {});
 
       if (res?.data?.success) {
-        setDateList(res?.data?.data);
-        console.log('---------datelist', res?.data?.data)
-        setContent(res?.data?.data[0].content)
-        setStartDate(res?.data?.data[0].item)
-        setEndDate(res?.data?.data[0].item)
+        // 生成 2025-02-18 到 2025-03-31 的日期数组
+        const generatedDates = generateDateRange('2025-02-18', '2025-03-31');
+        
+        // 合并 API 返回的数据和生成的日期（生成的日期放在最后）
+        const mergedDateList = [...res?.data?.data, ...generatedDates];
+        
+        // 按日期降序排序（最新的日期在前）
+        mergedDateList.sort((a, b) => b.item.localeCompare(a.item));
+        
+        setDateList(mergedDateList);
+        console.log('---------datelist', mergedDateList)
+        setContent(mergedDateList[0].content || '')
+        setStartDate(mergedDateList[0].item)
+        setEndDate(mergedDateList[0].item)
       } else {
         alert('请求失败');
       }
@@ -167,7 +199,7 @@ export default function CustomersPage() {
         <CardContent>
           {/* Date Selection Controls */}
           <div className="flex flex-row gap-4 items-center mb-6">
-            <span style={{ color: '#26d', fontSize: '14px' }}>选择日期（全日期可选支持）</span>
+            <span style={{ color: '#26d', fontSize: '14px' }}>选择日期（按日期）</span>
             <input
               type="date"
               value={startDate}
@@ -187,7 +219,7 @@ export default function CustomersPage() {
                 fontSize: '14px'
               }}
             />
-            <span style={{ color: '#26d', fontSize: '14px' }}></span>
+            <span style={{ color: '#26d', fontSize: '14px' }}>（按更新）</span>
             <select
               disabled={loading}
               onChange={(e) => {
@@ -235,6 +267,7 @@ export default function CustomersPage() {
                 // 判断是否在前4个卡片中（0, 1, 2, 3），这些卡片会显示数量
                 const isCountCard = originalIndex < 4;
                 // 判断是否是可用的卡片（7, 8, 9, 11）
+                console.log('config:', config)
                 const isAvailableCard = config.id === 7 || config.id === 8 || config.id === 9 || config.id === 11;
                 // 调试信息
                 if (config.id === 11) {
@@ -319,15 +352,15 @@ export default function CustomersPage() {
             <Card className="w-[220px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white">
               <CardContent className="p-4">
                 <Button
-                  onClick={() => {
-                    // 直接使用静态文件路径，Next.js 会自动处理 public 文件夹
-                    const link = document.createElement('a');
-                    link.href = '/anz/数据分析.zip';
-                    link.download = '数据分析.zip';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
+                  // onClick={() => {
+                  //   // 直接使用静态文件路径，Next.js 会自动处理 public 文件夹
+                  //   const link = document.createElement('a');
+                  //   link.href = '/anz/数据分析.zip';
+                  //   link.download = '数据分析.zip';
+                  //   document.body.appendChild(link);
+                  //   link.click();
+                  //   document.body.removeChild(link);
+                  // }}
                   variant="ghost"
                   className="w-full h-16 flex flex-col items-center justify-center p-0 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                 >
@@ -335,10 +368,10 @@ export default function CustomersPage() {
                     <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7974" width="36" height="36"><path d="M663.04 112.64h-430.08c-29.184 0-52.736 22.528-53.248 49.664v698.368c0 27.648 23.552 49.664 53.248 49.664h557.568c29.184 0 52.736-22.528 52.736-49.664V302.08l-180.224-189.44z" fill="#5393FB" p-id="7975"></path><path d="M663.03488 112.64v189.44h180.736l-180.736-189.44z" fill="#0850C6" p-id="7976"></path><path d="M338.18112 376.53504c0-12.8 9.728-23.04 22.016-23.04h301.568c12.288 0 22.016 10.24 22.016 23.04s-9.728 23.04-22.016 23.04h-301.568c-11.776 0.512-22.016-10.24-22.016-23.04zM394.50112 603.35104c-2.56 0-4.608 1.536-5.632 4.096-1.024 2.56-0.512 5.632 1.536 7.168l112.128 112.64c2.048 2.56 5.632 4.096 8.704 4.096 3.072 0 6.656-1.536 8.704-4.096l112.128-112.64c1.536-2.048 2.048-4.608 1.536-7.168-1.024-2.56-3.072-4.096-5.632-4.096h-66.048v-112.64c0-7.168-5.632-13.312-12.8-13.312h-75.776c-6.656 0-12.288 6.144-12.8 13.312v112.64h-66.048z" fill="#FFFFFF" ></path></svg>
                     <div className="flex flex-col items-left">
                       <div className="flex items-center gap-1 justify-between mb-2">
-                        <span style={{ color: '#1c252e' }} className="font-bold text-[16px] opacity-90">成交价值分析报告</span>
+                        <span style={{ color: '#1c252e' }} className="font-bold text-[16px] opacity-90">客户分析报告</span>
                       </div>
                       <div className="flex items-center gap-1 justify-between">
-                        <span style={{ color: '#26d' }} className="text-[12px] opacity-90">点击下载</span>
+                        <span style={{ color: '#26d' }} className="text-[12px] opacity-90">暂时手工发送</span>
                       </div>
                     </div>
                   </div>

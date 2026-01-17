@@ -70,6 +70,8 @@ export default function CustomersPage() {
         return <span style={{ fontSize: '12px' }} className="bg-green-500 text-white px-2 py-1 rounded">企业员工</span>;
       case 3:
         return <span style={{ fontSize: '12px' }} className="bg-purple-500 text-white px-2 py-1 rounded">加盟管理员</span>;
+      case 4:
+        return <span style={{ fontSize: '12px' }} className="bg-orange-500 text-white px-2 py-1 rounded">技术支持</span>;
       default:
         return <span style={{ fontSize: '12px' }} className="bg-gray-500 text-white px-2 py-1 rounded">未知</span>;
     }
@@ -295,6 +297,7 @@ export default function CustomersPage() {
                   <option value={1}>平台所有者</option>
                   <option value={2}>企业员工</option>
                   <option value={3}>加盟管理员</option>
+                  <option value={4}>技术支持</option>
                 </select>
               </div>
               <div className="mt-2">
