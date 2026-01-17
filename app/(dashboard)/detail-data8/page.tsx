@@ -341,7 +341,7 @@ export default function ItemsTable() {
       setCurrentStatus(`数据获取成功，共 ${listData.length} 条记录，开始处理详情数据...`);
 
       // 处理每个商户
-      for (let i = 0; i < listData.length; i++) {
+      for (let i = 91; i < listData.length; i++) {
         const merchant = listData[i];
         if (!merchant.detailId) continue;
 
